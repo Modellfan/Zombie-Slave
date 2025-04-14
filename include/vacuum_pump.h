@@ -1,0 +1,89 @@
+#ifndef VACUUM_PUMP_H
+#define VACUUM_PUMP_H
+
+#include "params.h"
+#include "hwdefs.h"
+#include "digio.h"
+
+class VacuumPump
+{
+private:
+    uint16_t pump_timer = 0;            // Time counter for hysteresis (counts in 10ms steps)
+    uint16_t insufficient_timer = 0;    // Time counter for insufficient vacuum warning
+    bool pump_state = false;            // Current pump state (ON/OFF)
+
+public:
+    /** Default constructor */
+    VacuumPump() {}
+
+    /** Task to be executed every 10ms */
+    void Task10Ms()
+    {
+        /*
+         *  Start --> [Read vacuum_sensor_in] --> (Vacuum OK?)
+         *                    | Yes |                   | No |
+         *          [Start Pump Timer]           [Turn ON Pump]
+         *                    |                         |
+         *        (Exceeded Hysteresis?)         [Keep Pump ON]
+         *                    | Yes |                 | No |
+         *          [Turn OFF Pump]                 [Continue]
+         *                    |
+         *          (Vacuum Insufficient Too Long?)
+         *                    | Yes |     | No |
+         *       [Set Warning]     [Continue]
+         *                    |
+         *      [Update Parameters] --> End
+         */
+
+        // Read vacuum sensor (0 = No Vacuum, 1 = Vacuum OK)
+        bool vacuum_ok = DigIo::vacuum_sensor_in.Get();
+
+        // Read hysteresis and warning delay parameters (convert from ms to 10ms steps)
+        uint16_t hysteresis_time = Param::GetInt(Param::vacuum_hysteresis) / 10;
+        uint16_t warning_delay = Param::GetInt(Param::vacuum_warning_delay) / 10;
+
+        // Handle vacuum pump state
+        if (!vacuum_ok) // Vacuum NOT OK -> Turn ON pump immediately
+        {
+            pump_state = true;
+            pump_timer = 0; // Reset hysteresis timer
+            DigIo::vacuum_pump_out.Clear(); // ON (Active Low)
+        }
+        else // Vacuum OK -> Start pump OFF timer
+        {
+            if (pump_state)
+            {
+                pump_timer++; // Increment hysteresis timer (each step is 10ms)
+                if (pump_timer >= hysteresis_time)
+                {
+                    pump_state = false;
+                    DigIo::vacuum_pump_out.Set(); // OFF
+                    pump_timer = 0; // Reset counter
+                }
+            }
+        }
+
+        // Track insufficient vacuum duration
+        if (!vacuum_ok)
+        {
+            insufficient_timer++; // Count 10ms steps
+            if (insufficient_timer >= warning_delay)
+            {
+                // Set Insufficient Vacuum Warning
+                Param::SetInt(Param::vacuum_pump_insufficient, 1);
+            }
+        }
+        else
+        {
+            // Reset warning when vacuum is OK
+            insufficient_timer = 0;
+            Param::SetInt(Param::vacuum_pump_insufficient, 0);
+        }
+
+        // **Update ECU Parameters**
+        Param::SetInt(Param::vacuum_pump_out, pump_state ? 1 : 0); // 1 = ON, 0 = OFF
+        Param::SetInt(Param::vacuum_pump_insufficient, vacuum_ok ? 1 : 0); // Vacuum level (1 = OK, 0 = Insufficient)
+    }
+};
+
+#endif // VACUUM_PUMP_H
