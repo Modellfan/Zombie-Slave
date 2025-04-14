@@ -39,15 +39,34 @@
 #include "terminalcommands.h"
 #include "tesla_valve.h"
 #include "tesla_coolant_pump.h"
+#include "TeslaDCDC.h"
 
 #define PRINT_JSON 0
 
 static Stm32Scheduler *scheduler;
-static CanHardware *can;
+static CanHardware *canInterface[3];
 static CanMap *canMap;
 static TeslaCoolantPump coolantPump;
 static TeslaValve teslaValve;
+static TeslaDCDC DCDCTesla;
 
+// Whenever the user clears mapped can messages or changes the
+// CAN interface of a device, this will be called by the CanHardware module
+static void SetCanFilters()
+{
+   CanHardware *dcdc_can = canInterface[Param::GetInt(Param::DCDCCan)];
+
+   DCDCTesla.SetCanInterface(dcdc_can);
+
+   canInterface[1]->RegisterUserMessage(0x601); // CanSDO
+   canInterface[0]->RegisterUserMessage(0x601); // CanSDO
+}
+
+static bool CanCallback(uint32_t id, uint32_t data[2], uint8_t dlc) // This is where we go when a defined CAN message is received.
+{
+   DCDCTesla.DecodeCAN(id, (uint8_t *)data);
+   return false;
+}
 
 // sample 100ms task
 static void Ms100Task(void)
@@ -58,7 +77,7 @@ static void Ms100Task(void)
    // DigIo::led_out.Set(); //turns LED on
    // DigIo::led_out.Clear(); //turns LED off
    // For every entry in digio_prj.h there is a member in DigIo
-   //DigIo::led_out.Toggle();
+   // DigIo::led_out.Toggle();
    // The boot loader enables the watchdog, we have to reset it
    // at least every 2s or otherwise the controller is hard reset.
    iwdg_reset();
@@ -74,6 +93,7 @@ static void Ms100Task(void)
    // Give calculation power to the module
    teslaValve.Task100Ms();
    coolantPump.Task100Ms();
+   DCDCTesla.Task100Ms();
 }
 
 // sample 10 ms task
@@ -82,7 +102,7 @@ static void Ms10Task(void)
    // Set timestamp of error message
    ErrorMessage::SetTime(rtc_get_counter_val());
 
-   //Param::SetInt(Param::ignition_drive_in, DigIo::ignition_drive_input_pin.Get());
+   // Param::SetInt(Param::ignition_drive_in, DigIo::ignition_drive_input_pin.Get());
 
    // if (DigIo::test_in.Get())
    // {
@@ -90,16 +110,18 @@ static void Ms10Task(void)
    //    ErrorMessage::Post(ERR_TESTERROR);
    // }
 
-
    // If we chose to send CAN messages every 10 ms, do this here.
    if (Param::GetInt(Param::canperiod) == CAN_PERIOD_10MS)
       canMap->SendAll();
+
+   DCDCTesla.Task10Ms();
 }
 
 // sample 1 ms task
 static void Ms1Task(void)
 {
-  coolantPump.Task1Ms();
+   coolantPump.Task1Ms();
+   DCDCTesla.Task1Ms();
 }
 
 /** This function is called when the user changes a parameter */
@@ -137,13 +159,19 @@ extern "C" int main(void)
 
    Stm32Scheduler s(TIM2); // We never exit main so it's ok to put it on stack
    scheduler = &s;
+
    // Initialize CAN1, including interrupts. Clock must be enabled in clock_setup()
    Stm32Can c(CAN1, (CanHardware::baudrates)Param::GetInt(Param::canspeed));
+   Stm32Can c2(CAN2, (CanHardware::baudrates)Param::GetInt(Param::canspeed));
+   FunctionPointerCallback cb(CanCallback, SetCanFilters);
    CanMap cm(&c);
    CanSdo sdo(&c, &cm);
-   sdo.SetNodeId(33); // Set node ID for SDO access e.g. by wifi module
-   // store a pointer for easier access
-   can = &c;
+   sdo.SetNodeId(33); // id 33 for vcu?
+   canInterface[0] = &c;
+   canInterface[1] = &c2;
+   c.AddCallback(&cb);
+   c2.AddCallback(&cb);
+   TerminalCommands::SetCanMap(&cm);
    canMap = &cm;
 
    // This is all we need to do to set up a terminal on USART3

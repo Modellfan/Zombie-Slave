@@ -110,6 +110,8 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 - Use a **3.9k resistor in series** for voltage protection
 - Analog inputs are all **5V tolerant**
 
+
+
 ---
 
 ## 📄 License

@@ -40,7 +40,7 @@
 
 // Define a version string of your firmware here
 #define VER 1.06.R
-#define VERSTR STRINGIFY(4=VER)
+#define VERSTR STRINGIFY(4 = VER)
 
 /* Entries must be ordered as follows:
    1. Saveable parameters (id != 0)
@@ -50,34 +50,38 @@
 // Next param id (increase when adding new parameter!): 3
 // Next value Id: 2005
 /*              category     name         unit       min     max     default id */
-#define PARAM_LIST                                                                     \
-   PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                              \
-   PARAM_ENTRY(CAT_COMM, canperiod, CANPERIODS, 0, 1, 0, 2)                            \
-   PARAM_ENTRY(CAT_TEST, testparam, "Hz", -100, 1000, 0, 0)                            \
-   PARAM_ENTRY(CAT_VALVE, valve_out, VALVE, 0, 2, 0, 100)                              \
-   PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_mode, AUTO_MANUAL, 0, 1, 0, 101)   \
+#define PARAM_LIST                                                                        \
+   PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
+   PARAM_ENTRY(CAT_COMM, canperiod, CANPERIODS, 0, 1, 0, 2)                               \
+   PARAM_ENTRY(CAT_TEST, testparam, "Hz", -100, 1000, 0, 0)                               \
+   PARAM_ENTRY(CAT_VALVE, valve_out, VALVE, 0, 2, 0, 100)                                 \
+   PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_mode, AUTO_MANUAL, 0, 1, 0, 101)      \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_manual_value, "RPM", 0, 4700, 0, 102) \
-   PARAM_ENTRY(CAT_EPS, eps_startup_delay, "ms", 0, 5000, 1000, 103)                   \
-   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 5000, 500, 104)            \
-   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 5000, 2000, 105)        \
-   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_pump_threshold, "mBar", 0, 1000, 200, 106)      \
-   VALUE_ENTRY(opmode, OPMODES, 2000)                                                  \
-   VALUE_ENTRY(version, VERSTR, 2001)                                                  \
-   VALUE_ENTRY(lasterr, errorListString, 2002)                                         \
-   VALUE_ENTRY(testain, "dig", 2003)                                                   \
-   VALUE_ENTRY(cpuload, "%", 2004)                                                     \
-   VALUE_ENTRY(valve_in_raw, "V", 2100)                                                \
-   VALUE_ENTRY(valve_in, VALVE_STATE, 2101)                                            \
-   VALUE_ENTRY(valve_auto_target, VALVE_TARGET, 2102)                                  \
-   VALUE_ENTRY(coolant_pump_automatic_value, "RPM", 2103)                              \
-   VALUE_ENTRY(coolant_pump_status, "On/Off", 2104)                                    \
-   VALUE_ENTRY(coolant_pump_fault, "Error", 2105)                                      \
-   VALUE_ENTRY(ignition_drive_in, "On/Off", 2106)                                      \
-   VALUE_ENTRY(eps_ignition_out, "On/Off", 2107)                                       \
-   VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                         \
-   VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                        \
-   VALUE_ENTRY(vacuum_sensor_in, ONOFF, 2110)                                          \
-   VALUE_ENTRY(vacuum_pump_insufficient, "Warning", 2111)
+   PARAM_ENTRY(CAT_EPS, eps_startup_delay, "ms", 0, 5000, 1000, 103)                      \
+   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 5000, 500, 104)               \
+   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 5000, 2000, 105)           \
+   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_pump_threshold, "mBar", 0, 1000, 200, 106)         \
+   PARAM_ENTRY(CAT_SETUP, DCDCCan, CAN_DEV, 0, 1, 1, 107)                                 \
+   VALUE_ENTRY(opmode, OPMODES, 2000)                                                     \
+   VALUE_ENTRY(version, VERSTR, 2001)                                                     \
+   VALUE_ENTRY(lasterr, errorListString, 2002)                                            \
+   VALUE_ENTRY(testain, "dig", 2003)                                                      \
+   VALUE_ENTRY(cpuload, "%", 2004)                                                        \
+   VALUE_ENTRY(valve_in_raw, "V", 2100)                                                   \
+   VALUE_ENTRY(valve_in, VALVE_STATE, 2101)                                               \
+   VALUE_ENTRY(valve_auto_target, VALVE_TARGET, 2102)                                     \
+   VALUE_ENTRY(coolant_pump_automatic_value, "RPM", 2103)                                 \
+   VALUE_ENTRY(coolant_pump_status, "On/Off", 2104)                                       \
+   VALUE_ENTRY(coolant_pump_fault, "Error", 2105)                                         \
+   VALUE_ENTRY(ignition_drive_in, "On/Off", 2106)                                         \
+   VALUE_ENTRY(eps_ignition_out, "On/Off", 2107)                                          \
+   VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                            \
+   VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
+   VALUE_ENTRY(vacuum_sensor_in, ONOFF, 2110)                                             \
+   VALUE_ENTRY(vacuum_pump_insufficient, "Warning", 2111)                                 \
+   VALUE_ENTRY(U12V, "V", 2070)                                                           \
+   VALUE_ENTRY(I12V, "A", 2083)                                                           \
+   VALUE_ENTRY(ChgTemp, "°C", 2078)
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run"
@@ -94,6 +98,8 @@
 #define CAT_TESLA_COOLANT_PUMP "Tesla Coolant Pump"
 #define CAT_EPS "Electric Power Steering"
 #define CAT_VACUUM_PUMP "Vacuum Pump"
+#define CAN_DEV      "0=CAN1, 1=CAN2"
+#define CAT_SETUP    "General Setup"
 
 /***** enums ******/
 
@@ -131,6 +137,11 @@ enum _eps_states
    EPS_ON
 };
 
+enum can_devices
+{
+    CAN_DEV1 = 0,
+    CAN_DEV2 = 1
+};
 
 // Generated enum-string for possible errors
 extern const char *errorListString;
