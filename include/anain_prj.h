@@ -16,7 +16,7 @@
 #define ANA_IN_LIST \
    ANA_IN_ENTRY(tesla_coolant_valve_1_in, GPIOC, 0) \
    ANA_IN_ENTRY(tesla_coolant_valve_2_in, GPIOC, 1) \
-   ANA_IN_ENTRY(12v_power_supply, GPIOB, 1) 
+   ANA_IN_ENTRY(dc_power_supply, GPIOB, 1) 
 #endif // ANAIN_PRJ_H_INCLUDED
 
 //All analog are 5V !!!

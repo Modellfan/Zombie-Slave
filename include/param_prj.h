@@ -40,6 +40,7 @@
 
 // Define a version string of your firmware here
 #define VER 1.06.R
+#define VERSTR STRINGIFY(4=VER)
 
 /* Entries must be ordered as follows:
    1. Saveable parameters (id != 0)
@@ -129,6 +130,7 @@ enum _eps_states
    EPS_OFF = 0,
    EPS_ON
 };
+
 
 // Generated enum-string for possible errors
 extern const char *errorListString;
