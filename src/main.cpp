@@ -39,6 +39,7 @@
 #include "terminalcommands.h"
 #include "tesla_valve.h"
 #include "tesla_coolant_pump.h"
+#include "dcdc.h"
 #include "TeslaDCDC.h"
 
 #define PRINT_JSON 0
@@ -64,6 +65,7 @@ static void SetCanFilters()
 
 static bool CanCallback(uint32_t id, uint32_t data[2], uint8_t dlc) // This is where we go when a defined CAN message is received.
 {
+   dlc = dlc;
    DCDCTesla.DecodeCAN(id, (uint8_t *)data);
    return false;
 }

@@ -26,18 +26,18 @@
  * https://openinverter.org/wiki/Tesla_Model_S/X_DC/DC_Converter
  */
 
-class TeslaDCDC: public DCDC
+class TeslaDCDC : public DCDC
 {
-   public:
-      void DecodeCAN(int, uint8_t *);
-      void DeInit() {};
-      void Task100Ms();
-      void SetCanInterface(CanHardware* c);
-   protected:
-      CanHardware* can;
-   private:
-      uint8_t timer500=0;
+public:
+   void DecodeCAN(int, uint8_t *);
+   void DeInit() {};
+   void Task100Ms();
+   void SetCanInterface(CanHardware *c);
+
+protected:
+   CanHardware *can;
+
+private:
+   uint8_t timer500 = 0;
 };
 #endif // TeslaDCDC_H
-
-
