@@ -159,8 +159,6 @@ extern "C" int main(void)
    nvic_setup(); // Set up some interrupts
    parm_load();  // Load stored parameters
 
-   Stm32Scheduler s(TIM2); // We never exit main so it's ok to put it on stack
-   scheduler = &s;
 
    // Initialize CAN1, including interrupts. Clock must be enabled in clock_setup()
    Stm32Can c(CAN1, (CanHardware::baudrates)Param::GetInt(Param::canspeed));
@@ -180,14 +178,20 @@ extern "C" int main(void)
    Terminal t(USART3, termCmds);
    TerminalCommands::SetCanMap(canMap);
 
+   // This will call SetCanFilters() via the Clear Callback
+   canInterface[0]->ClearUserMessages();
+   canInterface[1]->ClearUserMessages();
+
    // Up to four tasks can be added to each timer scheduler
    // AddTask takes a function pointer and a calling interval in milliseconds.
    // The longest interval is 655ms due to hardware restrictions
    // You have to enable the interrupt (int this case for TIM2) in nvic_setup()
    // There you can also configure the priority of the scheduler over other interrupts
+   Stm32Scheduler s(TIM2); // We never exit main so it's ok to put it on stack
+   scheduler = &s;
    s.AddTask(Ms1Task, 1);
    s.AddTask(Ms10Task, 10);
-   s.AddTask(Ms100Task, 500);
+   s.AddTask(Ms100Task, 100);
 
    // backward compatibility, version 4 was the first to support the "stream" command
    Param::SetInt(Param::version, 4);
