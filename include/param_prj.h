@@ -133,7 +133,7 @@
    VALUE_ENTRY(BMS_CONT_PrechargeInput, ONOFF, 2226)                                      \
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, ONOFF, 2227)                              \
                                                                                           \
-   PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 111)          \
+   PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=Manual ON", 0, 1, 0, 111)     \
    PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
    VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
@@ -154,6 +154,7 @@
 #define CANPERIODS "0=100ms, 1=10ms"
 #define CAT_TEST "Testing"
 #define CAT_BMS "BMS"
+#define CAT_HEATER "Heater"
 #define CAT_COMM "Communication"
 #define ONOFF "0=No Vacuum, 1=Vacuum OK"
 #define VALVE "0=180deg, 1=90deg, 2=Auto"

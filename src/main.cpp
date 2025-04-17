@@ -43,6 +43,7 @@
 #include "TeslaDCDC.h"
 #include "bms.h"
 #include "teensyBMS.h"
+#include "heater.h"
 
 #define PRINT_JSON 0
 
@@ -53,6 +54,7 @@ static TeslaCoolantPump coolantPump;
 static TeslaValve teslaValve;
 static TeslaDCDC DCDCTesla;
 static TeensyBMS teensyBms;
+static Heater heater;
 
 // Whenever the user clears mapped can messages or changes the
 // CAN interface of a device, this will be called by the CanHardware module
@@ -123,6 +125,7 @@ static void Ms10Task(void)
       canMap->SendAll();
 
    DCDCTesla.Task10Ms();
+   heater.Task10Ms();
 }
 
 // sample 1 ms task
