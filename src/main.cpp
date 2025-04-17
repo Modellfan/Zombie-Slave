@@ -41,6 +41,8 @@
 #include "tesla_coolant_pump.h"
 #include "dcdc.h"
 #include "TeslaDCDC.h"
+#include "bms.h"
+#include "teensyBMS.h"
 
 #define PRINT_JSON 0
 
@@ -50,17 +52,20 @@ static CanMap *canMap;
 static TeslaCoolantPump coolantPump;
 static TeslaValve teslaValve;
 static TeslaDCDC DCDCTesla;
+static TeensyBMS teensyBms;
 
 // Whenever the user clears mapped can messages or changes the
 // CAN interface of a device, this will be called by the CanHardware module
 static void SetCanFilters()
 {
-   CanHardware *dcdc_can = canInterface[Param::GetInt(Param::DCDCCan)];
+   CanHardware *dcdc_can = canInterface[Param::GetInt(Param::dcdc_can)];
+   CanHardware *bms_can = canInterface[Param::GetInt(Param::BMS_CAN)];
 
    DCDCTesla.SetCanInterface(dcdc_can);
+   teensyBms.SetCanInterface(bms_can);
 
-   canInterface[1]->RegisterUserMessage(0x601); // CanSDO
    canInterface[0]->RegisterUserMessage(0x601); // CanSDO
+   canInterface[1]->RegisterUserMessage(0x601); // CanSDO
 }
 
 static bool CanCallback(uint32_t id, uint32_t data[2], uint8_t dlc) // This is where we go when a defined CAN message is received.
@@ -96,6 +101,7 @@ static void Ms100Task(void)
    teslaValve.Task100Ms();
    coolantPump.Task100Ms();
    DCDCTesla.Task100Ms();
+   teensyBms.Task100Ms();
 }
 
 // sample 10 ms task
@@ -131,6 +137,10 @@ void Param::Change(Param::PARAM_NUM paramNum)
 {
    switch (paramNum)
    {
+   case Param::BMS_CAN:
+      SetCanFilters(); // Re-assign CAN interface to TeensyBMS
+      break;
+
    default:
       // Handle general parameter changes here. Add paramNum labels for handling specific parameters
       break;
@@ -158,7 +168,6 @@ extern "C" int main(void)
    tim_setup();  // Sample init of a timer
    nvic_setup(); // Set up some interrupts
    parm_load();  // Load stored parameters
-
 
    // Initialize CAN1, including interrupts. Clock must be enabled in clock_setup()
    Stm32Can c(CAN1, (CanHardware::baudrates)Param::GetInt(Param::canspeed));

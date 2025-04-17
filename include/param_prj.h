@@ -39,7 +39,7 @@
  */
 
 // Define a version string of your firmware here
-#define VER 1.06.R
+#define VER 1.08.R
 #define VERSTR STRINGIFY(4 = VER)
 
 /* Entries must be ordered as follows:
@@ -61,7 +61,9 @@
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 5000, 500, 104)               \
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 5000, 2000, 105)           \
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_pump_threshold, "mBar", 0, 1000, 200, 106)         \
-   PARAM_ENTRY(CAT_SETUP, DCDCCan, CAN_DEV, 0, 1, 1, 107)                                 \
+   PARAM_ENTRY(CAT_SETUP, dcdc_can, CAN_DEV, 0, 1, 1, 107)                                \
+   PARAM_ENTRY(CAT_TESLA_DCDC, dcdc_voltage_setpoint, "V", 9, 16, 13.5, 108)              \
+                                                                                          \
    VALUE_ENTRY(opmode, OPMODES, 2000)                                                     \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
    VALUE_ENTRY(lasterr, errorListString, 2002)                                            \
@@ -74,20 +76,84 @@
    VALUE_ENTRY(coolant_pump_status, "On/Off", 2104)                                       \
    VALUE_ENTRY(coolant_pump_fault, "Error", 2105)                                         \
    VALUE_ENTRY(ignition_drive_in, "On/Off", 2106)                                         \
+                                                                                          \
    VALUE_ENTRY(eps_ignition_out, "On/Off", 2107)                                          \
    VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                            \
+                                                                                          \
    VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
    VALUE_ENTRY(vacuum_sensor_in, ONOFF, 2110)                                             \
    VALUE_ENTRY(vacuum_pump_insufficient, "Warning", 2111)                                 \
-   VALUE_ENTRY(U12V, "V", 2070)                                                           \
-   VALUE_ENTRY(I12V, "A", 2083)                                                           \
-   VALUE_ENTRY(ChgTemp, "°C", 2078)
+                                                                                          \
+   VALUE_ENTRY(dcdc_coolant_temp, "°C", 2112)                                             \
+   VALUE_ENTRY(dcdc_input_power, "W", 2113)                                               \
+   VALUE_ENTRY(dcdc_output_voltage, "V", 2114)                                            \
+   VALUE_ENTRY(dcdc_output_current, "A", 2115)                                            \
+   VALUE_ENTRY(dcdc_fault_heater_shorted, YESNO, 2117)                                    \
+   VALUE_ENTRY(dcdc_fault_overtemp, YESNO, 2118)                                          \
+   VALUE_ENTRY(dcdc_fault_undervolt, YESNO, 2119)                                         \
+   VALUE_ENTRY(dcdc_fault_bias, YESNO, 2120)                                              \
+   VALUE_ENTRY(dcdc_fault_input_not_ok, YESNO, 2121)                                      \
+   VALUE_ENTRY(dcdc_fault_overvolt, YESNO, 2122)                                          \
+   VALUE_ENTRY(dcdc_fault_current_limited, YESNO, 2123)                                   \
+   VALUE_ENTRY(dcdc_fault_heater_open, YESNO, 2124)                                       \
+   VALUE_ENTRY(dcdc_fault_timeout, YESNO, 2129)                                           \
+   VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                               \
+   VALUE_ENTRY(dcdc_status_coolant_request, YESNO, 2125)                                  \
+   VALUE_ENTRY(dcdc_status_thermal_limit, YESNO, 2126)                                    \
+   VALUE_ENTRY(dcdc_status_voltage_reg_fault, YESNO, 2127)                                \
+   VALUE_ENTRY(dcdc_status_calibration_fault, YESNO, 2128)                                \
+                                                                                          \
+   PARAM_ENTRY(CAT_BMS, BMS_CAN, CAN_DEV, 0, 1, 1, 110)                                   \
+   VALUE_ENTRY(BMS_ChargeLim, "A", 2200)                                                  \
+   VALUE_ENTRY(BMS_Vmin, "V", 2201)                                                       \
+   VALUE_ENTRY(BMS_Vmax, "V", 2202)                                                       \
+   VALUE_ENTRY(BMS_Tmin, "°C", 2203)                                                      \
+   VALUE_ENTRY(BMS_Tmax, "°C", 2204)                                                      \
+   VALUE_ENTRY(BMS_SOC, "%", 2205)                                                        \
+   VALUE_ENTRY(BMS_ActualCurrent, "A", 2206)                                              \
+   VALUE_ENTRY(BMS_PackPower, "W", 2207)                                                  \
+   VALUE_ENTRY(BMS_State, BMS_STATE, 2208)                                                \
+   VALUE_ENTRY(BMS_DTC, BMS_DTC_FLAGS, 2209)                                              \
+   VALUE_ENTRY(BMS_TimeoutFault, YESNO, 2210)                                             \
+   VALUE_ENTRY(BMS_DeltaCellVoltage, "V", 2211)                                           \
+   VALUE_ENTRY(BMS_BalancingVoltage, "V", 2212)                                           \
+   VALUE_ENTRY(BMS_BalancingActive, ONOFF, 2213)                                          \
+   VALUE_ENTRY(BMS_BalancingAnyActive, ONOFF, 2214)                                       \
+   VALUE_ENTRY(BMS_PackVoltage, "V", 2215)                                                \
+   VALUE_ENTRY(BMS_MaxChargeCurrent, "A", 2216)                                           \
+   VALUE_ENTRY(BMS_MaxDischargeCurrent, "A", 2217)                                        \
+   VALUE_ENTRY(BMS_ShutdownRequest, ONOFF, 2218)                                          \
+   VALUE_ENTRY(BMS_ShutdownReady, ONOFF, 2219)                                            \
+   VALUE_ENTRY(BMS_ShutdownAcknowledge, ONOFF, 2220)                                      \
+   VALUE_ENTRY(BMS_DataValid, YESNO, 2221)                                                \
+   VALUE_ENTRY(BMS_CONT_State, CONT_STATE, 2222)                                          \
+   VALUE_ENTRY(BMS_CONT_DTC, CONT_DTC_FLAGS, 2223)                                        \
+   VALUE_ENTRY(BMS_CONT_NegativeInput, ONOFF, 2224)                                       \
+   VALUE_ENTRY(BMS_CONT_PositiveInput, ONOFF, 2225)                                       \
+   VALUE_ENTRY(BMS_CONT_PrechargeInput, ONOFF, 2226)                                      \
+   VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, ONOFF, 2227)                              \
+                                                                                          \
+   PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 111)          \
+   PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=Manual ON", 0, 1, 0, 111)     \
+   PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
+   VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
+   VALUE_ENTRY(heater_flap_in, "Raw ADC", 2134)                                           \
+   VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
+   VALUE_ENTRY(heater_thermal_switch_boot_fault, "0=OK, 1=Overtemp on Boot", 2140)        \
+   VALUE_ENTRY(heater_thermal_switch_does_not_open_fault, "0=OK, 1=Stuck Closed", 2141)   \
+   VALUE_ENTRY(heater_thermal_switch_overheat_fault, "0=OK, 1=Too Long Open", 2142)       \
+   VALUE_ENTRY(heater_contactor_feedback_in, "0=Open, 1=Closed", 2132)                    \
+   VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
+   VALUE_ENTRY(heater_contactor_fault, "0=OK, 1=No Feedback, 2=Welded", 2138)             \
+   VALUE_ENTRY(heater_fault, "0=OK, 1=Fault", 2143)                                       \
+   VALUE_ENTRY(hv_comfort_functions_allowed, "0=No, 1=Yes", 2144)
 
 /***** Enum String definitions *****/
-#define OPMODES "0=Off, 1=Run"
+#define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
 #define CANSPEEDS "0=125k, 1=250k, 2=500k, 3=800k, 4=1M"
 #define CANPERIODS "0=100ms, 1=10ms"
 #define CAT_TEST "Testing"
+#define CAT_BMS "BMS"
 #define CAT_COMM "Communication"
 #define ONOFF "0=No Vacuum, 1=Vacuum OK"
 #define VALVE "0=180deg, 1=90deg, 2=Auto"
@@ -98,8 +164,15 @@
 #define CAT_TESLA_COOLANT_PUMP "Tesla Coolant Pump"
 #define CAT_EPS "Electric Power Steering"
 #define CAT_VACUUM_PUMP "Vacuum Pump"
-#define CAN_DEV      "0=CAN1, 1=CAN2"
-#define CAT_SETUP    "General Setup"
+#define CAN_DEV "0=CAN1, 1=CAN2"
+#define CAT_SETUP "General Setup"
+#define CAT_TESLA_DCDC "Tesla DCDC"
+#define YESNO "0=No, 1=Yes"
+
+#define BMS_STATE "0=INIT, 1=OPERATING, 2=FAULT"
+#define BMS_DTC_FLAGS "0=NONE,1=CAN_SEND_ERROR,2=CAN_INIT_ERROR,4=PACK_FAULT"
+#define CONT_STATE "0=INIT,1=OPEN,2=CLOSING_PRECHARGE,3=CLOSING_POSITIVE,4=CLOSED,5=OPENING_POSITIVE,6=OPENING_PRECHARGE,7=FAULT"
+#define CONT_DTC_FLAGS "0=NONE,1=NO_SUPPLY,2=NEG_FAULT,4=PRE_FAULT,8=POS_FAULT"
 
 /***** enums ******/
 
@@ -110,10 +183,13 @@ enum _canperiods
    CAN_PERIOD_LAST
 };
 
-enum _modes
+enum modes
 {
    MOD_OFF = 0,
    MOD_RUN,
+   MOD_PRECHARGE,
+   MOD_PCHFAIL,
+   MOD_CHARGE,
    MOD_LAST
 };
 
@@ -139,8 +215,8 @@ enum _eps_states
 
 enum can_devices
 {
-    CAN_DEV1 = 0,
-    CAN_DEV2 = 1
+   CAN_DEV1 = 0,
+   CAN_DEV2 = 1
 };
 
 // Generated enum-string for possible errors

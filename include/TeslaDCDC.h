@@ -25,19 +25,22 @@
 /* This is an interface for The Tesla GEN2 DCDC converter
  * https://openinverter.org/wiki/Tesla_Model_S/X_DC/DC_Converter
  */
-
-class TeslaDCDC : public DCDC
-{
-public:
-   void DecodeCAN(int, uint8_t *);
-   void DeInit() {};
-   void Task100Ms();
-   void SetCanInterface(CanHardware *c);
-
-protected:
-   CanHardware *can;
-
-private:
-   uint8_t timer500 = 0;
-};
-#endif // TeslaDCDC_H
+ 
+ class TeslaDCDC : public DCDC
+ {
+ public:
+     void DecodeCAN(int id, uint8_t *data);
+     void DeInit() {}
+     void Task100Ms();
+     void SetCanInterface(CanHardware* c);
+ 
+ protected:
+     CanHardware* can;
+ 
+ private:
+     uint8_t timer500 = 0;
+     uint8_t timeoutCounter = 0;
+ };
+ 
+ #endif // TeslaDCDC_H
+ 
