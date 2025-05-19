@@ -101,7 +101,7 @@
  
  void TeslaDCDC::Task100Ms()
  {
-     int opmode = Param::GetInt(Param::opmode);
+    //  int opmode = Param::GetInt(Param::opmode);
      float DCSetVal = Param::GetFloat(Param::dcdc_voltage_setpoint);
      uint8_t bytes[8] = {0};
  
@@ -113,8 +113,8 @@
          Param::SetInt(Param::dcdc_fault_any, 1);  // Include timeout as a fault
      }
  
-     if ((opmode == MOD_RUN || opmode == MOD_CHARGE) && can)
-     {
+    //  if ((opmode == MOD_RUN || opmode == MOD_CHARGE) && can)
+    //  {
          timer500++;
          if (timer500 == 5)
          {
@@ -130,5 +130,5 @@
              can->Send(TESLA_DCDC_CMD_ID, bytes, 3);
              timer500 = 0;
          }
-     }
+    //  }
  }

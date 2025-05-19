@@ -5,6 +5,70 @@
 #include "hwdefs.h"
 #include "digio.h"
 
+/*
+    Heater Control Function – Logic Overview
+    ========================================
+
+           +----------------------------+
+           | hv_comfort_functions_allowed? |
+           +------------+---------------+
+                        |
+                      [YES]
+                        |
+                        v
+         +-------------------------------+
+         | Fault present? (any fault flag) |
+         +------------+------------------+
+                      |
+                    [NO]
+                      |
+                      v
+         +---------------------------------------------+
+         | Flap input > threshold  OR manual override? |
+         +------------+------------------+
+                      |
+                    [YES]
+                      |
+                      v
+         +---------------------------------------------+
+         | Thermal switch closed?                      |
+         +------------+------------------+
+                      |
+                    [YES]
+                      |
+                      v
+     +----------------------------------------------------+
+     | Start ON delay counter (in 10ms steps)             |
+     | - Restart counter when thermal switch closes       |
+     | - Only count up while thermal switch remains closed|
+     +----------------------------------------------------+
+                      |
+                      v
+         +-------------------------------+
+         | Delay counter >= threshold?   |
+         +------------+------------------+
+                      |
+                    [YES]
+                      |
+                      v
+               +-------------------+
+               | Close contactor   |
+               | (active low)      |
+               +-------------------+
+
+    Else:
+      - Reset delay counter
+      - Set heater output OFF
+      - Do NOT close contactor
+
+    Conditions for heater OFF:
+      - hv_comfort_functions_allowed == 0
+      - Any fault active
+      - No flap input & no manual override
+      - Thermal switch open
+*/
+
+
 // Constants
 #define CONTACTOR_FAULT_DEBOUNCE_COUNT         2      // 2 x 10ms = 20ms
 #define HEATER_THERMAL_OPEN_TIMEOUT_MS         2000

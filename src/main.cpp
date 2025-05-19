@@ -44,6 +44,7 @@
 #include "bms.h"
 #include "teensyBMS.h"
 #include "heater.h"
+#include "vacuum_pump.h"
 
 #define PRINT_JSON 0
 
@@ -55,6 +56,7 @@ static TeslaValve teslaValve;
 static TeslaDCDC DCDCTesla;
 static TeensyBMS teensyBms;
 static Heater heater;
+static VacuumPump vacuumPump;
 
 // Whenever the user clears mapped can messages or changes the
 // CAN interface of a device, this will be called by the CanHardware module
@@ -117,22 +119,21 @@ static void Ms10Task(void)
    // if (DigIo::test_in.Get())
    // {
    //    // Post a test error message when our test input is high
-   //    ErrorMessage::Post(ERR_TESTERROR);
+   //   ErrorMessage::Post(ERR_TESTERROR);
    // }
 
    // If we chose to send CAN messages every 10 ms, do this here.
    if (Param::GetInt(Param::canperiod) == CAN_PERIOD_10MS)
       canMap->SendAll();
 
-   DCDCTesla.Task10Ms();
    heater.Task10Ms();
+   vacuumPump.Task10Ms();
 }
 
 // sample 1 ms task
 static void Ms1Task(void)
 {
    coolantPump.Task1Ms();
-   DCDCTesla.Task1Ms();
 }
 
 /** This function is called when the user changes a parameter */

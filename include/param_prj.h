@@ -39,7 +39,7 @@
  */
 
 // Define a version string of your firmware here
-#define VER 1.08.R
+#define VER 1.19.R
 #define VERSTR STRINGIFY(4 = VER)
 
 /* Entries must be ordered as follows:
@@ -58,9 +58,8 @@
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_mode, AUTO_MANUAL, 0, 1, 0, 101)      \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_manual_value, "RPM", 0, 4700, 0, 102) \
    PARAM_ENTRY(CAT_EPS, eps_startup_delay, "ms", 0, 5000, 1000, 103)                      \
-   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 5000, 500, 104)               \
-   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 5000, 2000, 105)           \
-   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_pump_threshold, "mBar", 0, 1000, 200, 106)         \
+   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 60000, 500, 104)              \
+   PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 60000, 2000, 105)          \
    PARAM_ENTRY(CAT_SETUP, dcdc_can, CAN_DEV, 0, 1, 1, 107)                                \
    PARAM_ENTRY(CAT_TESLA_DCDC, dcdc_voltage_setpoint, "V", 9, 16, 13.5, 108)              \
                                                                                           \
@@ -81,7 +80,7 @@
    VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                            \
                                                                                           \
    VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
-   VALUE_ENTRY(vacuum_sensor_in, ONOFF, 2110)                                             \
+   VALUE_ENTRY(vacuum_sensor, "On/Off", 2110)                                             \
    VALUE_ENTRY(vacuum_pump_insufficient, "Warning", 2111)                                 \
                                                                                           \
    VALUE_ENTRY(dcdc_coolant_temp, "°C", 2112)                                             \
@@ -117,21 +116,21 @@
    VALUE_ENTRY(BMS_TimeoutFault, YESNO, 2210)                                             \
    VALUE_ENTRY(BMS_DeltaCellVoltage, "V", 2211)                                           \
    VALUE_ENTRY(BMS_BalancingVoltage, "V", 2212)                                           \
-   VALUE_ENTRY(BMS_BalancingActive, ONOFF, 2213)                                          \
-   VALUE_ENTRY(BMS_BalancingAnyActive, ONOFF, 2214)                                       \
+   VALUE_ENTRY(BMS_BalancingActive, "On/Off", 2213)                                       \
+   VALUE_ENTRY(BMS_BalancingAnyActive, "On/Off", 2214)                                    \
    VALUE_ENTRY(BMS_PackVoltage, "V", 2215)                                                \
    VALUE_ENTRY(BMS_MaxChargeCurrent, "A", 2216)                                           \
    VALUE_ENTRY(BMS_MaxDischargeCurrent, "A", 2217)                                        \
-   VALUE_ENTRY(BMS_ShutdownRequest, ONOFF, 2218)                                          \
-   VALUE_ENTRY(BMS_ShutdownReady, ONOFF, 2219)                                            \
-   VALUE_ENTRY(BMS_ShutdownAcknowledge, ONOFF, 2220)                                      \
+   VALUE_ENTRY(BMS_ShutdownRequest, "On/Off", 2218)                                       \
+   VALUE_ENTRY(BMS_ShutdownReady, "On/Off", 2219)                                         \
+   VALUE_ENTRY(BMS_ShutdownAcknowledge, "On/Off", 2220)                                   \
    VALUE_ENTRY(BMS_DataValid, YESNO, 2221)                                                \
    VALUE_ENTRY(BMS_CONT_State, CONT_STATE, 2222)                                          \
    VALUE_ENTRY(BMS_CONT_DTC, CONT_DTC_FLAGS, 2223)                                        \
-   VALUE_ENTRY(BMS_CONT_NegativeInput, ONOFF, 2224)                                       \
-   VALUE_ENTRY(BMS_CONT_PositiveInput, ONOFF, 2225)                                       \
-   VALUE_ENTRY(BMS_CONT_PrechargeInput, ONOFF, 2226)                                      \
-   VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, ONOFF, 2227)                              \
+   VALUE_ENTRY(BMS_CONT_NegativeInput, "On/Off", 2224)                                    \
+   VALUE_ENTRY(BMS_CONT_PositiveInput, "On/Off", 2225)                                    \
+   VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
+   VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=Manual ON", 0, 1, 0, 111)     \
@@ -156,7 +155,7 @@
 #define CAT_BMS "BMS"
 #define CAT_HEATER "Heater"
 #define CAT_COMM "Communication"
-#define ONOFF "0=No Vacuum, 1=Vacuum OK"
+#define ONOFFVAC "0=NoVacuum, 1=VacuumOK"
 #define VALVE "0=180deg, 1=90deg, 2=Auto"
 #define VALVE_STATE "0=180deg, 1=90deg, 2=Transition"
 #define VALVE_TARGET "0=180deg, 1=90deg"
@@ -199,13 +198,6 @@ enum _coolant_pump_modes
    COOLANT_PUMP_MANUAL = 0,
    COOLANT_PUMP_AUTO,
    COOLANT_PUMP_LAST
-};
-
-enum _vacuum_pump_states
-{
-   VACUUM_PUMP_OFF = 0,
-   VACUUM_PUMP_ON,
-   VACUUM_PUMP_WARNING
 };
 
 enum _eps_states
