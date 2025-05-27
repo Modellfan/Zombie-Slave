@@ -154,14 +154,7 @@
    VALUE_ENTRY(LVDU_vehicle_state, VEHICLE_STATE, 2147)                                   \
    VALUE_ENTRY(LVDU_last_vehicle_state, VEHICLE_STATE, 2148)                              \
    VALUE_ENTRY(LVDU_diagnose_pending, "On/Off", 2149)                                     \
-   VALUE_ENTRY(LVDU_diagnose_timer, "ms", 2150)                                           \
-   VALUE_ENTRY(LVDU_force_standby_active, "On/Off", 2151)                                 \
-   VALUE_ENTRY(LVDU_force_standby_timer, "ms", 2152)                                      \
-   VALUE_ENTRY(LVDU_force_sleep_active, "On/Off", 2153)                                   \
-   VALUE_ENTRY(LVDU_force_sleep_timer, "ms", 2154)                                        \
    VALUE_ENTRY(LVDU_12v_battery_voltage, "V", 2155)                                       \
-   VALUE_ENTRY(LVDU_12v_too_low, "Yes/No", 2156)                                          \
-   VALUE_ENTRY(LVDU_hv_too_low, "Yes/No", 2157)                                           \
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
    VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)
