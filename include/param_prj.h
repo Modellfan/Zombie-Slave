@@ -62,6 +62,8 @@
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 60000, 2000, 105)          \
    PARAM_ENTRY(CAT_SETUP, dcdc_can, CAN_DEV, 0, 1, 1, 107)                                \
    PARAM_ENTRY(CAT_TESLA_DCDC, dcdc_voltage_setpoint, "V", 9, 16, 13.5, 108)              \
+   PARAM_ENTRY(CAT_LVDU, LVDU_12v_low_threshold, "V", 8.0, 13.5, 11.0, 116)               \
+   PARAM_ENTRY(CAT_LVDU, LVDU_hv_low_threshold, "V", 100.0, 800.0, 200.0, 117)            \
                                                                                           \
    VALUE_ENTRY(opmode, OPMODES, 2000)                                                     \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
@@ -145,7 +147,24 @@
    VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
    VALUE_ENTRY(heater_contactor_fault, "0=OK, 1=No Feedback, 2=Welded", 2138)             \
    VALUE_ENTRY(heater_fault, "0=OK, 1=Fault", 2143)                                       \
-   VALUE_ENTRY(hv_comfort_functions_allowed, "0=No, 1=Yes", 2144)
+   VALUE_ENTRY(hv_comfort_functions_allowed, "0=No, 1=Yes", 2144)                         \
+                                                                                          \
+   VALUE_ENTRY(LVDU_ignition_in, "On/Off", 2145)                                          \
+   VALUE_ENTRY(LVDU_ready_safety_in, "On/Off", 2146)                                      \
+   VALUE_ENTRY(LVDU_vehicle_state, VEHICLE_STATE, 2147)                                   \
+   VALUE_ENTRY(LVDU_last_vehicle_state, VEHICLE_STATE, 2148)                              \
+   VALUE_ENTRY(LVDU_diagnose_pending, "On/Off", 2149)                                     \
+   VALUE_ENTRY(LVDU_diagnose_timer, "ms", 2150)                                           \
+   VALUE_ENTRY(LVDU_force_standby_active, "On/Off", 2151)                                 \
+   VALUE_ENTRY(LVDU_force_standby_timer, "ms", 2152)                                      \
+   VALUE_ENTRY(LVDU_force_sleep_active, "On/Off", 2153)                                   \
+   VALUE_ENTRY(LVDU_force_sleep_timer, "ms", 2154)                                        \
+   VALUE_ENTRY(LVDU_12v_battery_voltage, "V", 2155)                                       \
+   VALUE_ENTRY(LVDU_12v_too_low, "Yes/No", 2156)                                          \
+   VALUE_ENTRY(LVDU_hv_too_low, "Yes/No", 2157)                                           \
+   VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
+   VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
+   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
@@ -168,11 +187,13 @@
 #define CAT_SETUP "General Setup"
 #define CAT_TESLA_DCDC "Tesla DCDC"
 #define YESNO "0=No, 1=Yes"
+#define CAT_LVDU "Low Voltage Distribution"
 
 #define BMS_STATE "0=INIT, 1=OPERATING, 2=FAULT"
 #define BMS_DTC_FLAGS "0=NONE,1=CAN_SEND_ERROR,2=CAN_INIT_ERROR,4=PACK_FAULT"
 #define CONT_STATE "0=INIT,1=OPEN,2=CLOSING_PRECHARGE,3=CLOSING_POSITIVE,4=CLOSED,5=OPENING_POSITIVE,6=OPENING_PRECHARGE,7=FAULT"
 #define CONT_DTC_FLAGS "0=NONE,1=NO_SUPPLY,2=NEG_FAULT,4=PRE_FAULT,8=POS_FAULT"
+#define VEHICLE_STATE "0=SLEEP,1=STANDBY,2=READY,3=CONDITIONING,4=DRIVE,5=CHARGE,6=ERROR,7=LIMP_HOME"
 
 /***** enums ******/
 

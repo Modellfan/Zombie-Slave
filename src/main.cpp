@@ -45,6 +45,7 @@
 #include "teensyBMS.h"
 #include "heater.h"
 #include "vacuum_pump.h"
+#include "lvdu.h"
 
 #define PRINT_JSON 0
 
@@ -57,6 +58,7 @@ static TeslaDCDC DCDCTesla;
 static TeensyBMS teensyBms;
 static Heater heater;
 static VacuumPump vacuumPump;
+static LVDU lvdu;
 
 // Whenever the user clears mapped can messages or changes the
 // CAN interface of a device, this will be called by the CanHardware module
@@ -128,6 +130,7 @@ static void Ms10Task(void)
 
    heater.Task10Ms();
    vacuumPump.Task10Ms();
+   lvdu.Task10Ms();
 }
 
 // sample 1 ms task
