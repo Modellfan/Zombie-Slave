@@ -59,11 +59,7 @@ private:
     bool driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
 
 public:
-    LVDU()
-    {
-        // Initialize outputs to a safe state on construction
-        UpdateOutputs();
-    }
+    LVDU() {}
 
     void Task100Ms()
     {
@@ -95,9 +91,6 @@ private:
 
     void UpdateState()
     {
-        // Inhibit standby timeout is controlled via parameter:
-        bool inhibitStandbyTimeout = Param::GetInt(Param::LVDU_standby_timeout_inhibit) != 0;
-
         switch (state)
         {
         case STATE_SLEEP:
@@ -120,18 +113,9 @@ private:
             }
             else
             {
-                // Only increment and check timeout if not inhibited (firmware flashing or maintenance)
-                if (!inhibitStandbyTimeout)
+                if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
                 {
-                    if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
-                    {
-                        TransitionTo(STATE_SLEEP);
-                    }
-                }
-                else
-                {
-                    // If timeout is inhibited, keep counter at 0
-                    standbyTimeoutCounter = 0;
+                    TransitionTo(STATE_SLEEP);
                 }
             }
             break;
@@ -396,7 +380,8 @@ private:
 
         Param::SetInt(Param::LVDU_vcu_out, DigIo::vcu_out.Get() ? 1 : 0);
         Param::SetInt(Param::LVDU_condition_out, DigIo::condition_out.Get() ? 1 : 0);
-        Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
+        // Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
+        Param::SetInt(Param::LVDU_ready_out, standbyTimeoutCounter);
     }
 };
 
