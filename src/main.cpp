@@ -108,6 +108,7 @@ static void Ms100Task(void)
    coolantPump.Task100Ms();
    DCDCTesla.Task100Ms();
    teensyBms.Task100Ms();
+   lvdu.Task100Ms();
 }
 
 // sample 10 ms task
@@ -130,7 +131,7 @@ static void Ms10Task(void)
 
    heater.Task10Ms();
    vacuumPump.Task10Ms();
-   lvdu.Task10Ms();
+   
 }
 
 // sample 1 ms task

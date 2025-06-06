@@ -8,11 +8,12 @@
 #include "anain.h"
 
 // Configuration macros
-#define LVDU_DIAGNOSE_DELAY_STEPS 400   // 4000 ms - How long hold the relay after ignition off to check, if the relay is working 
-#define LVDU_READY_DELAY_STEPS 200      // 2000 ms - How long is the hystersis, after that the ready_in shoould follow the ignition
-#define LVDU_FORCE_DELAY_STEPS 2000      // 20s - How long after force should down because of low HV or LV  
-#define LVDU_STANDBY_TIMEOUT_STEPS 1000 // 10s @ 10ms - How long in standby to should down
-#define VOLTAGE_DIVIDER_RATIO 0.0059f //For internal 12V measurement
+#define LVDU_DIAGNOSE_DELAY_STEPS 40   // 4000 ms - How long hold the relay after ignition off to check, if the relay is working
+#define LVDU_READY_DELAY_STEPS 20      // 2000 ms - How long is the hysteresis, after that the ready_in should follow the ignition
+#define LVDU_FORCE_DELAY_STEPS 200     // 20s - How long after force should down because of low HV or LV
+#define LVDU_STANDBY_TIMEOUT_STEPS 100 // 10s @ 100ms - How long in standby to shut down
+#define VOLTAGE_DIVIDER_RATIO 0.0059f  // For internal 12V measurement
+#define LVDU_DIAGNOSE_COOLDOWN_STEPS 2 // 200 ms cooldown after diagnosis ends
 
 enum VehicleState
 {
@@ -36,6 +37,7 @@ private:
     bool diagnosePending = false;
     uint16_t diagnoseTimer = 0;
     uint16_t readySetDelayTimer = 0;
+    uint16_t diagnoseCooldownTimer = 0;
 
     // Force Standby/Sleep
     bool forceStandbyActive = false;
@@ -46,21 +48,24 @@ private:
 
     // Interne Flags
     bool ignitionOn = false;
-    float voltage12V = 13.2f; // Cached analog read
+    float voltage12V = 13.2f; // Cached analog read, 13.2V = typical "full" battery voltage
     bool is12VTooLow = false; // Cached threshold comparison
     bool IsHVTooLow = false;
     bool chargerPlugged = false;                 // TODO: Add real charger detection via CAN
     bool remotePreconditioningRequested = false; // TODO: Add flag/CAN/schedule check via CAN
-    bool thermalTaskCompleted = true;           // TODO: Implement or simulate via CAN
+    bool thermalTaskCompleted = true;            // TODO: Implement or simulate via CAN
     bool criticalFault = false;                  // TODO: Detect via system/BMS via CAN
     bool degradedFault = false;                  // TODO: Detect via system/BMS via CAN
-    bool driverequestrecieved = false;           // TODO: Detect via system/BMS via CAN
-    bool standbyTimeout = false;
+    bool driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
 
 public:
-    LVDU() {}
+    LVDU()
+    {
+        // Initialize outputs to a safe state on construction
+        UpdateOutputs();
+    }
 
-    void Task10Ms()
+    void Task100Ms()
     {
         UpdateInputs();
         UpdateState();
@@ -90,6 +95,9 @@ private:
 
     void UpdateState()
     {
+        // Inhibit standby timeout is controlled via parameter:
+        bool inhibitStandbyTimeout = Param::GetInt(Param::LVDU_standby_timeout_inhibit) != 0;
+
         switch (state)
         {
         case STATE_SLEEP:
@@ -112,23 +120,26 @@ private:
             }
             else
             {
-                if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
+                // Only increment and check timeout if not inhibited (firmware flashing or maintenance)
+                if (!inhibitStandbyTimeout)
                 {
-                    standbyTimeout = true;
+                    if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
+                    {
+                        TransitionTo(STATE_SLEEP);
+                    }
                 }
-            }
-
-            if (standbyTimeout)
-            {
-                standbyTimeout = false;
-                TransitionTo(STATE_SLEEP);
+                else
+                {
+                    // If timeout is inhibited, keep counter at 0
+                    standbyTimeoutCounter = 0;
+                }
             }
             break;
 
         case STATE_READY:
             if (!ignitionOn)
                 TransitionTo(STATE_CONDITIONING);
-            else if (driverequestrecieved)
+            else if (driverequestreceived)
                 TransitionTo(STATE_DRIVE);
             else if (chargerPlugged)
                 TransitionTo(STATE_CHARGE);
@@ -141,7 +152,7 @@ private:
                 TransitionTo(STATE_READY);
             else if (chargerPlugged)
                 TransitionTo(STATE_CHARGE);
-            else if (thermalTaskCompleted)
+            else if (thermalTaskCompleted && !diagnosePending)
                 TransitionTo(STATE_STANDBY);
             else if (criticalFault)
                 TransitionTo(STATE_ERROR);
@@ -174,6 +185,8 @@ private:
             break;
         }
 
+        // --- Safe decrement for force timers to prevent underflow
+
         // Check HV too low during READY or CONDITIONING
         if ((state == STATE_READY || state == STATE_CONDITIONING) && IsHVTooLow)
         {
@@ -189,10 +202,14 @@ private:
             forceStandbyTimer = 0;
         }
 
-        if (forceStandbyActive && --forceStandbyTimer == 0)
+        if (forceStandbyActive && forceStandbyTimer > 0)
         {
-            forceStandbyActive = false;
-            TransitionTo(STATE_STANDBY);
+            --forceStandbyTimer;
+            if (forceStandbyTimer == 0)
+            {
+                forceStandbyActive = false;
+                TransitionTo(STATE_STANDBY);
+            }
         }
 
         // Check LV too low during STANDBY or ERROR
@@ -210,10 +227,14 @@ private:
             forceSleepTimer = 0;
         }
 
-        if (forceSleepActive && --forceSleepTimer == 0)
+        if (forceSleepActive && forceSleepTimer > 0)
         {
-            forceSleepActive = false;
-            TransitionTo(STATE_SLEEP);
+            --forceSleepTimer;
+            if (forceSleepTimer == 0)
+            {
+                forceSleepActive = false;
+                TransitionTo(STATE_SLEEP);
+            }
         }
     }
 
@@ -221,14 +242,13 @@ private:
     {
         lastState = state;
         state = newState;
-    
-        // Reset standby timeout counter if leaving STANDBY
-        if (lastState == STATE_STANDBY)
+
+        // Reset standbyTimeoutCounter when entering STANDBY
+        if (newState == STATE_STANDBY)
         {
-            standbyTimeout = false;
             standbyTimeoutCounter = 0;
         }
-    
+
         // READY → CONDITIONING: Start diagnosis
         if (lastState == STATE_READY && newState == STATE_CONDITIONING)
         {
@@ -236,15 +256,19 @@ private:
             diagnoseTimer = LVDU_DIAGNOSE_DELAY_STEPS;
         }
     }
-    
 
     void HandleReadyDiagnosis()
     {
+        // Reset readySetDelayTimer if ready_safety_in is set during the window
 
-        // Case 1: ignition ON → ready_safety_in must follow within 100ms
+        // Case 1: ignition ON → ready_safety_in must follow within 2000ms (LVDU_READY_DELAY_STEPS)
         if (ignitionOn)
         {
-            if (readySetDelayTimer < LVDU_READY_DELAY_STEPS)
+            if (DigIo::ready_safety_in.Get())
+            {
+                readySetDelayTimer = 0; // Success, reset early
+            }
+            else if (readySetDelayTimer < LVDU_READY_DELAY_STEPS)
             {
                 readySetDelayTimer++;
 
@@ -269,8 +293,6 @@ private:
             {
                 diagnoseTimer--;
 
-                DigIo::ready_out.Set(); // Keep ready ON during diagnose
-
                 // Error: ready_safety_in dropped during diagnose
                 if (!DigIo::ready_safety_in.Get())
                 {
@@ -281,15 +303,19 @@ private:
             }
             else
             {
-                DigIo::ready_out.Clear();
                 diagnosePending = false;
+                diagnoseCooldownTimer = LVDU_DIAGNOSE_COOLDOWN_STEPS;
             }
         }
 
         // Case 3: ignition is OFF and no diagnosis → ready must be off
-        if (!diagnosePending && !ignitionOn && !DigIo::ready_out.Get())
+        if (!diagnosePending && !ignitionOn)
         {
-            if (DigIo::ready_safety_in.Get())
+            if (diagnoseCooldownTimer > 0)
+            {
+                diagnoseCooldownTimer--;
+            }
+            else if (DigIo::ready_safety_in.Get())
             {
                 ErrorMessage::Post(ERR_READY_STUCK_ON_IGNITION_OFF);
             }
@@ -325,7 +351,9 @@ private:
             // VCU and conditioning on, ready off
             DigIo::vcu_out.Set();
             DigIo::condition_out.Set();
-            if (!diagnosePending)
+            if (diagnosePending)
+                DigIo::ready_out.Set();
+            else
                 DigIo::ready_out.Clear();
             break;
 
