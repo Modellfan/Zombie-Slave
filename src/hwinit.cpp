@@ -56,8 +56,9 @@ void clock_setup(void)
    rcc_periph_clock_enable(RCC_DMA1);  //ADC, Encoder and UART receive
    rcc_periph_clock_enable(RCC_ADC1);
    rcc_periph_clock_enable(RCC_CRC);
-   rcc_periph_clock_enable(RCC_AFIO); //CAN
-   rcc_periph_clock_enable(RCC_CAN1); //CAN
+   rcc_periph_clock_enable(RCC_AFIO); // CAN
+   rcc_periph_clock_enable(RCC_CAN1); // CAN1
+   rcc_periph_clock_enable(RCC_CAN2); // CAN2
 }
 
 /* Some pins should never be left floating at any time
