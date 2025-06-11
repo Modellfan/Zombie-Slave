@@ -5,6 +5,7 @@
 #include "hwdefs.h"
 #include "digio.h"
 #include "lvdu.h"
+#include "errormessage.h"
 
 class VacuumPump
 {
@@ -85,6 +86,7 @@ public:
             {
                 // Set Insufficient Vacuum Warning
                 Param::SetInt(Param::vacuum_pump_insufficient, 1);
+                ErrorMessage::Post(ERR_VACUUM_INSUFFICIENT);
             }
         }
         else
