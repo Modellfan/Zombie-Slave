@@ -46,7 +46,7 @@ public:
             pump_state = false;
             pump_timer = 0;
             insufficient_timer = 0;
-            DigIo::vacuum_pump_out.Set(); // OFF (Active Low)
+            DigIo::vacuum_pump_out.Clear(); // OFF (Active Low)
             Param::SetInt(Param::vacuum_pump_insufficient, 0);
             Param::SetInt(Param::vacuum_pump_out, 0);
             return;

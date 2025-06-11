@@ -380,8 +380,7 @@ private:
 
         Param::SetInt(Param::LVDU_vcu_out, DigIo::vcu_out.Get() ? 1 : 0);
         Param::SetInt(Param::LVDU_condition_out, DigIo::condition_out.Get() ? 1 : 0);
-        // Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
-        Param::SetInt(Param::LVDU_ready_out, standbyTimeoutCounter);
+        Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
     }
 };
 
