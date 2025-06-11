@@ -21,7 +21,8 @@
  * https://openinverter.org/wiki/Tesla_Model_S/X_DC/DC_Converter
  */
 
- #include "TeslaDCDC.h"
+#include "TeslaDCDC.h"
+#include "lvdu.h" // for VehicleState enums
 
  #define TESLA_DCDC_STATUS_ID     0x210
  #define TESLA_DCDC_CMD_ID        0x3D8
@@ -102,24 +103,32 @@
  void TeslaDCDC::Task100Ms()
  {
     //  int opmode = Param::GetInt(Param::opmode);
-     float DCSetVal = Param::GetFloat(Param::dcdc_voltage_setpoint);
-     uint8_t bytes[8] = {0};
- 
-     // Timeout handling
-     timeoutCounter++;
-     if (timeoutCounter > TESLA_DCDC_TIMEOUT_TICKS)
-     {
-         Param::SetInt(Param::dcdc_fault_timeout, 1);
-         Param::SetInt(Param::dcdc_fault_any, 1);  // Include timeout as a fault
-     }
- 
-    //  if ((opmode == MOD_RUN || opmode == MOD_CHARGE) && can)
-    //  {
-         timer500++;
-         if (timer500 == 5)
-         {
-             if (DCSetVal < 9.0f)  DCSetVal = 9.0f;
-             if (DCSetVal > 16.0f) DCSetVal = 16.0f;
+    float DCSetVal = Param::GetFloat(Param::dcdc_voltage_setpoint);
+    uint8_t bytes[8] = {0};
+
+    // Timeout handling
+    timeoutCounter++;
+    if (timeoutCounter > TESLA_DCDC_TIMEOUT_TICKS)
+    {
+        Param::SetInt(Param::dcdc_fault_timeout, 1);
+        Param::SetInt(Param::dcdc_fault_any, 1);  // Include timeout as a fault
+    }
+
+    // Check vehicle state - only send commands in READY, DRIVE, CONDITIONING or LIMP_HOME
+    int vehicleState = Param::GetInt(Param::LVDU_vehicle_state);
+    if (vehicleState != STATE_READY && vehicleState != STATE_DRIVE &&
+        vehicleState != STATE_CONDITIONING && vehicleState != STATE_LIMP_HOME)
+    {
+        return; // Skip sending commands in all other states
+    }
+
+   //  if ((opmode == MOD_RUN || opmode == MOD_CHARGE) && can)
+   //  {
+        timer500++;
+        if (timer500 == 5)
+        {
+            if (DCSetVal < 9.0f)  DCSetVal = 9.0f;
+            if (DCSetVal > 16.0f) DCSetVal = 16.0f;
  
              int voltageValue = static_cast<int>((DCSetVal - 9.0f) * 146.0f);
              voltageValue &= 0x03FF;
