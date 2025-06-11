@@ -48,7 +48,7 @@ public:
         {
             pump_state = true;
             pump_timer = 0; // Reset hysteresis timer
-            DigIo::vacuum_pump_out.Clear(); // ON (Active Low)
+            DigIo::vacuum_pump_out.Set(); // ON (Active Low)
         }
         else // Vacuum OK -> Start pump OFF timer
         {
@@ -58,7 +58,7 @@ public:
                 if (pump_timer >= hysteresis_time)
                 {
                     pump_state = false;
-                    DigIo::vacuum_pump_out.Set(); // OFF
+                    DigIo::vacuum_pump_out.Clear(); // OFF
                     pump_timer = 0; // Reset counter
                 }
             }
