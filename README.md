@@ -9,7 +9,7 @@ Originally developed for integration with the Zombie VCU, this project supports 
 
 - Tesla 3-way coolant valve
 - Coolant pump with RPM control (manual or auto mode)
-- Vacuum pump with hysteresis and warning detection
+- Vacuum pump with hysteresis and warning detection (active only in Ready state)
 - Voltage divider for analog signal monitoring
 - Digital IO pins for output control and sensor reading
 

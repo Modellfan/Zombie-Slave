@@ -4,6 +4,7 @@
 #include "params.h"
 #include "hwdefs.h"
 #include "digio.h"
+#include "lvdu.h"
 
 class VacuumPump
 {
@@ -38,6 +39,18 @@ public:
         // Read vacuum sensor (0 = No Vacuum, 1 = Vacuum OK)
         bool vacuum_ok = !(DigIo::vacuum_sensor_in.Get());
         Param::SetInt(Param::vacuum_sensor, vacuum_ok ? 1 : 0); // 1 = ON, 0 = OFF
+
+        // Only operate the pump while the vehicle is in READY state
+        if (Param::GetInt(Param::LVDU_vehicle_state) != STATE_READY)
+        {
+            pump_state = false;
+            pump_timer = 0;
+            insufficient_timer = 0;
+            DigIo::vacuum_pump_out.Set(); // OFF (Active Low)
+            Param::SetInt(Param::vacuum_pump_insufficient, 0);
+            Param::SetInt(Param::vacuum_pump_out, 0);
+            return;
+        }
 
         // Read hysteresis and warning delay parameters (convert from ms to 10ms steps)
         uint16_t hysteresis_time = Param::GetInt(Param::vacuum_hysteresis) / 10;
