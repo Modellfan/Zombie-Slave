@@ -53,8 +53,7 @@
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
    PARAM_ENTRY(CAT_COMM, canperiod, CANPERIODS, 0, 1, 0, 2)                               \
-   PARAM_ENTRY(CAT_TEST, testparam, "Hz", -100, 1000, 0, 0)                               \
-   PARAM_ENTRY(CAT_VALVE, valve_out, VALVE, 0, 2, 0, 100)                                 \
+   PARAM_ENTRY(CAT_VALVE, valve_out_1, VALVE, 0, 2, 0, 100)                                 \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_mode, AUTO_MANUAL, 0, 1, 0, 101)      \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_manual_value, "RPM", 0, 4700, 0, 102) \
    PARAM_ENTRY(CAT_EPS, eps_startup_delay, "ms", 0, 5000, 1000, 103)                      \
@@ -135,14 +134,14 @@
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
-   PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=Manual ON", 0, 1, 0, 111)     \
+   PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)     \
    PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
    VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
    VALUE_ENTRY(heater_flap_in, "Raw ADC", 2134)                                           \
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
-   VALUE_ENTRY(heater_thermal_switch_boot_fault, "0=OK, 1=Overtemp on Boot", 2140)        \
-   VALUE_ENTRY(heater_thermal_switch_does_not_open_fault, "0=OK, 1=Stuck Closed", 2141)   \
-   VALUE_ENTRY(heater_thermal_switch_overheat_fault, "0=OK, 1=Too Long Open", 2142)       \
+   VALUE_ENTRY(heater_thermal_switch_boot_fault, "0=OK, 1=OvertempOnBoot", 2140)        \
+   VALUE_ENTRY(heater_thermal_switch_does_not_open_fault, "0=OK, 1=StuckClosed", 2141)   \
+   VALUE_ENTRY(heater_thermal_switch_overheat_fault, "0=OK, 1=TooLongOpen", 2142)       \
    VALUE_ENTRY(heater_contactor_feedback_in, "0=Open, 1=Closed", 2132)                    \
    VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
    VALUE_ENTRY(heater_contactor_fault, "0=OK, 1=No Feedback, 2=Welded", 2138)             \
