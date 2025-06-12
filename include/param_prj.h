@@ -158,6 +158,10 @@
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
    VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)
+         \
+   VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2161)
+         \
+   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2162)
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
