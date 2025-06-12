@@ -80,6 +80,7 @@ static bool CanCallback(uint32_t id, uint32_t data[2], uint8_t dlc) // This is w
 {
    dlc = dlc;
    DCDCTesla.DecodeCAN(id, (uint8_t *)data);
+   teensyBms.DecodeCAN(id, (uint8_t *)data);
    return false;
 }
 

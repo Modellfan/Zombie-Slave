@@ -118,7 +118,7 @@ public:
         bool manual_override  = Param::GetInt(Param::heater_active_manual);
         bool comfort_allowed  = Param::GetInt(Param::hv_comfort_functions_allowed);
         bool thermal_closed   = DigIo::heater_thermal_switch_in.Get(); // High = closed
-        bool contactor_feedback = (DigIo::heater_contactor_feedback_in.Get() == 0); // active low
+        bool contactor_feedback = (DigIo::heater_contactor_feedback_in.Get() == 1); 
         bool contactor_out      = (DigIo::heater_contactor_out.Get() == 0);         // active low
 
         // Update parameter values
@@ -187,7 +187,7 @@ private:
     void DiagnoseContactor()
     {
         bool cmd_on = (DigIo::heater_contactor_out.Get() == 0);              // Active low
-        bool feedback_closed = (DigIo::heater_contactor_feedback_in.Get() == 0); // Active low
+        bool feedback_closed = (DigIo::heater_contactor_feedback_in.Get() == 1); 
         bool thermal_closed = DigIo::heater_thermal_switch_in.Get();        // High = closed
 
         int fault = Param::GetInt(Param::heater_contactor_fault); // Keep current state
