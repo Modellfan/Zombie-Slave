@@ -6,7 +6,7 @@
 /* Here you specify generic IO pins, i.e. digital input or outputs.
  * Inputs can be floating (INPUT_FLT), have a 30k pull-up (INPUT_PU)
  * or pull-down (INPUT_PD) or be an output (OUTPUT)
- * !!Pull-Up dows not work on zombie, because externaly pulled down!! */
+ * !!Pull-Up does not work on Zombie because externally pulled down!! */
 
 #define DIG_IO_LIST                                                             \
     DIG_IO_ENTRY(led_out, GPIOE, GPIO2, PinMode::OUTPUT)                        \
