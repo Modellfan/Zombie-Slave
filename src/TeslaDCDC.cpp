@@ -62,7 +62,10 @@
      bool calibrationFactorFault = data[1] & (1 << 3);
  
      // Byte 2–5: Scaled measurements
-     float coolantTemp   = (data[2] * 0.5f) - 40.0f;
+    // Coolant temperature is encoded as a signed byte with 0.5 °C steps and
+    // an offset of +40 °C.  Use sign-extension to correctly handle negative
+    // values.
+    float coolantTemp   = ((data[2] - (2 * (data[2] & 0x80))) * 0.5f) + 40.0f;
      float inputPower    = data[3] * 16.0f;
      float outputCurrent = static_cast<float>(data[4]);
      float outputVoltage = data[5] * 0.1f;
