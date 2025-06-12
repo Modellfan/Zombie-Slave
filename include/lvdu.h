@@ -381,6 +381,15 @@ private:
         Param::SetInt(Param::LVDU_vcu_out, DigIo::vcu_out.Get() ? 1 : 0);
         Param::SetInt(Param::LVDU_condition_out, DigIo::condition_out.Get() ? 1 : 0);
         Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
+
+        int connectHV = 0;
+        if (state == STATE_READY || state == STATE_CONDITIONING ||
+            state == STATE_DRIVE || state == STATE_CHARGE ||
+            state == STATE_LIMP_HOME)
+        {
+            connectHV = 1;
+        }
+        Param::SetInt(Param::LVDU_connectHVcommand, connectHV);
     }
 };
 
