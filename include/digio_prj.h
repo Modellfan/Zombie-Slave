@@ -23,5 +23,7 @@
     DIG_IO_ENTRY(heater_contactor_out, GPIOC, GPIO6, PinMode::OUTPUT)           \
     DIG_IO_ENTRY(heater_contactor_feedback_in, GPIOD, GPIO5, PinMode::INPUT_PU) \
     DIG_IO_ENTRY(servo_pump_out, GPIOB, GPIO0, PinMode::OUTPUT)                 \
+    DIG_IO_ENTRY(eps_quick_spoolup_out, GPIOA, GPIO7, PinMode::OUTPUT)\
+    DIG_IO_ENTRY(eps_ignition_on_out, GPIOA, GPIO6, PinMode::OUTPUT)\
     DIG_IO_ENTRY(heater_thermal_switch_in, GPIOD, GPIO7, PinMode::INPUT_PD)
 #endif // PinMode_PRJ_H_INCLUDED
