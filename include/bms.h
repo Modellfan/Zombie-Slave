@@ -32,7 +32,7 @@
  * function to return whether charging is permitted and the maximum
  * charge current.
  * The function Task100Ms() will be called every 100ms and should
- * be used to implement a timeout for receiving fata from the BMS.
+ * be used to implement a timeout for receiving data from the BMS.
  */
 
 class BMS

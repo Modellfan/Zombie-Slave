@@ -82,8 +82,8 @@
    VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                            \
                                                                                           \
    VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
-   VALUE_ENTRY(vacuum_sensor, "On/Off", 2110)                                             \
-   VALUE_ENTRY(vacuum_pump_insufficient, "Warning", 2111)                                 \
+   VALUE_ENTRY(vacuum_sensor, VACUUM_STATE, 2110)                                             \
+   VALUE_ENTRY(vacuum_pump_insufficient, YESNO, 2111)                                 \
                                                                                           \
    VALUE_ENTRY(dcdc_coolant_temp, "°C", 2112)                                             \
    VALUE_ENTRY(dcdc_input_power, "W", 2113)                                               \
@@ -157,9 +157,11 @@
    VALUE_ENTRY(LVDU_12v_battery_voltage, "V", 2155)                                       \
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
-   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)
-         \
-   VALUE_ENTRY(eps_state, EPS_STATE, 2161)
+   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)        \
+   VALUE_ENTRY(eps_state, EPS_STATE, 2161)\
+   VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2161)\
+   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2162)
+
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
@@ -169,7 +171,7 @@
 #define CAT_BMS "BMS"
 #define CAT_HEATER "Heater"
 #define CAT_COMM "Communication"
-#define ONOFFVAC "0=NoVacuum, 1=VacuumOK"
+#define VACUUM_STATE "0=Vacuum Low, 1=Vacuum OK"
 #define VALVE "0=180deg, 1=90deg, 2=Auto"
 #define VALVE_STATE "0=180deg, 1=90deg, 2=Transition"
 #define VALVE_TARGET "0=180deg, 1=90deg"

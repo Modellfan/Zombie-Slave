@@ -2,7 +2,27 @@
 #include "params.h"
 #include <string.h>
 
+// CAN message ID for VCU -> BMS feedback
+#define VCU_STATUS_MSG_ID 0x437
+
+/*
+Shutdown sequence (simplified)
+------------------------------
+
+ BMS        VCU       Contactors
+  |--0x41F: request-->|
+  |<--0x437: status---|
+  |                   |--open HV
+  |<--0x41F: ready----|
+  |--0x41F: ack------>|
+*/
+
 void TeensyBMS::SetCanInterface(CanHardware* c) {
+    if (c == nullptr) {
+        can = nullptr;
+        return;
+    }
+
     can = c;
     can->RegisterUserMessage(0x41A); // 1050: Pack state
     can->RegisterUserMessage(0x41B); // 1051: Voltage info
@@ -114,4 +134,14 @@ void TeensyBMS::Task100Ms() {
     Param::SetInt(Param::BMS_CONT_PositiveInput, contactorPositiveInput);
     Param::SetInt(Param::BMS_CONT_PrechargeInput, contactorPrechargeInput);
     Param::SetInt(Param::BMS_CONT_SupplyVoltageAvailable, contactorSupplyAvailable);
+
+    // Send VCU status back to the BMS every cycle (100ms)
+    if (can) {
+        uint8_t bytes[3] = {
+            static_cast<uint8_t>(Param::GetInt(Param::LVDU_vehicle_state)),
+            static_cast<uint8_t>(Param::GetInt(Param::LVDU_forceVCUsShutdown)),
+            static_cast<uint8_t>(Param::GetInt(Param::LVDU_connectHVcommand))};
+        can->Send(VCU_STATUS_MSG_ID, bytes, 3);
+    }
 }
+

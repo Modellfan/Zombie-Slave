@@ -165,6 +165,30 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 | 56  | Permanent +12V              |                  |                                                                                                       |                           |
 | Int | 12V Supply Measurement       | PB1              | Voltage divider (8.2k/1.8k), filtered to scale to ADC                                                 | `AnaIn::dc_power_supply`    |
 | Int | Status LED                   | PE2              | Push-pull output, 680Ω to GND                                                                         | `DigIo::led_out`          |
+### Heater Wiring
+
+```
+       +12V
+         |
+     [FUSE_sVCU]
+         |
+  [Contactor Feedback SW]-----> Feedback Input
+
+       +12V
+         |
+     [FUSE_heater]
+         |
+  [Thermal Switch 65°C]-----> Thermo Switch Input
+         |
+     Contactor +
+         |
+  [Heater Contactor]
+         |
+    Contactor -
+         |
+  LS Switch Output (to GND)
+```
+
 
 
 
@@ -183,4 +207,3 @@ Based on the [stm32-template](https://github.com/jsphuebner/stm32-template) by *
 Extended for Zombie VCU use cases and embedded control.
 
 ---
-

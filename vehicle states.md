@@ -9,7 +9,7 @@
 | 🚗 **Drive**       | ✅          | ✅                   | ✅            | ✅            | BMS + Inverter     | Full driving mode. Torque delivery enabled. Requires ignition ON, brake pressed, and completed start sequence. |
 | ⚡ **Charge**      | ✅          | ✅                   | ❌            | ✅            | BMS only           | Charging via AC or DC. Drive disabled. On finish, system exits to Conditioning for cooling. |
 | ⚠️ **Error**       | ✅          | ❌                   | ❌            | ❌            | —                  | Fault state. HV and torque disabled. Awaiting 12V power cycle to reset and reboot safely. |
-| 🛠️ **Limp Home**   | ✅          | ✅                   | ✅            | ✅            | BMS + Inverter     | Degraded fault state. HV and limited drive allowed. Used when faults permit continued low-performance operation. Can exit to Conditioning. Important, because Tesla SDU does't allow HV power of.|
+| 🛠️ **Limp Home**   | ✅          | ✅                   | ✅            | ✅            | BMS + Inverter     | Degraded fault state. HV and limited drive allowed. Used when faults permit continued low-performance operation. Can exit to Conditioning. Important because the Tesla SDU doesn't allow HV power off.|
 
 ---
 
