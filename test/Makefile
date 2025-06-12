@@ -6,13 +6,16 @@ all: run
 run: test_teensyBMS
 	./test_teensyBMS
 
-test_teensyBMS: test_teensyBMS.o ../src/teensyBMS.o
+test_teensyBMS: test_teensyBMS.o params.o ../src/teensyBMS.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 ../src/teensyBMS.o: ../src/teensyBMS.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 test_teensyBMS.o: test_teensyBMS.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+params.o: stubs/params.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:

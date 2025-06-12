@@ -30,9 +30,18 @@ public:
         BMS_CONT_NegativeInput,
         BMS_CONT_PositiveInput,
         BMS_CONT_PrechargeInput,
-        BMS_CONT_SupplyVoltageAvailable
+        BMS_CONT_SupplyVoltageAvailable,
+        LVDU_vehicle_state,
+        LVDU_forceVCUsShutdown,
+        LVDU_connectHVcommand
     };
     static void SetFloat(int, float) {}
-    static void SetInt(int, int) {}
+    static void SetInt(int idx, int val) { values[idx] = val; }
+    static int  GetInt(int idx) { return values[idx]; }
+
+private:
+    static int values[64];
 };
+
+// Storage for parameters will be defined in params.cpp
 #endif

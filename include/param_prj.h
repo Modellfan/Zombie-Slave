@@ -56,7 +56,7 @@
    PARAM_ENTRY(CAT_VALVE, valve_out_1, VALVE, 0, 2, 0, 100)                                 \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_mode, AUTO_MANUAL, 0, 1, 0, 101)      \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_manual_value, "RPM", 0, 4700, 0, 102) \
-   PARAM_ENTRY(CAT_EPS, eps_startup_delay, "ms", 0, 5000, 1000, 103)                      \
+   PARAM_ENTRY(CAT_EPS, eps_spoolup_delay, "ms", 0, 5000, 500, 106)\
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 60000, 500, 104)              \
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 60000, 2000, 105)          \
    PARAM_ENTRY(CAT_SETUP, dcdc_can, CAN_DEV, 0, 1, 1, 107)                                \
@@ -156,7 +156,11 @@
    VALUE_ENTRY(LVDU_12v_battery_voltage, "V", 2155)                                       \
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
-   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)
+   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)        \
+   VALUE_ENTRY(eps_state, EPS_STATE, 2161)\
+   VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2161)\
+   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2162)
+
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
@@ -182,6 +186,7 @@
 #define CAT_LVDU "Low Voltage Distribution"
 
 #define BMS_STATE "0=INIT, 1=OPERATING, 2=FAULT"
+#define EPS_STATE "0=OFF, 1=ON, 2=FAULT"
 #define BMS_DTC_FLAGS "0=NONE,1=CAN_SEND_ERROR,2=CAN_INIT_ERROR,4=PACK_FAULT"
 #define CONT_STATE "0=INIT,1=OPEN,2=CLOSING_PRECHARGE,3=CLOSING_POSITIVE,4=CLOSED,5=OPENING_POSITIVE,6=OPENING_PRECHARGE,7=FAULT"
 #define CONT_DTC_FLAGS "0=NONE,1=NO_SUPPLY,2=NEG_FAULT,4=PRE_FAULT,8=POS_FAULT"
@@ -216,7 +221,8 @@ enum _coolant_pump_modes
 enum _eps_states
 {
    EPS_OFF = 0,
-   EPS_ON
+   EPS_ON,
+   EPS_FAULT
 };
 
 enum can_devices
