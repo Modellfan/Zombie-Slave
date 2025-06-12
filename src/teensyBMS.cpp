@@ -3,6 +3,11 @@
 #include <string.h>
 
 void TeensyBMS::SetCanInterface(CanHardware* c) {
+    if (c == nullptr) {
+        can = nullptr;
+        return;
+    }
+
     can = c;
     can->RegisterUserMessage(0x41A); // 1050: Pack state
     can->RegisterUserMessage(0x41B); // 1051: Voltage info
