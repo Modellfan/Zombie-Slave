@@ -112,8 +112,8 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 | 03  | GP Out 3                      | PD13             | Low-side switch (NCV8402ASTT1G) — Sinks to GND via N-MOSFET, 1k pull-up to 12V                       | `DigIo::tesla_coolant_valve_1_out` |
 | 04  | GP Out 2                      | PD14             | Same as above                                                                                         | `DigIo::tesla_coolant_valve_2_out` |
 | 05  | PWM 3                         | PB0              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::servo_pump_out`  |
-| 06  | PWM 2                         | PA7              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      |                           |
-| 07  | PWM 1                         | PA6              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      |                           |
+| 06  | PWM 2                         | PA7              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::eps_quick_spoolup_out` |
+| 07  | PWM 1                         | PA6              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::eps_ignition_on_out` |
 | 08  | Analog 2 in                   | PC3              | 5V tolerant analog input, clamped to 3.3V, protected by resistor & diode                              |                           |
 | 09  | Analog 1 in                   | PC2              | Same as above                                                                                         |                           |
 | 10  | DAC 2                         | PA5              | Buffered via op-amp (TDA2320A), filtered output                                                       |                           |
