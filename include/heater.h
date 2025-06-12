@@ -9,62 +9,41 @@
     Heater Control Function – Logic Overview
     ========================================
 
-           +----------------------------+
-           | hv_comfort_functions_allowed? |
-           +------------+---------------+
-                        |
-                      [YES]
+    Start
+     |
+     v
+    Check hv_comfort_functions_allowed?
+       ├─ No  → Heater OFF
+       └─ Yes → Continue
+                |
+                v
+        Check aggregated fault flag?
+           ├─ Fault present → Heater OFF
+           └─ No fault → Continue
                         |
                         v
-         +-------------------------------+
-         | Fault present? (any fault flag) |
-         +------------+------------------+
-                      |
-                    [NO]
-                      |
-                      v
-         +---------------------------------------------+
-         | Flap input > threshold  OR manual override? |
-         +------------+------------------+
-                      |
-                    [YES]
-                      |
-                      v
-         +---------------------------------------------+
-         | Thermal switch closed?                      |
-         +------------+------------------+
-                      |
-                    [YES]
-                      |
-                      v
-     +----------------------------------------------------+
-     | Start ON delay counter (in 10ms steps)             |
-     | - Restart counter when thermal switch closes       |
-     | - Only count up while thermal switch remains closed|
-     +----------------------------------------------------+
-                      |
-                      v
-         +-------------------------------+
-         | Delay counter >= threshold?   |
-         +------------+------------------+
-                      |
-                    [YES]
-                      |
-                      v
-               +-------------------+
-               | Close contactor   |
-               | (active low)      |
-               +-------------------+
+            Manual override OR flap > threshold?
+               ├─ No  → Heater OFF
+               └─ Yes → Continue
+                            |
+                            v
+                    Thermal switch closed?
+                       ├─ No → Reset delay counter, Heater OFF
+                       └─ Yes
+                            |
+                            v
+                       Increment delay timer
+                            |
+                            v
+                   Delay timer ≥ heater_contactor_on_delay?
+                       ├─ No → Heater OFF (keep counting)
+                       └─ Yes → Close heater contactor (active low),
+                                Set heater_active = true
 
-    Else:
-      - Reset delay counter
-      - Set heater output OFF
-      - Do NOT close contactor
-
-    Conditions for heater OFF:
+    Conditions causing heater OFF:
       - hv_comfort_functions_allowed == 0
       - Any fault active
-      - No flap input & no manual override
+      - Flap below threshold and no manual override
       - Thermal switch open
 */
 
