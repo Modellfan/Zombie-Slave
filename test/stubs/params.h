@@ -35,7 +35,8 @@ public:
         BMS_DecodeCanCalled,
         LVDU_vehicle_state,
         LVDU_forceVCUsShutdown,
-        LVDU_connectHVcommand
+        LVDU_connectHVcommand,
+        hv_comfort_functions_allowed
     };
     static void SetFloat(int, float) {}
     static void SetInt(int idx, int val) { values[idx] = val; }
