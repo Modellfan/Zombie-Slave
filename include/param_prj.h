@@ -140,6 +140,8 @@
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \
    PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
+   PARAM_ENTRY(CAT_HEATER, heater_thermal_open_timeout, "s", 0, 600, 2, 114)                    \
+   PARAM_ENTRY(CAT_HEATER, heater_thermal_close_timeout, "s", 0, 600, 5, 115)                    \
    VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
    VALUE_ENTRY(heater_flap_in, "Raw ADC", 2134)                                           \
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \

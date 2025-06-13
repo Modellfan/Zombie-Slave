@@ -50,11 +50,6 @@
 
 // Constants
 #define CONTACTOR_FAULT_DEBOUNCE_COUNT         2      // 2 x 10ms = 20ms
-#define HEATER_THERMAL_OPEN_TIMEOUT_MS         200000
-#define HEATER_THERMAL_CLOSE_TIMEOUT_MS        500000
-
-#define HEATER_THERMAL_OPEN_TIMEOUT_STEPS      (HEATER_THERMAL_OPEN_TIMEOUT_MS / 10)
-#define HEATER_THERMAL_CLOSE_TIMEOUT_STEPS     (HEATER_THERMAL_CLOSE_TIMEOUT_MS / 10)
 
 class Heater
 {
@@ -201,10 +196,13 @@ private:
         bool contactor_on = (DigIo::heater_contactor_out.Get() == 1); 
         bool thermal_closed = DigIo::heater_thermal_switch_in.Get();  // High = closed
 
+        int open_timeout_steps  = Param::GetInt(Param::heater_thermal_open_timeout) * 100;  // seconds -> 10ms steps
+        int close_timeout_steps = Param::GetInt(Param::heater_thermal_close_timeout) * 100; // seconds -> 10ms steps
+
         // Fault: Should open after contactor ON
         if (contactor_on && thermal_closed)
         {
-            if (++thermal_open_timer >= HEATER_THERMAL_OPEN_TIMEOUT_STEPS)
+            if (++thermal_open_timer >= open_timeout_steps)
                 Param::SetInt(Param::heater_thermal_switch_does_not_open_fault, 1);
         }
         else
@@ -215,7 +213,7 @@ private:
         // Fault: Should close after contactor OFF
         if (!contactor_on && !thermal_closed)
         {
-            if (++thermal_close_timer >= HEATER_THERMAL_CLOSE_TIMEOUT_STEPS)
+            if (++thermal_close_timer >= close_timeout_steps)
                 Param::SetInt(Param::heater_thermal_switch_overheat_fault, 1);
         }
         else
