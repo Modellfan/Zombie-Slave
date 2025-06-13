@@ -20,7 +20,7 @@ public:
     /** Write parameter to the digital pin */
     void WriteValveState()
     {
-        int valveState = Param::GetInt(Param::valve_out);
+        int valveState = Param::GetInt(Param::valve_out_1);
         if (valveState == 1)
         {
             DigIo::tesla_coolant_valve_1_out.Set();
@@ -69,7 +69,7 @@ public:
     void Task100Ms()
     {
         ReadValveState();
-        if (Param::GetInt(Param::valve_out) == 2)
+        if (Param::GetInt(Param::valve_out_1) == 2)
         {
             ControlAutoMode();
         }
