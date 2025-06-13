@@ -53,10 +53,10 @@
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
    PARAM_ENTRY(CAT_COMM, canperiod, CANPERIODS, 0, 1, 0, 2)                               \
-   PARAM_ENTRY(CAT_VALVE, valve_out_1, VALVE, 0, 2, 0, 100)                                 \
+   PARAM_ENTRY(CAT_VALVE, valve_out_1, VALVE, 0, 2, 0, 100)                               \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_mode, AUTO_MANUAL, 0, 1, 0, 101)      \
    PARAM_ENTRY(CAT_TESLA_COOLANT_PUMP, coolant_pump_manual_value, "RPM", 0, 4700, 0, 102) \
-   PARAM_ENTRY(CAT_EPS, eps_spoolup_delay, "ms", 0, 5000, 500, 106)\
+   PARAM_ENTRY(CAT_EPS, eps_spoolup_delay, "ms", 0, 5000, 500, 106)                       \
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 60000, 500, 104)              \
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 60000, 2000, 105)          \
    PARAM_ENTRY(CAT_SETUP, dcdc_can, CAN_DEV, 0, 1, 1, 107)                                \
@@ -81,8 +81,8 @@
    VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                            \
                                                                                           \
    VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
-   VALUE_ENTRY(vacuum_sensor, VACUUM_STATE, 2110)                                             \
-   VALUE_ENTRY(vacuum_pump_insufficient, YESNO, 2111)                                 \
+   VALUE_ENTRY(vacuum_sensor, VACUUM_STATE, 2110)                                         \
+   VALUE_ENTRY(vacuum_pump_insufficient, YESNO, 2111)                                     \
                                                                                           \
    VALUE_ENTRY(dcdc_coolant_temp, "°C", 2112)                                             \
    VALUE_ENTRY(dcdc_input_power, "W", 2113)                                               \
@@ -134,14 +134,14 @@
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
-   PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)     \
+   PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \
    PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
    VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
    VALUE_ENTRY(heater_flap_in, "Raw ADC", 2134)                                           \
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
-   VALUE_ENTRY(heater_thermal_switch_boot_fault, "0=OK, 1=OvertempOnBoot", 2140)        \
-   VALUE_ENTRY(heater_thermal_switch_does_not_open_fault, "0=OK, 1=StuckClosed", 2141)   \
-   VALUE_ENTRY(heater_thermal_switch_overheat_fault, "0=OK, 1=TooLongOpen", 2142)       \
+   VALUE_ENTRY(heater_thermal_switch_boot_fault, "0=OK, 1=OvertempOnBoot", 2140)          \
+   VALUE_ENTRY(heater_thermal_switch_does_not_open_fault, "0=OK, 1=StuckClosed", 2141)    \
+   VALUE_ENTRY(heater_thermal_switch_overheat_fault, "0=OK, 1=TooLongOpen", 2142)         \
    VALUE_ENTRY(heater_contactor_feedback_in, "0=Open, 1=Closed", 2132)                    \
    VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
    VALUE_ENTRY(heater_contactor_fault, "0=OK, 1=No Feedback, 2=Welded", 2138)             \
@@ -156,11 +156,10 @@
    VALUE_ENTRY(LVDU_12v_battery_voltage, "V", 2155)                                       \
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
-   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)        \
-   VALUE_ENTRY(eps_state, EPS_STATE, 2161)\
-   VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2161)\
-   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2162)
-
+   VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)                                            \
+   VALUE_ENTRY(eps_state, EPS_STATE, 2161)                                                \
+   VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2162)                                    \
+   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
@@ -170,7 +169,7 @@
 #define CAT_BMS "BMS"
 #define CAT_HEATER "Heater"
 #define CAT_COMM "Communication"
-#define VACUUM_STATE "0=Vacuum Low, 1=Vacuum OK"
+#define VACUUM_STATE "0=VacuumLow, 1=VacuumOK"
 #define VALVE "0=180deg, 1=90deg, 2=Auto"
 #define VALVE_STATE "0=180deg, 1=90deg, 2=Transition"
 #define VALVE_TARGET "0=180deg, 1=90deg"

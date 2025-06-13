@@ -135,7 +135,6 @@ static void Ms10Task(void)
 
    heater.Task10Ms();
    vacuumPump.Task10Ms();
-   
 }
 
 // sample 1 ms task
@@ -150,6 +149,10 @@ void Param::Change(Param::PARAM_NUM paramNum)
    switch (paramNum)
    {
    case Param::BMS_CAN:
+      SetCanFilters(); // Re-assign CAN interface to TeensyBMS
+      break;
+
+   case Param::dcdc_can:
       SetCanFilters(); // Re-assign CAN interface to TeensyBMS
       break;
 

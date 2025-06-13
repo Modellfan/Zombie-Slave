@@ -50,8 +50,8 @@
 
 // Constants
 #define CONTACTOR_FAULT_DEBOUNCE_COUNT         2      // 2 x 10ms = 20ms
-#define HEATER_THERMAL_OPEN_TIMEOUT_MS         2000
-#define HEATER_THERMAL_CLOSE_TIMEOUT_MS        5000
+#define HEATER_THERMAL_OPEN_TIMEOUT_MS         200000
+#define HEATER_THERMAL_CLOSE_TIMEOUT_MS        500000
 
 #define HEATER_THERMAL_OPEN_TIMEOUT_STEPS      (HEATER_THERMAL_OPEN_TIMEOUT_MS / 10)
 #define HEATER_THERMAL_CLOSE_TIMEOUT_STEPS     (HEATER_THERMAL_CLOSE_TIMEOUT_MS / 10)
@@ -95,10 +95,10 @@ public:
         int flap_signal       = Param::GetInt(Param::valve_in_raw);
         int flap_threshold    = Param::GetInt(Param::heater_flap_threshold);
         bool manual_override  = Param::GetInt(Param::heater_active_manual);
-        bool comfort_allowed  = Param::GetInt(Param::hv_comfort_functions_allowed);
+        bool comfort_allowed  = true; // todo Param::GetInt(Param::hv_comfort_functions_allowed);
         bool thermal_closed   = DigIo::heater_thermal_switch_in.Get(); // High = closed
         bool contactor_feedback = (DigIo::heater_contactor_feedback_in.Get() == 1); 
-        bool contactor_out      = (DigIo::heater_contactor_out.Get() == 0);         // active low
+        bool contactor_out      = (DigIo::heater_contactor_out.Get() == 1);         
 
         // Update parameter values
         Param::SetInt(Param::heater_flap_in, flap_signal);
@@ -136,26 +136,26 @@ public:
 
                 if (contactor_on_delay_timer >= Param::GetInt(Param::heater_contactor_on_delay) / 10)
                 {
-                    DigIo::heater_contactor_out.Clear(); // ON (active low)
+                    DigIo::heater_contactor_out.Set(); //on
                     heater_active = true;
                 }
                 else
                 {
-                    DigIo::heater_contactor_out.Set(); // OFF
+                    DigIo::heater_contactor_out.Clear(); //off
                     heater_active = false;
                 }
             }
             else
             {
                 contactor_on_delay_timer = 0;
-                DigIo::heater_contactor_out.Set(); // OFF
+                DigIo::heater_contactor_out.Clear(); // OFF
                 heater_active = false;
             }
         }
         else
         {
             contactor_on_delay_timer = 0;
-            DigIo::heater_contactor_out.Set(); // OFF
+            DigIo::heater_contactor_out.Clear(); // OFF
             heater_active = false;
         }
 
@@ -165,7 +165,7 @@ public:
 private:
     void DiagnoseContactor()
     {
-        bool cmd_on = (DigIo::heater_contactor_out.Get() == 0);              // Active low
+        bool cmd_on = (DigIo::heater_contactor_out.Get() == 1);              
         bool feedback_closed = (DigIo::heater_contactor_feedback_in.Get() == 1); 
         bool thermal_closed = DigIo::heater_thermal_switch_in.Get();        // High = closed
 
@@ -198,7 +198,7 @@ private:
 
     void DiagnoseThermalSwitch()
     {
-        bool contactor_on = (DigIo::heater_contactor_out.Get() == 0); // Active low
+        bool contactor_on = (DigIo::heater_contactor_out.Get() == 1); 
         bool thermal_closed = DigIo::heater_thermal_switch_in.Get();  // High = closed
 
         // Fault: Should open after contactor ON
