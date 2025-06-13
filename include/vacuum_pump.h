@@ -41,8 +41,9 @@ public:
         bool vacuum_ok = !(DigIo::vacuum_sensor_in.Get());
         Param::SetInt(Param::vacuum_sensor, vacuum_ok ? 1 : 0); // 1 = ON, 0 = OFF
 
-        // Only operate the pump while the vehicle is in READY state
-        if (Param::GetInt(Param::LVDU_vehicle_state) != STATE_READY)
+        // Only operate the pump while the vehicle is in READY, DRIVE or LIMP_HOME state
+        VehicleState vehicleState = static_cast<VehicleState>(Param::GetInt(Param::LVDU_vehicle_state));
+        if (vehicleState != STATE_READY && vehicleState != STATE_DRIVE && vehicleState != STATE_LIMP_HOME)
         {
             pump_state = false;
             pump_timer = 0;
