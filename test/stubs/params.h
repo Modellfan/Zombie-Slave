@@ -31,6 +31,8 @@ public:
         BMS_CONT_PositiveInput,
         BMS_CONT_PrechargeInput,
         BMS_CONT_SupplyVoltageAvailable,
+        BMS_SetCanInterfaceCalled,
+        BMS_DecodeCanCalled,
         LVDU_vehicle_state,
         LVDU_forceVCUsShutdown,
         LVDU_connectHVcommand

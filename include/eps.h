@@ -10,7 +10,7 @@
 class EPS
 {
 private:
-    uint16_t spoolupCounter = 0;   // counts 100ms steps
+    uint16_t spoolupCounter = 0; // counts 100ms steps
     bool ignitionActive = false;
     bool spoolupActive = false;
     _eps_states epsState = EPS_OFF;
@@ -47,13 +47,6 @@ public:
                     ErrorMessage::Post(ERR_EPS_STARTUP_DCDC_FAULT);
                 }
             }
-            else
-            {
-                epsState = EPS_OFF;
-                DigIo::eps_ignition_on_out.Clear();
-                DigIo::eps_quick_spoolup_out.Clear();
-            }
-
             lastState = state;
         }
 

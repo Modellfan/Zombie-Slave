@@ -12,7 +12,11 @@
 #define LVDU_READY_DELAY_STEPS 20      // 2000 ms - How long is the hysteresis, after that the ready_in should follow the ignition
 #define LVDU_FORCE_DELAY_STEPS 200     // 20s - How long after force should down because of low HV or LV
 #define LVDU_STANDBY_TIMEOUT_STEPS 100 // 10s @ 100ms - How long in standby to shut down
-#define VOLTAGE_DIVIDER_RATIO 0.0059f  // For internal 12V measurement
+#define VOLTAGE_DIVIDER_RATIO 0.005556f \
+    // Conversion factor for dc_power_supply analog input
+    // 12V line is scaled to the 5V ADC using an 8.2k/1.8k resistor divider
+    // AnaIn::dc_power_supply returns millivolts, multiply by this factor to get
+    // the actual battery voltage in volts
 #define LVDU_DIAGNOSE_COOLDOWN_STEPS 2 // 200 ms cooldown after diagnosis ends
 
 enum VehicleState

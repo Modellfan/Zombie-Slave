@@ -31,9 +31,12 @@ void TeensyBMS::SetCanInterface(CanHardware* c) {
     can->RegisterUserMessage(0x41E); // 1054: Charge/discharge limits
     can->RegisterUserMessage(0x41F); // 1055: Shutdown handshake
     can->RegisterUserMessage(0x438); // 1080: Contactor manager state
+
+    Param::SetInt(Param::BMS_SetCanInterfaceCalled, 1);
 }
 
 void TeensyBMS::DecodeCAN(int id, uint8_t* data) {
+    Param::SetInt(Param::BMS_DecodeCanCalled, 1);
     switch (id) {
         case 0x41A: parseMessage41A(data); break;
         case 0x41B: parseMessage41B(data); break;
