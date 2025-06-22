@@ -90,7 +90,7 @@ public:
         int flap_signal       = Param::GetInt(Param::valve_in_raw);
         int flap_threshold    = Param::GetInt(Param::heater_flap_threshold);
         bool manual_override  = Param::GetInt(Param::heater_active_manual);
-        bool comfort_allowed  = true; // todo Param::GetInt(Param::hv_comfort_functions_allowed);
+        bool comfort_allowed  = Param::GetInt(Param::hv_comfort_functions_allowed);
         bool thermal_closed   = DigIo::heater_thermal_switch_in.Get(); // High = closed
         bool contactor_feedback = (DigIo::heater_contactor_feedback_in.Get() == 1); 
         bool contactor_out      = (DigIo::heater_contactor_out.Get() == 1);         

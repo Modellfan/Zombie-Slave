@@ -14,7 +14,6 @@ private:
     bool ignitionActive = false;
     bool spoolupActive = false;
     _eps_states epsState = EPS_OFF;
-    VehicleState lastState = STATE_SLEEP;
 
 public:
     EPS() {}
@@ -22,37 +21,21 @@ public:
     void Task100Ms()
     {
         VehicleState state = static_cast<VehicleState>(Param::GetInt(Param::LVDU_vehicle_state));
-        bool dcdcFault = Param::GetInt(Param::dcdc_fault_any);
+        bool dcdcOk = Param::GetInt(Param::dcdc_fault_any) == 0;
+        float dcdcVoltage = Param::GetFloat(Param::dcdc_output_voltage);
 
-        // Handle state transitions
-        if (state != lastState)
+        bool activeState = state == STATE_READY || state == STATE_DRIVE || state == STATE_LIMP_HOME;
+        bool dcdcReady  = dcdcOk && dcdcVoltage > 9.0f;
+
+        if (activeState && dcdcReady)
         {
-            spoolupCounter = 0;
-            spoolupActive = false;
-            ignitionActive = false;
-
-            if (state == STATE_READY)
+            if (epsState == EPS_OFF)
             {
-                if (!dcdcFault)
-                {
-                    ignitionActive = true;
-                    epsState = EPS_ON;
-                    DigIo::eps_ignition_on_out.Set();
-                }
-                else
-                {
-                    epsState = EPS_FAULT;
-                    DigIo::eps_ignition_on_out.Clear();
-                    DigIo::eps_quick_spoolup_out.Clear();
-                    ErrorMessage::Post(ERR_EPS_STARTUP_DCDC_FAULT);
-                }
+                ignitionActive = true;
+                spoolupActive = false;
+                spoolupCounter = 0;
             }
-            lastState = state;
-        }
 
-        // Keep outputs high in READY/DRIVE/LIMP_HOME
-        if ((state == STATE_READY || state == STATE_DRIVE || state == STATE_LIMP_HOME) && epsState == EPS_ON)
-        {
             if (ignitionActive && !spoolupActive)
             {
                 uint16_t delaySteps = Param::GetInt(Param::eps_spoolup_delay) / 100; // ms -> 100ms
@@ -61,7 +44,7 @@ public:
                 if (spoolupCounter >= delaySteps)
                 {
                     spoolupActive = true;
-                    DigIo::eps_quick_spoolup_out.Set();
+                    epsState = EPS_ON;
                 }
             }
 
@@ -74,8 +57,8 @@ public:
         {
             ignitionActive = false;
             spoolupActive = false;
-            if (state != STATE_READY && state != STATE_DRIVE && state != STATE_LIMP_HOME)
-                epsState = EPS_OFF;
+            spoolupCounter = 0;
+            epsState = EPS_OFF;
             DigIo::eps_ignition_on_out.Clear();
             DigIo::eps_quick_spoolup_out.Clear();
         }

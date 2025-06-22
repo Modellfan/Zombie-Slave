@@ -386,6 +386,9 @@ private:
         Param::SetInt(Param::LVDU_condition_out, DigIo::condition_out.Get() ? 1 : 0);
         Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
 
+        // For now comfort functions are always permitted
+        Param::SetInt(Param::hv_comfort_functions_allowed, 1);
+
         int connectHV = 0;
         if (state == STATE_READY || state == STATE_CONDITIONING ||
             state == STATE_DRIVE || state == STATE_CHARGE ||
