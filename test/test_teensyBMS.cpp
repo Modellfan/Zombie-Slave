@@ -45,6 +45,14 @@ int main() {
         assert(can.lastData[0] == 3);
         assert(can.lastData[1] == 1);
         assert(can.lastData[2] == 0);
+
+        // Test DecodeCAN updates parameters
+        Param::SetInt(Param::BMS_DecodeCanCalled, 0);
+        Param::SetInt(Param::BMS_LastCanId, 0);
+        uint8_t data[8] = {0};
+        bms.DecodeCAN(0x41A, data);
+        assert(Param::GetInt(Param::BMS_DecodeCanCalled) == 1);
+        assert(Param::GetInt(Param::BMS_LastCanId) == 0x41A);
     }
     return 0;
 }
