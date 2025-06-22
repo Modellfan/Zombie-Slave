@@ -77,9 +77,6 @@
    VALUE_ENTRY(coolant_pump_fault, "Error", 2105)                                         \
    VALUE_ENTRY(ignition_drive_in, "On/Off", 2106)                                         \
                                                                                           \
-   VALUE_ENTRY(eps_ignition_out, "On/Off", 2107)                                          \
-   VALUE_ENTRY(eps_startup_in, "On/Off", 2108)                                            \
-                                                                                          \
    VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
    VALUE_ENTRY(vacuum_sensor, VACUUM_STATE, 2110)                                         \
    VALUE_ENTRY(vacuum_pump_insufficient, YESNO, 2111)                                     \
@@ -132,16 +129,15 @@
    VALUE_ENTRY(BMS_CONT_PositiveInput, "On/Off", 2225)                                    \
    VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
-   VALUE_ENTRY(BMS_SetCanInterfaceCalled, YESNO, 2228)\
-          \
-   VALUE_ENTRY(BMS_DecodeCanCalled, YESNO, 2229)\
-          \
+   VALUE_ENTRY(BMS_SetCanInterfaceCalled, YESNO, 2228)                                    \
+                                                                                          \
+   VALUE_ENTRY(BMS_DecodeCanCalled, YESNO, 2229)                                          \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \
    PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
-   PARAM_ENTRY(CAT_HEATER, heater_thermal_open_timeout, "s", 0, 600, 2, 114)                    \
-   PARAM_ENTRY(CAT_HEATER, heater_thermal_close_timeout, "s", 0, 600, 5, 115)                    \
+   PARAM_ENTRY(CAT_HEATER, heater_thermal_open_timeout, "s", 0, 600, 2, 114)              \
+   PARAM_ENTRY(CAT_HEATER, heater_thermal_close_timeout, "s", 0, 600, 5, 115)             \
    VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
    VALUE_ENTRY(heater_flap_in, "Raw ADC", 2134)                                           \
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
@@ -163,9 +159,13 @@
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
    VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)                                            \
-   VALUE_ENTRY(eps_state, EPS_STATE, 2161)                                                \
+                                                                                          \
    VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2162)                                    \
-   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)
+   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)                                     \
+                                                                                          \
+   VALUE_ENTRY(eps_state, EPS_STATE, 2164)                                                \
+   VALUE_ENTRY(eps_ignition_out, "On/Off", 2165)                                          \
+   VALUE_ENTRY(eps_startup_out, "On/Off", 2166)
 
 /***** Enum String definitions *****/
 #define OPMODES "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
@@ -191,7 +191,7 @@
 #define CAT_LVDU "Low Voltage Distribution"
 
 #define BMS_STATE "0=INIT, 1=OPERATING, 2=FAULT"
-#define EPS_STATE "0=OFF, 1=ON, 2=FAULT"
+#define EPS_STATE "0=OFF, 1=ON, 2=SPOOLUP 3=FAULT"
 #define BMS_DTC_FLAGS "0=NONE,1=CAN_SEND_ERROR,2=CAN_INIT_ERROR,4=PACK_FAULT"
 #define CONT_STATE "0=INIT,1=OPEN,2=CLOSING_PRECHARGE,3=CLOSING_POSITIVE,4=CLOSED,5=OPENING_POSITIVE,6=OPENING_PRECHARGE,7=FAULT"
 #define CONT_DTC_FLAGS "0=NONE,1=NO_SUPPLY,2=NEG_FAULT,4=PRE_FAULT,8=POS_FAULT"
@@ -227,6 +227,7 @@ enum _eps_states
 {
    EPS_OFF = 0,
    EPS_ON,
+   EPS_SPOOL_UP,
    EPS_FAULT
 };
 

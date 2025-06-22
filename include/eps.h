@@ -25,46 +25,66 @@ public:
         float dcdcVoltage = Param::GetFloat(Param::dcdc_output_voltage);
 
         bool activeState = state == STATE_READY || state == STATE_DRIVE || state == STATE_LIMP_HOME;
-        bool dcdcReady  = dcdcOk && dcdcVoltage > 9.0f;
+        bool dcdcReady = dcdcOk && dcdcVoltage > 9.0f;
 
-        if (activeState && dcdcReady)
+        if (epsState == EPS_OFF)
         {
-            if (epsState == EPS_OFF)
-            {
-                ignitionActive = true;
-                spoolupActive = false;
-                spoolupCounter = 0;
-            }
-
-            if (ignitionActive && !spoolupActive)
-            {
-                uint16_t delaySteps = Param::GetInt(Param::eps_spoolup_delay) / 100; // ms -> 100ms
-                if (spoolupCounter < delaySteps)
-                    spoolupCounter++;
-                if (spoolupCounter >= delaySteps)
-                {
-                    spoolupActive = true;
-                    epsState = EPS_ON;
-                }
-            }
-
-            if (ignitionActive)
-                DigIo::eps_ignition_on_out.Set();
-            if (spoolupActive)
-                DigIo::eps_quick_spoolup_out.Set();
-        }
-        else
-        {
+            // In State
             ignitionActive = false;
             spoolupActive = false;
             spoolupCounter = 0;
-            epsState = EPS_OFF;
-            DigIo::eps_ignition_on_out.Clear();
-            DigIo::eps_quick_spoolup_out.Clear();
+
+            // Transition
+            if (activeState && dcdcReady)
+                epsState = EPS_SPOOL_UP;
+        }
+        else if (epsState == EPS_ON)
+        {
+            // In State
+            ignitionActive = true;
+            spoolupActive = true;
+            spoolupCounter = 0;
+
+            // Transition
+            if (!(activeState && dcdcReady))
+                epsState = EPS_OFF;
+        }
+        if (epsState == EPS_SPOOL_UP)
+        {
+            // In State
+            uint16_t delaySteps = Param::GetInt(Param::eps_spoolup_delay) / 100; // ms -> 100ms
+            if (spoolupCounter < delaySteps)
+                spoolupCounter++;
+
+            ignitionActive = true;
+            spoolupActive = false;
+
+            // Transition
+            if (spoolupCounter >= delaySteps)
+            {
+                spoolupActive = true;
+                epsState = EPS_ON;
+            }
+
+            if (!(activeState && dcdcReady))
+                epsState = EPS_OFF;
+        }
+        else // Fault
+        {
         }
 
+        if (ignitionActive)
+            DigIo::eps_ignition_on_out.Set();
+        else
+            DigIo::eps_ignition_on_out.Clear();
+
+        if (spoolupActive)
+            DigIo::eps_quick_spoolup_out.Set();
+        else
+            DigIo::eps_quick_spoolup_out.Clear();
+
         Param::SetInt(Param::eps_ignition_out, ignitionActive ? 1 : 0);
-        Param::SetInt(Param::eps_startup_in, spoolupActive ? 1 : 0);
+        Param::SetInt(Param::eps_startup_out, spoolupActive ? 1 : 0);
         Param::SetInt(Param::eps_state, epsState);
     }
 };
