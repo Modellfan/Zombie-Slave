@@ -33,6 +33,7 @@ public:
         BMS_CONT_SupplyVoltageAvailable,
         BMS_SetCanInterfaceCalled,
         BMS_DecodeCanCalled,
+        BMS_LastCanId,
         LVDU_vehicle_state,
         LVDU_forceVCUsShutdown,
         LVDU_connectHVcommand,
