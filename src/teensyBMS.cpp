@@ -36,8 +36,6 @@ void TeensyBMS::SetCanInterface(CanHardware* c) {
 }
 
 void TeensyBMS::DecodeCAN(int id, uint8_t* data) {
-    Param::SetInt(Param::BMS_DecodeCanCalled, 1);
-    Param::SetInt(Param::BMS_LastCanId, id);
     switch (id) {
         case 0x41A: parseMessage41A(data); break;
         case 0x41B: parseMessage41B(data); break;

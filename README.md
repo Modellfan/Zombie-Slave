@@ -133,32 +133,32 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 | 24  | LIN                           |                  |                                                                                                       |                           |
 | 25  | CAN EXT 3 L                  |                  |                                                                                                       |                           |
 | 26  | CAN EXT 3 H                  |                  |                                                                                                       |                           |
-| 27  | CAN EXT L                    |                  |                                                                                                       |                           |
-| 28  | CAN EXT H                    |                  |                                                                                                       |                           |
+| 27  | CAN EXT L                    |                  |                                                                                                       | `BMS-CAN; DCDC-CAN`       |
+| 28  | CAN EXT H                    |                  |                                                                                                       | `BMS-CAN; DCDC-CAN`       |
 | 29  | MG1 Temp +                    |                  | Temperature sensor input                                                                              |                           |
 | 30  | Oil Pump PWM                 | PE9              | 12V PWM via MMBT3904 NPN transistor                                                                  |                           |
 | 31  | Neg Contactor LS Switch      | PD15             | Low-side switch (NCV8402ASTT1G)                                                                       | `DigIo::tesla_coolant_pump_out` |
 | 32  | Inverter Power LS Switch     | PA8              | Low-side switch (NCV8402ASTT1G)                                                                       | `DigIo::ready_out`        |
 | 33  | Main Contactor LS Switch     | PC7              | Low-side switch (NCV8402ASTT1G)                                                                       | `DigIo::condition_out`    |
-| 34  | Precharge LS Switch          | PC6              | Low-side switch (NCV8402ASTT1G)                                                                       | `DigIo::cabin_heater_out` |
+| 34  | Precharge LS Switch          | PC6              | Low-side switch (NCV8402ASTT1G)                                                                       | `DigIo::heater_contactor_out` |
 | 35  | Pot 2                         |                  | Digital potentiometer (AD5227BRJZ50-R2), SPI controlled, 0.1μF filtered                               |                           |
 | 36  | Pot 1                         |                  | Same as above                                                                                         |                           |
-| 37  | Trans SP                     | PD12             | Protected HS switch (NCV8461DR2G) with diagnostics                                                    |                           |
+| 37  | Trans SP                     | PD12             | Protected HS switch (NCV8461DR2G) with diagnostics                                                    | `DigIo::VCU_out`     |
 | 38  | Trans SL2-                   | PC8              | Low-side switch (NCV8402ASTT1G)                                                                       |                           |
-| 39  | Trans SL1-                   | PC9              | Same as above                                                                                         |                           |
+| 39  | Trans SL1-                   | PC9              | Same as above                                                                                         | `DigIo::vacuum_pump_out`     |
 | 40  | Trans PB3                    |                  |                                                                                                       |                           |
 | 41  | Trans PB2                    |                  |                                                                                                       |                           |
 | 42  | Trans PB1                    |                  |                                                                                                       |                           |
-| 43  | CAN EXT 2 L                 |                  |                                                                                                       |                           |
-| 44  | CAN EXT 2 H                 |                  |                                                                                                       |                           |
+| 43  | CAN EXT 2 L                 |                  |                                                                                                       | `Charger-CAN`            |
+| 44  | CAN EXT 2 H                 |                  |                                                                                                       | `Charger-CAN`   |
 | 45  | Throttle Ground              |                  |                                                                                                       |                           |
 | 46  | Throttle 2                   | PC1              | 5V tolerant analog input, clamped & protected - 3.9k series resistor only 5V!                                                        | `AnaIn::tesla_coolant_valve_2_in` |
 | 47  | Throttle 1                   | PC0              | 5V tolerant analog input, clamped & protected - 3.9k series resistor only 5V!                                                                  | `AnaIn::tesla_coolant_valve_1_in` |
 | 48  | +5V Throttle                 |                  |                                                                                                       |                           |
 | 49  | Brake Input                  | PA15             | 12V digital input, protected                                                                          | `DigIo::ready_safety_in`  |
 | 50  | GP12V Input                  | PD4              | 12V digital input, protected                                                                          | `DigIo::vacuum_sensor_in`   |
-| 51  | Hvrequest                    | PD5              | 12V digital input, protected                                                                          | `DigIo::cabin_heater_in`  |
-| 52  | Start                        | PD7              | 12V digital input, protected                                                                          |                           |
+| 51  | Hvrequest                    | PD5              | 12V digital input, protected                                                                          | `DigIo::heater_contactor_feedback_in`  |
+| 52  | Start                        | PD7              | 12V digital input, protected                                                                          | `DigIo::heater_thermal_switch_in`|
 | 53  | Reverse Direction            | PB3              | 12V digital input, protected                                                                          |                           |
 | 54  | Forward Direction            | PB4              | 12V digital input, protected                                                                          |                           |
 | 55  | Ground                       |                  |                                                                                                       |                           |
