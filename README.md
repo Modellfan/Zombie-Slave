@@ -109,12 +109,12 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 |-----|-------------------------------|------------------|-------------------------------------------------------------------------------------------------------|---------------------------|
 | 01  | RS232 Rx                      |                  | RS232 receive line                                                                                   |                           |
 | 02  | RS232 Tx                      |                  | RS232 transmit line                                                                                  |                           |
-| 03  | GP Out 3                      | PD13             | Low-side switch (NCV8402ASTT1G) — Sinks to GND via N-MOSFET, 1k pull-up to 12V                       | `DigIo::tesla_coolant_valve_1_out` |
-| 04  | GP Out 2                      | PD14             | Same as above                                                                                         | `DigIo::tesla_coolant_valve_2_out` |
-| 05  | PWM 3                         | PB0              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::servo_pump_out`  |
+| 03  | GP Out 3                      | PD13             | Low-side switch (NCV8402ASTT1G) — Sinks to GND via N-MOSFET, 1k pull-up to 12V                       | `DigIo::tesla_coolant_valve_1_out right` |
+| 04  | GP Out 2                      | PD14             | Same as above                                                                                         | `DigIo::tesla_coolant_valve_2_out left` |
+| 05  | PWM 3                         | PB0              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      |               |
 | 06  | PWM 2                         | PA7              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::eps_quick_spoolup_out` |
 | 07  | PWM 1                         | PA6              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::eps_ignition_on_out` |
-| 08  | Analog 2 in                   | PC3              | 5V tolerant analog input, clamped to 3.3V, protected by resistor & diode                              |                           |
+| 08  | Analog 2 in                   | PC3              | 5V tolerant analog input, clamped to 3.3V, protected by resistor & diode                            `AnaIn::pag_hot_cool_flap`   |
 | 09  | Analog 1 in                   | PC2              | Same as above                                                                                         |                           |
 | 10  | DAC 2                         | PA5              | Buffered via op-amp (TDA2320A), filtered output                                                       |                           |
 | 11  | DAC 1                         | PA4              | Same as above                                                                                         |                           |
@@ -152,8 +152,8 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 | 43  | CAN EXT 2 L                 |                  |                                                                                                       | `Charger-CAN`            |
 | 44  | CAN EXT 2 H                 |                  |                                                                                                       | `Charger-CAN`   |
 | 45  | Throttle Ground              |                  |                                                                                                       |                           |
-| 46  | Throttle 2                   | PC1              | 5V tolerant analog input, clamped & protected - 3.9k series resistor only 5V!                                                        | `AnaIn::tesla_coolant_valve_2_in` |
-| 47  | Throttle 1                   | PC0              | 5V tolerant analog input, clamped & protected - 3.9k series resistor only 5V!                                                                  | `AnaIn::tesla_coolant_valve_1_in` |
+| 46  | Throttle 2                   | PC1              | 5V tolerant analog input, clamped & protected - 3.9k series resistor only 5V!                                                        | `AnaIn::tesla_coolant_valve_2_in left` |
+| 47  | Throttle 1                   | PC0              | 5V tolerant analog input, clamped & protected - 3.9k series resistor only 5V!                                                                  | `AnaIn::tesla_coolant_valve_1_in right` |
 | 48  | +5V Throttle                 |                  |                                                                                                       |                           |
 | 49  | Brake Input                  | PA15             | 12V digital input, protected                                                                          | `DigIo::ready_safety_in`  |
 | 50  | GP12V Input                  | PD4              | 12V digital input, protected                                                                          | `DigIo::vacuum_sensor_in`   |
