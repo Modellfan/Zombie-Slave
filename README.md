@@ -114,7 +114,7 @@ The firmware includes a terminal accessible over USART3 or via ESP8266.
 | 05  | PWM 3                         | PB0              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      |               |
 | 06  | PWM 2                         | PA7              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::eps_quick_spoolup_out` |
 | 07  | PWM 1                         | PA6              | High-side PWM (FAN3122TMX), 12V-level compatible                                                      | `DigIo::eps_ignition_on_out` |
-| 08  | Analog 2 in                   | PC3              | 5V tolerant analog input, clamped to 3.3V, protected by resistor & diode                            `AnaIn::pag_hot_cool_flap`   |
+| 08  | Analog 2 in                   | PC3              | 5V tolerant analog input, clamped to 3.3V, protected by resistor & diode                              | `AnaIn::pag_hot_cool_flap` |
 | 09  | Analog 1 in                   | PC2              | Same as above                                                                                         |                           |
 | 10  | DAC 2                         | PA5              | Buffered via op-amp (TDA2320A), filtered output                                                       |                           |
 | 11  | DAC 1                         | PA4              | Same as above                                                                                         |                           |
