@@ -35,6 +35,7 @@ public:
         BMS_DecodeCanCalled,
         BMS_LastCanId,
         LVDU_vehicle_state,
+        manual_charge_mode,
         LVDU_forceVCUsShutdown,
         LVDU_connectHVcommand,
         hv_comfort_functions_allowed
