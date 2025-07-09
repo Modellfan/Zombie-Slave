@@ -61,6 +61,7 @@ private:
     bool criticalFault = false;                  // TODO: Detect via system/BMS via CAN
     bool degradedFault = false;                  // TODO: Detect via system/BMS via CAN
     bool driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
+    bool manualChargePrev = false;               // Tracks previous manual_charge_mode value
 
 public:
     LVDU() {}
@@ -95,6 +96,20 @@ private:
 
     void UpdateState()
     {
+        // Manual override: detect rising/falling edge of manual_charge_mode
+        bool manualCharge = Param::GetInt(Param::manual_charge_mode);
+        if (manualCharge && !manualChargePrev && state != STATE_CHARGE)
+        {
+            // Rising edge → force Charge state
+            TransitionTo(STATE_CHARGE);
+        }
+        else if (!manualCharge && manualChargePrev && state == STATE_CHARGE)
+        {
+            // Falling edge → exit Charge as if charger unplugged
+            TransitionTo(STATE_CONDITIONING);
+        }
+        manualChargePrev = manualCharge;
+
         switch (state)
         {
         case STATE_SLEEP:

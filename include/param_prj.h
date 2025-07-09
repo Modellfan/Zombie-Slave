@@ -63,6 +63,7 @@
    PARAM_ENTRY(CAT_TESLA_DCDC, dcdc_voltage_setpoint, "V", 9, 16, 13.5, 108)              \
    PARAM_ENTRY(CAT_LVDU, LVDU_12v_low_threshold, "V", 8.0, 13.5, 11.0, 116)               \
    PARAM_ENTRY(CAT_LVDU, LVDU_hv_low_threshold, "V", 100.0, 800.0, 200.0, 117)            \
+   PARAM_ENTRY(CAT_LVDU, manual_charge_mode, YESNO, 0, 1, 0, 118) \
                                                                                           \
    VALUE_ENTRY(opmode, OPMODES, 2000)                                                     \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
