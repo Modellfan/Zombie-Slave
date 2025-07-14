@@ -41,9 +41,16 @@ public:
         bool vacuum_ok = !(DigIo::vacuum_sensor_in.Get());
         Param::SetInt(Param::vacuum_sensor, vacuum_ok ? 1 : 0); // 1 = ON, 0 = OFF
 
-        // Only operate the pump while the vehicle is in READY, DRIVE or LIMP_HOME state
+        // Only operate the pump while the vehicle is in READY, DRIVE or LIMP_HOME
+        // and the DCDC converter is ready (same conditions as EPS)
         VehicleState vehicleState = static_cast<VehicleState>(Param::GetInt(Param::LVDU_vehicle_state));
-        if (vehicleState != STATE_READY && vehicleState != STATE_DRIVE && vehicleState != STATE_LIMP_HOME)
+        bool dcdcOk = Param::GetInt(Param::dcdc_fault_any) == 0;
+        float dcdcVoltage = Param::GetFloat(Param::dcdc_output_voltage);
+
+        bool activeState = vehicleState == STATE_READY || vehicleState == STATE_DRIVE || vehicleState == STATE_LIMP_HOME;
+        bool dcdcReady = dcdcOk && dcdcVoltage > 9.0f;
+
+        if (!(activeState && dcdcReady))
         {
             pump_state = false;
             pump_timer = 0;
