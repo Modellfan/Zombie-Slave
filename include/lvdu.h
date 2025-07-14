@@ -72,6 +72,7 @@ public:
         UpdateState();
         HandleReadyDiagnosis();
         UpdateOutputs();
+        HandleLow12V();
         UpdateParams();
     }
 
@@ -387,6 +388,18 @@ private:
             DigIo::condition_out.Set();
             DigIo::ready_out.Set();
             break;
+        }
+    }
+
+    void HandleLow12V()
+    {
+        if (state != STATE_READY && state != STATE_DRIVE && state != STATE_LIMP_HOME)
+        {
+            float threshold = Param::GetFloat(Param::LVDU_12v_low_threshold);
+            if (voltage12V < threshold)
+            {
+                DigIo::vcu_out.Clear();
+            }
         }
     }
 
