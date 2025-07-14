@@ -3,6 +3,7 @@
 
 #include "bms.h"
 #include "canhardware.h"
+#include "errormessage.h"
 #include <stdint.h>
 
 #define BMS_TIMEOUT_TICKS 3 // 300ms @ 100ms cycle

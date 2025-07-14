@@ -3,7 +3,6 @@
 class Param {
 public:
     enum {
-        BMS_ChargeLim,
         BMS_Vmin,
         BMS_Vmax,
         BMS_Tmin,
