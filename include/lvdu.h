@@ -49,6 +49,7 @@ private:
     uint16_t forceStandbyTimer = 0;
     uint16_t forceSleepTimer = 0;
     uint16_t standbyTimeoutCounter = 0;
+    uint16_t chargeDoneCounter = 0;
 
     // Interne Flags
     bool ignitionOn = false;
@@ -172,10 +173,42 @@ private:
             break;
 
         case STATE_CHARGE:
-            if (!chargerPlugged)
-                TransitionTo(STATE_CONDITIONING);
-            else if (criticalFault)
-                TransitionTo(STATE_ERROR);
+            {
+                if (!chargerPlugged)
+                {
+                    TransitionTo(STATE_CONDITIONING);
+                    chargeDoneCounter = 0;
+                    break;
+                }
+                if (criticalFault)
+                {
+                    TransitionTo(STATE_ERROR);
+                    chargeDoneCounter = 0;
+                    break;
+                }
+
+                float doneCurrent = Param::GetFloat(Param::charge_done_current);
+                float actualCurrent = Param::GetFloat(Param::BMS_ActualCurrent);
+                if (actualCurrent < 0)
+                    actualCurrent = -actualCurrent;
+                int delaySteps = Param::GetInt(Param::charge_done_delay) * 10;
+
+                if (actualCurrent < doneCurrent)
+                {
+                    if (chargeDoneCounter < delaySteps)
+                        ++chargeDoneCounter;
+                }
+                else
+                {
+                    chargeDoneCounter = 0;
+                }
+
+                if (chargeDoneCounter >= delaySteps && delaySteps > 0)
+                {
+                    TransitionTo(STATE_CONDITIONING);
+                    chargeDoneCounter = 0;
+                }
+            }
             break;
 
         case STATE_ERROR:
@@ -188,6 +221,9 @@ private:
                 TransitionTo(STATE_CONDITIONING);
             break;
         }
+
+        if (state != STATE_CHARGE)
+            chargeDoneCounter = 0;
 
         // --- Safe decrement for force timers to prevent underflow
 
