@@ -102,7 +102,6 @@
    VALUE_ENTRY(dcdc_status_calibration_fault, YESNO, 2128)                                \
                                                                                           \
    PARAM_ENTRY(CAT_BMS, BMS_CAN, CAN_DEV, 0, 1, 1, 110)                                   \
-   VALUE_ENTRY(BMS_ChargeLim, "A", 2200)                                                  \
    VALUE_ENTRY(BMS_Vmin, "V", 2201)                                                       \
    VALUE_ENTRY(BMS_Vmax, "V", 2202)                                                       \
    VALUE_ENTRY(BMS_Tmin, "°C", 2203)                                                      \
@@ -131,6 +130,10 @@
    VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
    VALUE_ENTRY(BMS_SetCanInterfaceCalled, YESNO, 2228)                                    \
+   VALUE_ENTRY(BMS_DecodeCanCalled, YESNO, 2229)
+          \
+   VALUE_ENTRY(BMS_LastCanId, "ID", 2230)
+          \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \

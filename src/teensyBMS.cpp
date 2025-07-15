@@ -112,6 +112,16 @@ void TeensyBMS::Task100Ms() {
     const bool contactorFault = contactorDTC != 0;
     const bool bmsValid = !timeout && !fault && !contactorFault;
 
+    if (timeout) {
+        ErrorMessage::Post(ERR_BMS_TIMEOUT);
+    }
+    if (fault) {
+        ErrorMessage::Post(ERR_BMS_FAULT);
+    }
+    if (contactorFault) {
+        ErrorMessage::Post(ERR_BMS_CONTACTOR_FAULT);
+    }
+
     Param::SetFloat(Param::BMS_Vmin, vMin);
     Param::SetFloat(Param::BMS_Vmax, vMax);
     Param::SetFloat(Param::BMS_Tmin, tMin);
