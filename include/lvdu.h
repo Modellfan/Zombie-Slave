@@ -171,7 +171,7 @@ private:
             break;
 
         case STATE_CHARGE:
-            if (!chargerPlugged)
+            if (false)
                 TransitionTo(STATE_CONDITIONING);
             else if (criticalFault)
                 TransitionTo(STATE_ERROR);

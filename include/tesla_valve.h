@@ -7,9 +7,9 @@
 #include "digio.h"
 
 #define VOLTAGE_DIVIDER_RATIO 0.0059f // 4.9k to 1k voltage divider
-#define VALVE_90_DEG_VOLTAGE 11.0f    // Threshold voltage for 90° position
-#define VALVE_180_DEG_VOLTAGE 8.0f    // Threshold voltage for 180° position
-#define VALVE_TOLERANCE 0.25f         // Tolerance for determining valve state
+#define VALVE_90_DEG_VOLTAGE 11.34f    // Threshold voltage for 90° position
+#define VALVE_180_DEG_VOLTAGE 7.3f    // Threshold voltage for 180° position
+#define VALVE_TOLERANCE 1.25f         // Tolerance for determining valve state
 
 class TeslaValve
 {
