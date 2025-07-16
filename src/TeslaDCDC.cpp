@@ -117,30 +117,32 @@
         Param::SetInt(Param::dcdc_fault_any, 1);  // Include timeout as a fault
     }
 
-    // Check vehicle state - only send commands in READY, DRIVE, CONDITIONING or LIMP_HOME
+    // Determine if DC output should be enabled based on vehicle state
     int vehicleState = Param::GetInt(Param::LVDU_vehicle_state);
-    if (vehicleState != STATE_READY && vehicleState != STATE_DRIVE &&
-        vehicleState != STATE_CONDITIONING && vehicleState != STATE_LIMP_HOME)
-    {
-        return; // Skip sending commands in all other states
-    }
+    bool outputEnabled = (vehicleState == STATE_READY || vehicleState == STATE_DRIVE ||
+                          vehicleState == STATE_CONDITIONING ||
+                          vehicleState == STATE_LIMP_HOME);
 
    //  if ((opmode == MOD_RUN || opmode == MOD_CHARGE) && can)
    //  {
         timer500++;
         if (timer500 == 5)
         {
-            if (DCSetVal < 9.0f)  DCSetVal = 9.0f;
-            if (DCSetVal > 16.0f) DCSetVal = 16.0f;
- 
-             int voltageValue = static_cast<int>((DCSetVal - 9.0f) * 146.0f);
-             voltageValue &= 0x03FF;
- 
-             bytes[0] = voltageValue & 0xFF;
-             bytes[1] = ((voltageValue >> 8) & 0x03) | 0x04;
- 
-             can->Send(TESLA_DCDC_CMD_ID, bytes, 3);
-             timer500 = 0;
-         }
+            if (DCSetVal < 9.0f)
+                DCSetVal = 9.0f;
+            if (DCSetVal > 16.0f)
+                DCSetVal = 16.0f;
+
+            int voltageValue = static_cast<int>((DCSetVal - 9.0f) * 146.0f);
+            voltageValue &= 0x03FF;
+
+            bytes[0] = voltageValue & 0xFF;
+            bytes[1] = (voltageValue >> 8) & 0x03;
+            if (outputEnabled)
+                bytes[1] |= 0x04; // Enable DC output
+
+            can->Send(TESLA_DCDC_CMD_ID, bytes, 3);
+            timer500 = 0;
+        }
     //  }
  }
