@@ -4,6 +4,7 @@
 #include "params.h"
 #include "hwdefs.h"
 #include "digio.h"
+#include "lvdu.h"
 
 /*
     Heater Control Function – Logic Overview
@@ -12,7 +13,7 @@
     Start
      |
      v
-    Check hv_comfort_functions_allowed?
+    Check hv_comfort_functions_allowed and vehicle state?
        ├─ No  → Heater OFF
        └─ Yes → Continue
                 |
@@ -42,6 +43,7 @@
 
     Conditions causing heater OFF:
       - hv_comfort_functions_allowed == 0
+      - LVDU state not READY/CONDITIONING/DRIVE/CHARGE/LIMP_HOME
       - Any fault active
       - Flap below threshold and no manual override
       - Thermal switch open
@@ -91,6 +93,10 @@ public:
         int flap_threshold    = Param::GetInt(Param::heater_flap_threshold);
         bool manual_override  = Param::GetInt(Param::heater_active_manual);
         bool comfort_allowed  = Param::GetInt(Param::hv_comfort_functions_allowed);
+        VehicleState vehicle_state = static_cast<VehicleState>(Param::GetInt(Param::LVDU_vehicle_state));
+        bool lvdu_ok = vehicle_state == STATE_READY || vehicle_state == STATE_CONDITIONING ||
+                       vehicle_state == STATE_DRIVE || vehicle_state == STATE_CHARGE ||
+                       vehicle_state == STATE_LIMP_HOME;
         bool thermal_closed   = DigIo::heater_thermal_switch_in.Get(); // High = closed
         bool contactor_feedback = (DigIo::heater_contactor_feedback_in.Get() == 1); 
         bool contactor_out      = (DigIo::heater_contactor_out.Get() == 1);         
@@ -120,7 +126,7 @@ public:
         }
         thermal_switch_was_open = !thermal_closed;
 
-        if (comfort_allowed && !fault_present && heater_should_run)
+        if (comfort_allowed && lvdu_ok && !fault_present && heater_should_run)
         {
             if (thermal_closed)
             {
