@@ -3,6 +3,7 @@
 
 #include "bms.h"
 #include "canhardware.h"
+#include "errormessage.h"
 #include <stdint.h>
 
 #define BMS_TIMEOUT_TICKS 3 // 300ms @ 100ms cycle
@@ -15,13 +16,12 @@ public:
     void Task100Ms() override;
 
 private:
-    void parseMessage41A(uint8_t* data);
-    void parseMessage41B(uint8_t* data);
-    void parseMessage41C(uint8_t* data);
-    void parseMessage41D(uint8_t* data);
-    void parseMessage41E(uint8_t* data);
-    void parseMessage41F(uint8_t* data);
-    void parseMessage438(uint8_t* data);
+    void parseMsg1(uint8_t* data);
+    void parseMsg2(uint8_t* data);
+    void parseMsg3(uint8_t* data);
+    void parseMsg4(uint8_t* data);
+    void parseMsg5(uint8_t* data);
+    bool checkCrc(uint8_t* data);
 
     int timeoutCounter = 0;
 
@@ -55,6 +55,8 @@ private:
     bool contactorPositiveInput = false;
     bool contactorPrechargeInput = false;
     bool contactorSupplyAvailable = false;
+
+    uint8_t txCounter = 0;
 };
 
 #endif // TEENSYBMS_H

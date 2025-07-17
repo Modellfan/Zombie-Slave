@@ -49,6 +49,7 @@ private:
     uint16_t forceStandbyTimer = 0;
     uint16_t forceSleepTimer = 0;
     uint16_t standbyTimeoutCounter = 0;
+    uint16_t chargeDoneCounter = 0;
 
     // Interne Flags
     bool ignitionOn = false;
@@ -72,6 +73,7 @@ public:
         UpdateState();
         HandleReadyDiagnosis();
         UpdateOutputs();
+        HandleLow12V();
         UpdateParams();
     }
 
@@ -171,10 +173,49 @@ private:
             break;
 
         case STATE_CHARGE:
+<<<<<<< HEAD
             if (false)
                 TransitionTo(STATE_CONDITIONING);
             else if (criticalFault)
                 TransitionTo(STATE_ERROR);
+=======
+            {
+                if (!chargerPlugged)
+                {
+                    TransitionTo(STATE_CONDITIONING);
+                    chargeDoneCounter = 0;
+                    break;
+                }
+                if (criticalFault)
+                {
+                    TransitionTo(STATE_ERROR);
+                    chargeDoneCounter = 0;
+                    break;
+                }
+
+                float doneCurrent = Param::GetFloat(Param::charge_done_current);
+                float actualCurrent = Param::GetFloat(Param::BMS_ActualCurrent);
+                if (actualCurrent < 0)
+                    actualCurrent = -actualCurrent;
+                int delaySteps = Param::GetInt(Param::charge_done_delay) * 10;
+
+                if (actualCurrent < doneCurrent)
+                {
+                    if (chargeDoneCounter < delaySteps)
+                        ++chargeDoneCounter;
+                }
+                else
+                {
+                    chargeDoneCounter = 0;
+                }
+
+                if (chargeDoneCounter >= delaySteps && delaySteps > 0)
+                {
+                    TransitionTo(STATE_CONDITIONING);
+                    chargeDoneCounter = 0;
+                }
+            }
+>>>>>>> 3724079adbd430c2a68ecaa194b8796c093b1515
             break;
 
         case STATE_ERROR:
@@ -187,6 +228,9 @@ private:
                 TransitionTo(STATE_CONDITIONING);
             break;
         }
+
+        if (state != STATE_CHARGE)
+            chargeDoneCounter = 0;
 
         // --- Safe decrement for force timers to prevent underflow
 
@@ -387,6 +431,18 @@ private:
             DigIo::condition_out.Set();
             DigIo::ready_out.Set();
             break;
+        }
+    }
+
+    void HandleLow12V()
+    {
+        if (state != STATE_READY && state != STATE_DRIVE && state != STATE_LIMP_HOME)
+        {
+            float threshold = Param::GetFloat(Param::LVDU_12v_low_threshold);
+            if (voltage12V < threshold)
+            {
+                DigIo::vcu_out.Clear();
+            }
         }
     }
 

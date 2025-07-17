@@ -42,7 +42,7 @@ class BMS
       virtual void DeInit() {};
       virtual float MaxChargeCurrent() { return 9999.0; };
       virtual void Task100Ms() {
-            Param::SetInt(Param::BMS_ChargeLim, MaxChargeCurrent());
+            Param::SetFloat(Param::BMS_MaxChargeCurrent, MaxChargeCurrent());
             Param::SetFloat(Param::BMS_Vmin, 0);
             Param::SetFloat(Param::BMS_Vmax, 0);
             Param::SetFloat(Param::BMS_Tmin, 0);

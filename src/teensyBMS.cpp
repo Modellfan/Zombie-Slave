@@ -1,6 +1,7 @@
 #include "teensyBMS.h"
 #include "params.h"
 #include <string.h>
+#include <libopencm3/stm32/crc.h>
 
 // CAN message ID for VCU -> BMS feedback
 #define VCU_STATUS_MSG_ID 0x437
@@ -24,74 +25,74 @@ void TeensyBMS::SetCanInterface(CanHardware* c) {
     }
 
     can = c;
-    can->RegisterUserMessage(0x41A); // 1050: Pack state
-    can->RegisterUserMessage(0x41B); // 1051: Voltage info
-    can->RegisterUserMessage(0x41C); // 1052: Temperatures
-    can->RegisterUserMessage(0x41D); // 1053: Current + SOC
-    can->RegisterUserMessage(0x41E); // 1054: Charge/discharge limits
-    can->RegisterUserMessage(0x41F); // 1055: Shutdown handshake
-    can->RegisterUserMessage(0x438); // 1080: Contactor manager state
+    can->RegisterUserMessage(0x41A); // MSG1: Voltage
+    can->RegisterUserMessage(0x41B); // MSG2: Cell Temp
+    can->RegisterUserMessage(0x41C); // MSG3: Limits/Fault
+    can->RegisterUserMessage(0x41D); // MSG4: SOC/SOH
+    can->RegisterUserMessage(0x41E); // MSG5: HMI
 
     Param::SetInt(Param::BMS_SetCanInterfaceCalled, 1);
 }
 
 void TeensyBMS::DecodeCAN(int id, uint8_t* data) {
     switch (id) {
-        case 0x41A: parseMessage41A(data); break;
-        case 0x41B: parseMessage41B(data); break;
-        case 0x41C: parseMessage41C(data); break;
-        case 0x41D: parseMessage41D(data); break;
-        case 0x41E: parseMessage41E(data); break;
-        case 0x41F: parseMessage41F(data); break;
-        case 0x438: parseMessage438(data); break;
+        case 0x41A: parseMsg1(data); break;
+        case 0x41B: parseMsg2(data); break;
+        case 0x41C: parseMsg3(data); break;
+        case 0x41D: parseMsg4(data); break;
+        case 0x41E: parseMsg5(data); break;
     }
 }
 
-void TeensyBMS::parseMessage41A(uint8_t* d) {
-    state = d[0];
-    dtc = d[1];
-    balancingVoltage = (d[2] | (d[3] << 8)) * 0.001f;
-    balancingActive = d[4] & 0x01;
-    anyBalancing = (d[4] >> 1) & 0x01;
+bool TeensyBMS::checkCrc(uint8_t* d) {
+    uint32_t buf[2];
+    memcpy(buf, d, 8);
+    buf[1] &= 0x00FFFFFF; // clear CRC byte
+    crc_reset();
+    uint32_t crc = crc_calculate_block(buf, 2) & 0xFF;
+    return crc == d[7];
+}
+
+void TeensyBMS::parseMsg1(uint8_t* d) {
+    if (!checkCrc(d)) return;
+    packVoltage = (d[0] | (d[1] << 8)) / 10.0f;
+    actualCurrent = ((int16_t)(d[2] | (d[3] << 8)) - 5000) / 10.0f;
+    vMin = d[4] / 50.0f;
+    vMax = d[5] / 50.0f;
     timeoutCounter = BMS_TIMEOUT_TICKS;
 }
 
-void TeensyBMS::parseMessage41B(uint8_t* d) {
-    vMin = (d[0] | (d[1] << 8)) * 0.001f;
-    vMax = (d[2] | (d[3] << 8)) * 0.001f;
-    packVoltage = (d[4] | (d[5] << 8)) * 0.01f;
-    deltaVoltage = (d[6] | (d[7] << 8)) * 0.001f;
+void TeensyBMS::parseMsg2(uint8_t* d) {
+    if (!checkCrc(d)) return;
+    tMin = d[0] - 40;
+    tMax = d[1] - 40;
+    balancingVoltage = d[2] / 50.0f;
+    deltaVoltage = d[3] / 100.0f;
+    int16_t raw = d[4] | (d[5] << 8);
+    float kw = (raw - 2000) / 10.0f;
+    packPower = kw * 1000.0f;
 }
 
-void TeensyBMS::parseMessage41C(uint8_t* d) {
-    tMin = (int16_t)(d[0] | (d[1] << 8)) - 40;
-    tMax = (int16_t)(d[2] | (d[3] << 8)) - 40;
+void TeensyBMS::parseMsg3(uint8_t* d) {
+    if (!checkCrc(d)) return;
+    maxDischargeCurrent = (d[0] | (d[1] << 8)) / 10.0f;
+    maxChargeCurrent = (d[2] | (d[3] << 8)) / 10.0f;
+    contactorState = d[4];
+    dtc = d[5];
 }
 
-void TeensyBMS::parseMessage41D(uint8_t* d) {
-    actualCurrent = (int16_t)(d[0] | (d[1] << 8)) * 0.1f;
-    soc = (d[2] | (d[3] << 8)) * 0.1f;
-    packPower = d[4] | (d[5] << 8);
+void TeensyBMS::parseMsg4(uint8_t* d) {
+    if (!checkCrc(d)) return;
+    soc = (d[0] | (d[1] << 8)) / 100.0f;
+    // soh not used
+    balancingActive = d[4];
+    anyBalancing = balancingActive != 0;
+    state = d[5];
 }
 
-void TeensyBMS::parseMessage41E(uint8_t* d) {
-    maxChargeCurrent = (d[0] | (d[1] << 8)) * 0.1f;
-    maxDischargeCurrent = (d[2] | (d[3] << 8)) * 0.1f;
-}
-
-void TeensyBMS::parseMessage41F(uint8_t* d) {
-    shutdownRequest = d[0];
-    shutdownReady = d[1];
-    shutdownAck = d[2];
-}
-
-void TeensyBMS::parseMessage438(uint8_t* d) {
-    contactorState = d[0];
-    contactorDTC = d[1];
-    contactorNegativeInput = d[2] & 0x01;
-    contactorPositiveInput = d[3] & 0x01;
-    contactorPrechargeInput = d[4] & 0x01;
-    contactorSupplyAvailable = d[5] & 0x01;
+void TeensyBMS::parseMsg5(uint8_t* d) {
+    if (!checkCrc(d)) return;
+    // energy per hour and time to full currently unused
 }
 
 float TeensyBMS::MaxChargeCurrent() {
@@ -107,6 +108,16 @@ void TeensyBMS::Task100Ms() {
     const bool fault = dtc != 0;
     const bool contactorFault = contactorDTC != 0;
     const bool bmsValid = !timeout && !fault && !contactorFault;
+
+    if (timeout) {
+        ErrorMessage::Post(ERR_BMS_TIMEOUT);
+    }
+    if (fault) {
+        ErrorMessage::Post(ERR_BMS_FAULT);
+    }
+    if (contactorFault) {
+        ErrorMessage::Post(ERR_BMS_CONTACTOR_FAULT);
+    }
 
     Param::SetFloat(Param::BMS_Vmin, vMin);
     Param::SetFloat(Param::BMS_Vmax, vMax);
@@ -139,11 +150,19 @@ void TeensyBMS::Task100Ms() {
 
     // Send VCU status back to the BMS every cycle (100ms)
     if (can) {
-        uint8_t bytes[3] = {
-            static_cast<uint8_t>(Param::GetInt(Param::LVDU_vehicle_state)),
-            static_cast<uint8_t>(Param::GetInt(Param::LVDU_forceVCUsShutdown)),
-            static_cast<uint8_t>(Param::GetInt(Param::LVDU_connectHVcommand))};
-        can->Send(VCU_STATUS_MSG_ID, bytes, 3);
+        uint8_t bytes[8] = {0};
+        bytes[0] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_vehicle_state));
+        bytes[1] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_forceVCUsShutdown));
+        bytes[2] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_connectHVcommand));
+        bytes[3] = txCounter & 0x0F;
+        uint32_t word = 0;
+        memcpy(&word, bytes, sizeof(word));
+        crc_reset();
+        uint32_t crc = crc_calculate_block(&word, 1) & 0xFF;
+        bytes[4] = crc;
+        can->Send(VCU_STATUS_MSG_ID, bytes, 8);
+        // bytes[5..7] stay zero
+        txCounter = (txCounter + 1) & 0x0F;
     }
 }
 
