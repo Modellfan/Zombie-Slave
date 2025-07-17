@@ -64,6 +64,11 @@ private:
     bool driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
     bool manualChargePrev = false;               // Tracks previous manual_charge_mode value
 
+    // HV transition handling
+    bool hvRequestPending = false;               // Waiting for BMS contactor close
+    VehicleState hvRequestedState = STATE_STANDBY; // Target state once HV is on
+    bool hvContactorsClosed = false;             // BMS feedback
+
 public:
     LVDU() {}
 
@@ -90,6 +95,14 @@ private:
         // Threshold evaluation (Is12VTooLow logic)
         is12VTooLow = voltage12V < Param::GetFloat(Param::LVDU_12v_low_threshold);
 
+        // Read BMS information for HV management
+        float hvVoltage = Param::GetFloat(Param::BMS_PackVoltage);
+        int bmsValid = Param::GetInt(Param::BMS_DataValid);
+        int contState = Param::GetInt(Param::BMS_CONT_State);
+
+        hvContactorsClosed = bmsValid && contState == 4; // 4=CLOSED
+        IsHVTooLow = bmsValid && hvVoltage < Param::GetFloat(Param::LVDU_hv_low_threshold);
+
         // Update runtime value parameters
         Param::SetInt(Param::LVDU_ignition_in, ignitionOn ? 1 : 0);
         Param::SetInt(Param::LVDU_ready_safety_in, readySafety ? 1 : 0);
@@ -103,7 +116,7 @@ private:
         if (manualCharge && !manualChargePrev && state != STATE_CHARGE)
         {
             // Rising edge → force Charge state
-            TransitionTo(STATE_CHARGE);
+            RequestHVState(STATE_CHARGE);
         }
         else if (!manualCharge && manualChargePrev && state == STATE_CHARGE)
         {
@@ -111,6 +124,17 @@ private:
             TransitionTo(STATE_CONDITIONING);
         }
         manualChargePrev = manualCharge;
+
+        // Wait for HV contactor acknowledgment before entering HV states
+        if (hvRequestPending)
+        {
+            if (hvContactorsClosed)
+            {
+                hvRequestPending = false;
+                TransitionTo(hvRequestedState);
+            }
+            return; // hold current state until contactors closed
+        }
 
         switch (state)
         {
@@ -122,15 +146,15 @@ private:
         case STATE_STANDBY:
             if (ignitionOn)
             {
-                TransitionTo(STATE_READY);
+                RequestHVState(STATE_READY);
             }
             else if (remotePreconditioningRequested)
             {
-                TransitionTo(STATE_CONDITIONING);
+                RequestHVState(STATE_CONDITIONING);
             }
             else if (chargerPlugged)
             {
-                TransitionTo(STATE_CHARGE);
+                RequestHVState(STATE_CHARGE);
             }
             else
             {
@@ -290,6 +314,13 @@ private:
         lastState = state;
         state = newState;
 
+        if (!(newState == STATE_READY || newState == STATE_CONDITIONING ||
+              newState == STATE_DRIVE || newState == STATE_CHARGE ||
+              newState == STATE_LIMP_HOME))
+        {
+            hvRequestPending = false;
+        }
+
         // Reset standbyTimeoutCounter when entering STANDBY
         if (newState == STATE_STANDBY)
         {
@@ -302,6 +333,12 @@ private:
             diagnosePending = true;
             diagnoseTimer = LVDU_DIAGNOSE_DELAY_STEPS;
         }
+    }
+
+    void RequestHVState(VehicleState target)
+    {
+        hvRequestPending = true;
+        hvRequestedState = target;
     }
 
     void HandleReadyDiagnosis()
@@ -461,7 +498,7 @@ private:
         Param::SetInt(Param::hv_comfort_functions_allowed, 1);
 
         int connectHV = 0;
-        if (state == STATE_READY || state == STATE_CONDITIONING ||
+        if (hvRequestPending || state == STATE_READY || state == STATE_CONDITIONING ||
             state == STATE_DRIVE || state == STATE_CHARGE ||
             state == STATE_LIMP_HOME)
         {
