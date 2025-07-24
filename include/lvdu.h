@@ -8,15 +8,14 @@
 #include "anain.h"
 
 // Configuration macros
-#define LVDU_DIAGNOSE_DELAY_STEPS 40   // 4000 ms - How long hold the relay after ignition off to check, if the relay is working
-#define LVDU_READY_DELAY_STEPS 20      // 2000 ms - How long is the hysteresis, after that the ready_in should follow the ignition
-#define LVDU_FORCE_DELAY_STEPS 200     // 20s - How long after force should down because of low HV or LV
-#define LVDU_STANDBY_TIMEOUT_STEPS 100 // 10s @ 100ms - How long in standby to shut down
-#define VOLTAGE_DIVIDER_RATIO_12V 0.004559f \
-    // Conversion factor for dc_power_supply analog input
-    // 12V line is scaled to the 5V ADC using an 8.2k/1.8k resistor divider
-    // AnaIn::dc_power_supply returns millivolts, multiply by this factor to get
-    // the actual battery voltage in volts
+#define LVDU_DIAGNOSE_DELAY_STEPS 40        // 4000 ms - How long hold the relay after ignition off to check, if the relay is working
+#define LVDU_READY_DELAY_STEPS 20           // 2000 ms - How long is the hysteresis, after that the ready_in should follow the ignition
+#define LVDU_FORCE_DELAY_STEPS 200          // 20s - How long after force should down because of low HV or LV
+#define LVDU_STANDBY_TIMEOUT_STEPS 100      // 10s @ 100ms - How long in standby to shut down
+#define VOLTAGE_DIVIDER_RATIO_12V 0.004559f // Conversion factor for dc_power_supply analog input
+                                            // 12V line is scaled to the 5V ADC using an 8.2k/1.8k resistor divider
+                                            // AnaIn::dc_power_supply returns millivolts, multiply by this factor to get
+                                            // the actual battery voltage in volts
 #define LVDU_DIAGNOSE_COOLDOWN_STEPS 2 // 200 ms cooldown after diagnosis ends
 
 enum VehicleState
@@ -173,12 +172,12 @@ private:
             break;
 
         case STATE_CHARGE:
-<<<<<<< HEAD
+
             if (false)
                 TransitionTo(STATE_CONDITIONING);
             else if (criticalFault)
                 TransitionTo(STATE_ERROR);
-=======
+
             {
                 if (!chargerPlugged)
                 {
@@ -215,7 +214,6 @@ private:
                     chargeDoneCounter = 0;
                 }
             }
->>>>>>> 3724079adbd430c2a68ecaa194b8796c093b1515
             break;
 
         case STATE_ERROR:

@@ -63,11 +63,11 @@
    PARAM_ENTRY(CAT_TESLA_DCDC, dcdc_voltage_setpoint, "V", 9, 16, 13.5, 108)              \
    PARAM_ENTRY(CAT_LVDU, LVDU_12v_low_threshold, "V", 8.0, 13.5, 11.0, 116)               \
    PARAM_ENTRY(CAT_LVDU, LVDU_hv_low_threshold, "V", 100.0, 800.0, 200.0, 117)            \
-   PARAM_ENTRY(CAT_LVDU, manual_charge_mode, YESNO, 0, 1, 0, 118) \
-         \
-   PARAM_ENTRY(CAT_LVDU, charge_done_current, "A", 0, 10, 0.5, 119) \
-         \
-   PARAM_ENTRY(CAT_LVDU, charge_done_delay, "s", 0, 600, 30, 120) \
+   PARAM_ENTRY(CAT_LVDU, manual_charge_mode, YESNO, 0, 1, 0, 118)                         \
+                                                                                          \
+   PARAM_ENTRY(CAT_LVDU, charge_done_current, "A", 0, 10, 0.5, 119)                       \
+                                                                                          \
+   PARAM_ENTRY(CAT_LVDU, charge_done_delay, "s", 0, 600, 30, 120)                         \
                                                                                           \
    VALUE_ENTRY(opmode, OPMODES, 2000)                                                     \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
@@ -134,10 +134,8 @@
    VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
    VALUE_ENTRY(BMS_SetCanInterfaceCalled, YESNO, 2228)                                    \
-   VALUE_ENTRY(BMS_DecodeCanCalled, YESNO, 2229)
-          \
-   VALUE_ENTRY(BMS_LastCanId, "ID", 2230)
-          \
+   VALUE_ENTRY(BMS_DecodeCanCalled, YESNO, 2229)                                          \
+   VALUE_ENTRY(BMS_LastCanId, "ID", 2230)                                                 \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \
