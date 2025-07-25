@@ -119,7 +119,7 @@
 
     // Determine if DC output should be enabled based on vehicle state
     int vehicleState = Param::GetInt(Param::LVDU_vehicle_state);
-    bool outputEnabled = (vehicleState == STATE_READY || vehicleState == STATE_DRIVE ||
+    bool outputEnabled = (vehicleState == STATE_READY || vehicleState == STATE_DRIVE || vehicleState == STATE_CHARGE ||
                           vehicleState == STATE_CONDITIONING ||
                           vehicleState == STATE_LIMP_HOME);
 
