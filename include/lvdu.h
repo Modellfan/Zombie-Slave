@@ -521,6 +521,9 @@ private:
             connectHV = 1;
         }
         Param::SetInt(Param::LVDU_connectHVcommand, connectHV);
+
+        Param::SetInt(Param::LVDU_hv_request_pending, hvRequestPending ? 1 : 0);
+        Param::SetInt(Param::LVDU_hv_contactors_closed, hvContactorsClosed ? 1 : 0);
     }
 };
 
