@@ -35,6 +35,10 @@ void TeensyBMS::SetCanInterface(CanHardware* c) {
 }
 
 void TeensyBMS::DecodeCAN(int id, uint8_t* data) {
+    // Store diagnostics for the unit tests/stubs
+    Param::SetInt(Param::BMS_DecodeCanCalled, 1);
+    Param::SetInt(Param::BMS_LastCanId, id);
+
     switch (id) {
         case 0x41A: parseMsg1(data); break;
         case 0x41B: parseMsg2(data); break;
