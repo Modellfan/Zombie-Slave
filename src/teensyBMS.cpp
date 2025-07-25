@@ -159,13 +159,16 @@ void TeensyBMS::Task100Ms() {
         bytes[1] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_forceVCUsShutdown));
         bytes[2] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_connectHVcommand));
         bytes[3] = txCounter & 0x0F;
-        uint32_t word = 0;
-        memcpy(&word, bytes, sizeof(word));
+        // Calculate CRC over the first 7 bytes and place the result in the last
+        // byte to match the CRC format used by the BMS messages. Bytes 4..6
+        // remain unused and are transmitted as zero.
+        uint32_t buf[2] = {0, 0};
+        memcpy(buf, bytes, sizeof(buf));
+        buf[1] &= 0x00FFFFFF;  // clear CRC byte
         crc_reset();
-        uint32_t crc = crc_calculate_block(&word, 1) & 0xFF;
-        bytes[4] = crc;
+        uint32_t crc = crc_calculate_block(buf, 2) & 0xFF;
+        bytes[7] = crc;
         can->Send(VCU_STATUS_MSG_ID, bytes, 8);
-        // bytes[5..7] stay zero
         txCounter = (txCounter + 1) & 0x0F;
     }
 }
