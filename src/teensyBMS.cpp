@@ -31,13 +31,10 @@ void TeensyBMS::SetCanInterface(CanHardware* c) {
     can->RegisterUserMessage(0x41D); // MSG4: SOC/SOH
     can->RegisterUserMessage(0x41E); // MSG5: HMI
 
-    Param::SetInt(Param::BMS_SetCanInterfaceCalled, 1);
 }
 
 void TeensyBMS::DecodeCAN(int id, uint8_t* data) {
-    // Store diagnostics for the unit tests/stubs
-    Param::SetInt(Param::BMS_DecodeCanCalled, 1);
-    Param::SetInt(Param::BMS_LastCanId, id);
+    // Store diagnostics for the unit tests/stubs (removed params)
 
     switch (id) {
         case 0x41A: parseMsg1(data); break;

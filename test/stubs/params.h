@@ -30,13 +30,12 @@ public:
         BMS_CONT_PositiveInput,
         BMS_CONT_PrechargeInput,
         BMS_CONT_SupplyVoltageAvailable,
-        BMS_SetCanInterfaceCalled,
-        BMS_DecodeCanCalled,
-        BMS_LastCanId,
         LVDU_vehicle_state,
         manual_charge_mode,
         LVDU_forceVCUsShutdown,
         LVDU_connectHVcommand,
+        LVDU_hv_request_pending,
+        LVDU_hv_contactors_closed,
         hv_comfort_functions_allowed
     };
     static void SetFloat(int, float) {}

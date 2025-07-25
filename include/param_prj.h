@@ -133,10 +133,6 @@
    VALUE_ENTRY(BMS_CONT_PositiveInput, "On/Off", 2225)                                    \
    VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
-   VALUE_ENTRY(BMS_SetCanInterfaceCalled, YESNO, 2228)                                    \
-   VALUE_ENTRY(BMS_DecodeCanCalled, YESNO, 2229)                                          \
-   VALUE_ENTRY(BMS_LastCanId, "ID", 2230)                                                 \
-                                                                                          \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \
    PARAM_ENTRY(CAT_HEATER, heater_contactor_on_delay, "ms", 0, 10000, 2000, 112)          \
@@ -166,6 +162,10 @@
                                                                                           \
    VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2162)                                    \
    VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)                                     \
+   VALUE_ENTRY(LVDU_hv_request_pending, "On/Off", 2167)\
+          \
+   VALUE_ENTRY(LVDU_hv_contactors_closed, "On/Off", 2168)\
+          \
                                                                                           \
    VALUE_ENTRY(eps_state, EPS_STATE, 2164)                                                \
    VALUE_ENTRY(eps_ignition_out, "On/Off", 2165)                                          \
