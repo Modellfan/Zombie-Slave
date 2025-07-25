@@ -47,7 +47,10 @@ int main() {
         assert(can.lastData[1] == 1);
         assert(can.lastData[2] == 0);
         assert(can.lastData[3] == 4);
-        assert(can.lastData[4] == 0); // CRC from stub
+        assert(can.lastData[4] == 0);
+        assert(can.lastData[5] == 0);
+        assert(can.lastData[6] == 0);
+        assert(can.lastData[7] == 0); // CRC from stub
 
         // Test DecodeCAN updates parameters
         Param::SetInt(Param::BMS_DecodeCanCalled, 0);
