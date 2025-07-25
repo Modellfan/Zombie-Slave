@@ -127,12 +127,36 @@ private:
         // Wait for HV contactor acknowledgment before entering HV states
         if (hvRequestPending)
         {
-            if (hvContactorsClosed)
+            bool requestValid = true;
+            switch (hvRequestedState)
+            {
+            case STATE_READY:
+                requestValid = ignitionOn;
+                break;
+            case STATE_CONDITIONING:
+                requestValid = remotePreconditioningRequested;
+                break;
+            case STATE_CHARGE:
+                requestValid = chargerPlugged || manualCharge;
+                break;
+            default:
+                break;
+            }
+
+            if (!requestValid)
+            {
+                hvRequestPending = false; // cancel request if conditions change
+            }
+            else if (hvContactorsClosed)
             {
                 hvRequestPending = false;
                 TransitionTo(hvRequestedState);
+                return;
             }
-            return; // hold current state until contactors closed
+            else
+            {
+                return; // hold current state until contactors closed
+            }
         }
 
         switch (state)
