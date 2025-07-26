@@ -69,10 +69,8 @@
                                                                                           \
    PARAM_ENTRY(CAT_LVDU, charge_done_delay, "s", 0, 600, 30, 120)                         \
                                                                                           \
-   VALUE_ENTRY(opmode, OPMODES, 2000)                                                     \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
    VALUE_ENTRY(lasterr, errorListString, 2002)                                            \
-   VALUE_ENTRY(testain, "dig", 2003)                                                      \
    VALUE_ENTRY(cpuload, "%", 2004)                                                        \
    VALUE_ENTRY(valve_in_raw, "V", 2100)                                                   \
    VALUE_ENTRY(valve_in, VALVE_STATE, 2101)                                               \
@@ -80,7 +78,6 @@
    VALUE_ENTRY(coolant_pump_automatic_value, "RPM", 2103)                                 \
    VALUE_ENTRY(coolant_pump_status, "On/Off", 2104)                                       \
    VALUE_ENTRY(coolant_pump_fault, "Error", 2105)                                         \
-   VALUE_ENTRY(ignition_drive_in, "On/Off", 2106)                                         \
                                                                                           \
    VALUE_ENTRY(vacuum_pump_out, "On/Off", 2109)                                           \
    VALUE_ENTRY(vacuum_sensor, VACUUM_STATE, 2110)                                         \
@@ -162,10 +159,8 @@
                                                                                           \
    VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2162)                                    \
    VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)                                     \
-   VALUE_ENTRY(LVDU_hv_request_pending, "On/Off", 2167)\
-          \
-   VALUE_ENTRY(LVDU_hv_contactors_closed, "On/Off", 2168)\
-          \
+                                                                                          \
+   VALUE_ENTRY(LVDU_hv_contactors_closed, "On/Off", 2168)                                 \
                                                                                           \
    VALUE_ENTRY(eps_state, EPS_STATE, 2164)                                                \
    VALUE_ENTRY(eps_ignition_out, "On/Off", 2165)                                          \
