@@ -87,20 +87,7 @@
    VALUE_ENTRY(dcdc_input_power, "W", 2113)                                               \
    VALUE_ENTRY(dcdc_output_voltage, "V", 2114)                                            \
    VALUE_ENTRY(dcdc_output_current, "A", 2115)                                            \
-   VALUE_ENTRY(dcdc_fault_heater_shorted, YESNO, 2117)                                    \
-   VALUE_ENTRY(dcdc_fault_overtemp, YESNO, 2118)                                          \
-   VALUE_ENTRY(dcdc_fault_undervolt, YESNO, 2119)                                         \
-   VALUE_ENTRY(dcdc_fault_bias, YESNO, 2120)                                              \
-   VALUE_ENTRY(dcdc_fault_input_not_ok, YESNO, 2121)                                      \
-   VALUE_ENTRY(dcdc_fault_overvolt, YESNO, 2122)                                          \
-   VALUE_ENTRY(dcdc_fault_current_limited, YESNO, 2123)                                   \
-   VALUE_ENTRY(dcdc_fault_heater_open, YESNO, 2124)                                       \
-   VALUE_ENTRY(dcdc_fault_timeout, YESNO, 2129)                                           \
-   VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                               \
-   VALUE_ENTRY(dcdc_status_coolant_request, YESNO, 2125)                                  \
-   VALUE_ENTRY(dcdc_status_thermal_limit, YESNO, 2126)                                    \
-   VALUE_ENTRY(dcdc_status_voltage_reg_fault, YESNO, 2127)                                \
-   VALUE_ENTRY(dcdc_status_calibration_fault, YESNO, 2128)                                \
+   VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                                \
                                                                                           \
    PARAM_ENTRY(CAT_BMS, BMS_CAN, CAN_DEV, 0, 1, 1, 110)                                   \
    VALUE_ENTRY(BMS_Vmin, "V", 2201)                                                       \
