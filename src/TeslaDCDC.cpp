@@ -23,6 +23,7 @@
 
 #include "TeslaDCDC.h"
 #include "lvdu.h" // for VehicleState enums
+#include "errormessage.h"
 
  #define TESLA_DCDC_STATUS_ID     0x210
  #define TESLA_DCDC_CMD_ID        0x3D8
@@ -76,31 +77,36 @@
      Param::SetFloat(Param::dcdc_output_current, outputCurrent);
      Param::SetFloat(Param::dcdc_output_voltage, outputVoltage);
  
-     // Set fault flags
-     Param::SetInt(Param::dcdc_fault_heater_shorted, heaterShorted);
-     Param::SetInt(Param::dcdc_fault_overtemp, overTemp);
-     Param::SetInt(Param::dcdc_fault_undervolt, outputUndervolt);
-     Param::SetInt(Param::dcdc_fault_bias, biasFault);
-     Param::SetInt(Param::dcdc_fault_input_not_ok, inputNotOk);
-     Param::SetInt(Param::dcdc_fault_overvolt, outputOvervolt);
-     Param::SetInt(Param::dcdc_fault_current_limited, currentLimited);
-     Param::SetInt(Param::dcdc_fault_heater_open, heaterOpenCircuit);
- 
-     // Set status flags
-     Param::SetInt(Param::dcdc_status_coolant_request, coolantRequest);
-     Param::SetInt(Param::dcdc_status_thermal_limit, thermalLimit);
-     Param::SetInt(Param::dcdc_status_voltage_reg_fault, voltageRegFault);
-     Param::SetInt(Param::dcdc_status_calibration_fault, calibrationFactorFault);
- 
-     // Clear timeout flag
-     Param::SetInt(Param::dcdc_fault_timeout, 0);
- 
-     // Fault aggregation (timeout is not active here)
-     bool anyFault = heaterShorted || overTemp || outputUndervolt || biasFault ||
-                     inputNotOk || outputOvervolt || currentLimited || heaterOpenCircuit ||
-                     thermalLimit || voltageRegFault || calibrationFactorFault;
- 
-     Param::SetInt(Param::dcdc_fault_any, anyFault);
+     // Report fault flags via error messages
+     if (heaterShorted)
+         ErrorMessage::Post(ERR_DCDC_HEATER_SHORTED);
+     if (overTemp)
+         ErrorMessage::Post(ERR_DCDC_OVERTEMP);
+     if (outputUndervolt)
+         ErrorMessage::Post(ERR_DCDC_OUTPUT_UNDERVOLT);
+     if (biasFault)
+         ErrorMessage::Post(ERR_DCDC_BIAS);
+     if (inputNotOk)
+         ErrorMessage::Post(ERR_DCDC_INPUT_NOT_OK);
+     if (outputOvervolt)
+         ErrorMessage::Post(ERR_DCDC_OUTPUT_OVERVOLT);
+     if (currentLimited)
+         ErrorMessage::Post(ERR_DCDC_CURRENT_LIMITED);
+     if (heaterOpenCircuit)
+         ErrorMessage::Post(ERR_DCDC_HEATER_OPEN);
+
+     if (coolantRequest)
+         ErrorMessage::Post(ERR_DCDC_COOLANT_REQUEST);
+     if (thermalLimit)
+         ErrorMessage::Post(ERR_DCDC_THERMAL_LIMIT);
+     if (voltageRegFault)
+         ErrorMessage::Post(ERR_DCDC_VOLTAGE_REG_FAULT);
+     if (calibrationFactorFault)
+         ErrorMessage::Post(ERR_DCDC_CALIBRATION_FAULT);
+
+     bool anyFault = heaterShorted || overTemp || outputUndervolt || biasFault || inputNotOk || outputOvervolt ||
+                     currentLimited || heaterOpenCircuit || thermalLimit || voltageRegFault || calibrationFactorFault;
+     Param::SetInt(Param::dcdc_fault_any, anyFault ? 1 : 0);
  }
  
  void TeslaDCDC::Task100Ms()
@@ -113,8 +119,8 @@
     timeoutCounter++;
     if (timeoutCounter > TESLA_DCDC_TIMEOUT_TICKS)
     {
-        Param::SetInt(Param::dcdc_fault_timeout, 1);
-        Param::SetInt(Param::dcdc_fault_any, 1);  // Include timeout as a fault
+        ErrorMessage::Post(ERR_DCDC_TIMEOUT);
+        Param::SetInt(Param::dcdc_fault_any, 1);
     }
 
     // Determine if DC output should be enabled based on vehicle state
