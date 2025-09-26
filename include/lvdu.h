@@ -86,6 +86,7 @@ private:
     bool degradedFault = false;                  // TODO: Detect via system/BMS via CAN
     bool driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
     bool manualChargePrev = false;               // Tracks previous manual_charge_mode value
+    bool bmsBalancing = false;                   // Tracks if BMS is currently balancing
 
     // HV contactor handling via manager
     HvContactorManager hvManager;
@@ -124,6 +125,7 @@ private:
         float hvVoltage = Param::GetFloat(Param::BMS_PackVoltage);
         bmsValid = Param::GetInt(Param::BMS_DataValid);
         contState = Param::GetInt(Param::BMS_CONT_State);
+        bmsBalancing = Param::GetInt(Param::BMS_BalancingAnyActive);
 
         // Still update for possible custom behavior
         chargerPlugged = false; // TODO: Add real charger detection via CAN
@@ -189,7 +191,11 @@ private:
             else
             {
                 hvManager.SetHVRequest(false);
-                if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
+                if (bmsBalancing)
+                {
+                    standbyTimeoutCounter = 0; // Stay awake while BMS is balancing
+                }
+                else if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
                 {
                     TransitionTo(STATE_SLEEP);
                 }
