@@ -56,8 +56,11 @@ bool TeensyBMS::checkCrc(uint8_t* d) {
 
 void TeensyBMS::parseMsg1(uint8_t* d) {
     if (!checkCrc(d)) return;
-    packVoltage = (d[0] | (d[1] << 8)) / 10.0f;
-    actualCurrent = ((int16_t)(d[2] | (d[3] << 8)) - 5000) / 10.0f;
+    const uint16_t rawPackVoltage = static_cast<uint16_t>(d[0]) | (static_cast<uint16_t>(d[1]) << 8);
+    packVoltage = rawPackVoltage / 10.0f;
+
+    const uint16_t rawPackCurrent = static_cast<uint16_t>(d[2]) | (static_cast<uint16_t>(d[3]) << 8);
+    actualCurrent = (static_cast<int32_t>(rawPackCurrent) - 5000) / 10.0f;
     vMin = d[4] / 50.0f;
     vMax = d[5] / 50.0f;
     timeoutCounter = BMS_TIMEOUT_TICKS;
@@ -65,13 +68,14 @@ void TeensyBMS::parseMsg1(uint8_t* d) {
 
 void TeensyBMS::parseMsg2(uint8_t* d) {
     if (!checkCrc(d)) return;
-    tMin = d[0] - 40;
-    tMax = d[1] - 40;
+    tMin = static_cast<float>(d[0]) - 40.0f;
+    tMax = static_cast<float>(d[1]) - 40.0f;
     balancingVoltage = d[2] / 50.0f;
     deltaVoltage = d[3] / 100.0f;
-    int16_t raw = d[4] | (d[5] << 8);
-    float kw = (raw - 2000) / 10.0f;
-    packPower = kw * 1000.0f;
+
+    const uint16_t rawPackPower = static_cast<uint16_t>(d[4]) | (static_cast<uint16_t>(d[5]) << 8);
+    const float packPowerKw = (static_cast<int32_t>(rawPackPower) - 30000) / 100.0f;
+    packPower = packPowerKw * 1000.0f;
 }
 
 void TeensyBMS::parseMsg3(uint8_t* d) {
@@ -86,8 +90,8 @@ void TeensyBMS::parseMsg4(uint8_t* d) {
     if (!checkCrc(d)) return;
     soc = (d[0] | (d[1] << 8)) / 100.0f;
     // soh not used
-    balancingActive = d[4];
-    anyBalancing = balancingActive != 0;
+    balancingActive = d[4] != 0;
+    anyBalancing = balancingActive;
     state = d[5];
 }
 
