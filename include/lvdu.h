@@ -147,6 +147,24 @@ private:
 
     void UpdateState()
     {
+        bool manualStandby = Param::GetInt(Param::manual_standby_mode);
+        if (manualStandby)
+        {
+            hvManager.SetHVRequest(false);
+            forceStandbyActive = false;
+            forceStandbyTimer = 0;
+            forceSleepActive = false;
+            forceSleepTimer = 0;
+            standbyTimeoutCounter = 0;
+            chargeDoneCounter = 0;
+
+            if (state != STATE_STANDBY)
+                TransitionTo(STATE_STANDBY);
+
+            manualChargePrev = false;
+            return;
+        }
+
         // Manual override: detect rising/falling edge of manual_charge_mode
         bool manualCharge = Param::GetInt(Param::manual_charge_mode);
         if (manualCharge && !manualChargePrev && state != STATE_CHARGE)
