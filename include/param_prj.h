@@ -47,8 +47,8 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-// Next param id (increase when adding new parameter!): 3
-// Next value Id: 2005
+// Next param id (increase when adding new parameter!): 166
+// Next value Id: 2333
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
@@ -60,6 +60,7 @@
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_hysteresis, "ms", 0, 60000, 500, 104)              \
    PARAM_ENTRY(CAT_VACUUM_PUMP, vacuum_warning_delay, "ms", 0, 60000, 2000, 105)          \
    PARAM_ENTRY(CAT_SETUP, dcdc_can, CAN_DEV, 0, 1, 1, 107)                                \
+   PARAM_ENTRY(CAT_SETUP, chargemodes, CHGMODS, 0, 8, 0, 37)                              \
    PARAM_ENTRY(CAT_TESLA_DCDC, dcdc_voltage_setpoint, "V", 9, 16, 13.5, 108)              \
    PARAM_ENTRY(CAT_LVDU, LVDU_12v_low_threshold, "V", 8.0, 13.5, 11.0, 116)               \
    PARAM_ENTRY(CAT_LVDU, LVDU_hv_low_threshold, "V", 100.0, 800.0, 200.0, 117)            \
@@ -69,6 +70,21 @@
    PARAM_ENTRY(CAT_LVDU, charge_done_current, "A", 0, 10, 0.5, 119)                       \
                                                                                           \
    PARAM_ENTRY(CAT_LVDU, charge_done_delay, "s", 0, 600, 30, 120)                         \
+#ifdef MLB_CHARGER_STANDALONE                                                             \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_SOC, "%", 0, 100, 50, 153)                        \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_SOC_Target, "%", 0, 100, 100, 154)                \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMSMinVolt, "V", 0, 1000, 0, 155)                 \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_IDCSetpnt, "A", 0, 200, 10, 156)                  \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_HVDCSetpnt, "V", 0, 1000, 400, 157)               \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMSBattCellSum, "V", 0, 1000, 350, 158)           \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMSMaxVolt, "V", 0, 1000, 400, 159)               \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMS_Cell_H_Temp, "°C", -40, 100, 25, 160)         \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMS_Cell_L_Temp, "°C", -40, 100, 20, 161)         \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMS_Cell_H_mV, "mV", 0, 5000, 4200, 162)          \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_BMS_Cell_L_mV, "mV", 0, 5000, 3000, 163)          \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_Activation_Crg, "dig", 0, 1, 0, 164)              \
+   PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_Lock, "dig", 0, 1, 0, 165)                        \
+#endif                                                                                     \
                                                                                           \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
    VALUE_ENTRY(lasterr, errorListString, 2002)                                            \
@@ -88,6 +104,39 @@
    VALUE_ENTRY(dcdc_input_power, "W", 2113)                                               \
    VALUE_ENTRY(dcdc_output_voltage, "V", 2114)                                            \
    VALUE_ENTRY(dcdc_output_current, "A", 2115)                                            \
+   VALUE_ENTRY(mlb_chr_DC_Max_ChargePower, "W", 2300)                                     \
+   VALUE_ENTRY(mlb_chr_DC_Max_ChargeVoltage, "V", 2301)                                   \
+   VALUE_ENTRY(mlb_chr_DC_Actual_Current, "A", 2302)                                      \
+   VALUE_ENTRY(mlb_chr_DC_Max_ChargeCurrent, "A", 2303)                                   \
+   VALUE_ENTRY(mlb_chr_DC_Min_ChargeVoltage, "V", 2304)                                   \
+   VALUE_ENTRY(mlb_chr_DC_Min_ChargeCurrent, "A", 2305)                                   \
+   VALUE_ENTRY(mlb_chr_Status_Grid, "dig", 2306)                                         \
+   VALUE_ENTRY(mlb_chr_ChargeManagerMode, HVLM_OPMODE, 2307)                               \
+   VALUE_ENTRY(mlb_chr_ChargerRequestingHV, HVLM_ACTREQ, 2308)                             \
+   VALUE_ENTRY(mlb_chr_ChargerErrorStatus, HVLM_ERRORSTATUS, 2309)                         \
+   VALUE_ENTRY(mlb_chr_PlugStatus, HVLM_PLUGSTATUS, 2310)                                  \
+   VALUE_ENTRY(mlb_chr_LoadRequest, HVLM_LOADREQ, 2311)                                    \
+   VALUE_ENTRY(mlb_chr_ChargerState, HVLM_CHARGERMODE, 2312)                               \
+   VALUE_ENTRY(mlb_chr_Charger_AC_Volt_RMS, "V", 2313)                                   \
+   VALUE_ENTRY(mlb_chr_Charger_VoltageOut_HV, "V", 2314)                                 \
+   VALUE_ENTRY(mlb_chr_Charger_CurrentOut_HV, "A", 2315)                                 \
+   VALUE_ENTRY(mlb_chr_Charger_Temperature, "°C", 2316)                                  \
+   VALUE_ENTRY(mlb_chr_ChargerSystemState, HVLM_CHARGESYSSTATE, 2317)                      \
+   VALUE_ENTRY(mlb_chr_Status_LED, "dig", 2318)                                          \
+   VALUE_ENTRY(mlb_chr_MaxCurrent_AC, "A", 2319)                                          \
+   VALUE_ENTRY(mlb_chr_LockRequest, HVLM_CONNECTORLOCK, 2320)                              \
+   VALUE_ENTRY(mlb_chr_Charger_Ready, HVLM_CHGREADY, 2321)                                 \
+   VALUE_ENTRY(mlb_chr_ChargerTemp_Reduction, "dig", 2322)                                \
+   VALUE_ENTRY(mlb_chr_ChargerCurrent_Reduction, "dig", 2323)                             \
+   VALUE_ENTRY(mlb_chr_SocketTemp_Reduction, "dig", 2324)                                 \
+   VALUE_ENTRY(mlb_chr_MaxChargerOutput, "W", 2325)                                       \
+   VALUE_ENTRY(mlb_chr_CableCurrentLimit, "A", 2326)                                      \
+   VALUE_ENTRY(mlb_chr_ControlPilotStatus, "dig", 2327)                                   \
+   VALUE_ENTRY(mlb_chr_LockState, "dig", 2328)                                            \
+   VALUE_ENTRY(mlb_chr_ChargerWarning, "dig", 2329)                                       \
+   VALUE_ENTRY(mlb_chr_ChargerFault, "dig", 2330)                                         \
+   VALUE_ENTRY(mlb_chr_OutputVolts, "V", 2331)                                            \
+   VALUE_ENTRY(mlb_chr_ActivationState, "dig", 2332)                                      \
    VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                               \
                                                                                           \
    PARAM_ENTRY(CAT_BMS, BMS_CAN, CAN_DEV, 0, 1, 1, 110)                                   \
@@ -174,6 +223,17 @@
 #define CAT_TESLA_DCDC "Tesla DCDC"
 #define YESNO "0=No, 1=Yes"
 #define CAT_LVDU "Low Voltage Distribution"
+#define CAT_MLB_SIM "MLB Charger Sim"
+#define CHGMODS "0=Off, 1=EXT_DIGI, 2=Volt_Ampera, 3=Leaf_PDM, 4=TeslaOI, 5=Out_lander, 6=Elcon, 7=MGgen2, 8=MLBEvo"
+#define HVLM_OPMODE "0=Inactive, 1=Active, 2=Init, 3=Error"
+#define HVLM_ACTREQ "0=No Request, 1=Charging, 2=Balancing, 3=AC/Climate"
+#define HVLM_ERRORSTATUS "0=No Error, 1=DC-NotOK, 2=AC-NotOK, 3=Interlock, 4=Reserved, 5=Reserved, 6=NoComponentFunction, 7=Init"
+#define HVLM_PLUGSTATUS "0=Init, 1=NoPlug, 2=PlugIn, 3=PlugLocked"
+#define HVLM_LOADREQ "0=NoRequest, 1=ACCharge, 2=DCCharge, 3=Recharge12V, 4=ACAWCCharge, 5=Reserved, 6=Init, 7=Error"
+#define HVLM_CHARGERMODE "0=Standby, 1=ACCharging, 3=DCCharging, 4=Precharge, 5=Fail, 7=Init"
+#define HVLM_CHARGESYSSTATE "0=OK, 1=Defective, 2=Incompatible, 3=DCChargeNotPossible"
+#define HVLM_CONNECTORLOCK "0=Unlock, 1=Lock, 2=Init, 3=NoRequest"
+#define HVLM_CHGREADY "0=NoError, 1=ACNotPossible, 2=DCNotPossible, 3=AC&DCNotPossible"
 
 #define BMS_STATE "0=INIT, 1=OPERATING, 2=FAULT"
 #define EPS_STATE "0=OFF, 1=ON, 2=SPOOLUP 3=FAULT"
@@ -214,6 +274,19 @@ enum _eps_states
    EPS_ON,
    EPS_SPOOL_UP,
    EPS_FAULT
+};
+
+enum ChargeModes
+{
+   Off = 0,
+   EXT_DIGI,
+   Volt_Ampera,
+   Leaf_PDM,
+   TeslaOI,
+   Out_lander,
+   Elcon,
+   MGgen2,
+   MLBevo
 };
 
 enum can_devices
