@@ -20,6 +20,8 @@
 #include <vw_mlb_charger.h>
 #include "params.h"
 
+#define MLB_CHARGER_STANDALONE // Comment out to run in Zombie integrated mode
+
 /*CAN send information flow path:
 
 +-------------------------------+           +-------------------------------+

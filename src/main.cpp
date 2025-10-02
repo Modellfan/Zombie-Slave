@@ -51,9 +51,12 @@
 
 #define PRINT_JSON 0
 
+// System SW components
 static Stm32Scheduler *scheduler;
 static CanHardware *canInterface[3];
 static CanMap *canMap;
+
+// Functional SW components
 static TeslaCoolantPump coolantPump;
 static TeslaValve teslaValve;
 static TeslaDCDC DCDCTesla;
@@ -70,10 +73,11 @@ static void SetCanFilters()
 {
    CanHardware *dcdc_can = canInterface[Param::GetInt(Param::dcdc_can)];
    CanHardware *bms_can = canInterface[Param::GetInt(Param::BMS_CAN)];
+   CanHardware *charger_can = canInterface[Param::GetInt(Param::charger_can)];
 
    DCDCTesla.SetCanInterface(dcdc_can);
    teensyBms.SetCanInterface(bms_can);
-   mlbCharger.SetCanInterface(bms_can);
+   mlbCharger.SetCanInterface(charger_can);
 
    canInterface[0]->RegisterUserMessage(0x601); // CanSDO
    canInterface[1]->RegisterUserMessage(0x601); // CanSDO
@@ -159,7 +163,11 @@ void Param::Change(Param::PARAM_NUM paramNum)
       break;
 
    case Param::dcdc_can:
-      SetCanFilters(); // Re-assign CAN interface to TeensyBMS
+      SetCanFilters(); // Re-assign CAN interface to DCDC
+      break;
+
+   case Param::charger_can:
+      SetCanFilters(); // Re-assign CAN interface to Charger
       break;
 
    default:
