@@ -47,6 +47,7 @@
 #include "vacuum_pump.h"
 #include "lvdu.h"
 #include "eps.h"
+#include "vw_mlb_charger.h"
 
 #define PRINT_JSON 0
 
@@ -61,6 +62,7 @@ static Heater heater;
 static VacuumPump vacuumPump;
 static LVDU lvdu;
 static EPS eps;
+static VWMLBClass mlbCharger;
 
 // Whenever the user clears mapped can messages or changes the
 // CAN interface of a device, this will be called by the CanHardware module
@@ -71,6 +73,7 @@ static void SetCanFilters()
 
    DCDCTesla.SetCanInterface(dcdc_can);
    teensyBms.SetCanInterface(bms_can);
+   mlbCharger.SetCanInterface(bms_can);
 
    canInterface[0]->RegisterUserMessage(0x601); // CanSDO
    canInterface[1]->RegisterUserMessage(0x601); // CanSDO
@@ -81,6 +84,7 @@ static bool CanCallback(uint32_t id, uint32_t data[2], uint8_t dlc) // This is w
    dlc = dlc;
    DCDCTesla.DecodeCAN(id, (uint8_t *)data);
    teensyBms.DecodeCAN(id, (uint8_t *)data);
+   mlbCharger.DecodeCAN(id, data);
    return false;
 }
 
@@ -113,6 +117,7 @@ static void Ms100Task(void)
    teensyBms.Task100Ms();
    lvdu.Task100Ms();
    eps.Task100Ms();
+   mlbCharger.Task100Ms();
 }
 
 // sample 10 ms task
@@ -135,6 +140,7 @@ static void Ms10Task(void)
 
    heater.Task10Ms();
    vacuumPump.Task10Ms();
+   mlbCharger.Task10Ms();
 }
 
 // sample 1 ms task
