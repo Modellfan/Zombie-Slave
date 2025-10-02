@@ -39,7 +39,7 @@
  */
 
 // Define a version string of your firmware here
-#define VER 1.19.R
+#define VER 2.01.R
 #define VERSTR STRINGIFY(4 = VER)
 
 /* Entries must be ordered as follows:
@@ -88,7 +88,7 @@
    VALUE_ENTRY(dcdc_input_power, "W", 2113)                                               \
    VALUE_ENTRY(dcdc_output_voltage, "V", 2114)                                            \
    VALUE_ENTRY(dcdc_output_current, "A", 2115)                                            \
-   VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                                \
+   VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                               \
                                                                                           \
    PARAM_ENTRY(CAT_BMS, BMS_CAN, CAN_DEV, 0, 1, 1, 110)                                   \
    VALUE_ENTRY(BMS_Vmin, "V", 2201)                                                       \
@@ -144,10 +144,8 @@
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
    VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)                                            \
-                                                                                          \
    VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2162)                                    \
    VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)                                     \
-                                                                                          \
    VALUE_ENTRY(LVDU_hv_contactors_closed, "On/Off", 2168)                                 \
                                                                                           \
    VALUE_ENTRY(eps_state, EPS_STATE, 2164)                                                \
