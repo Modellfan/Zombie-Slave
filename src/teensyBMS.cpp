@@ -89,15 +89,26 @@ void TeensyBMS::parseMsg3(uint8_t* d) {
 void TeensyBMS::parseMsg4(uint8_t* d) {
     if (!checkCrc(d)) return;
     soc = (d[0] | (d[1] << 8)) / 100.0f;
-    // soh not used
-    balancingActive = d[4] != 0;
+    soh = (d[2] | (d[3] << 8)) / 100.0f;
+    balancingStatus = d[4];
+    balancingActive = balancingStatus != 0;
     anyBalancing = balancingActive;
     state = d[5];
 }
 
 void TeensyBMS::parseMsg5(uint8_t* d) {
     if (!checkCrc(d)) return;
-    // energy per hour and time to full currently unused
+    const int16_t rawEnergyPerHour = static_cast<int16_t>(static_cast<uint16_t>(d[0]) |
+                                                         (static_cast<uint16_t>(d[1]) << 8));
+    averageEnergyPerHour = rawEnergyPerHour / 100.0f; // kWh per hour == kW
+
+    const uint16_t rawRemainingTimeSeconds =
+        static_cast<uint16_t>(d[2]) | (static_cast<uint16_t>(d[3]) << 8);
+    remainingTimeMinutes = rawRemainingTimeSeconds / 60.0f;
+
+    const uint16_t rawRemainingEnergyWh =
+        static_cast<uint16_t>(d[4]) | (static_cast<uint16_t>(d[5]) << 8);
+    remainingEnergyKWh = rawRemainingEnergyWh / 1000.0f;
 }
 
 float TeensyBMS::MaxChargeCurrent() {
@@ -135,8 +146,10 @@ void TeensyBMS::Task100Ms() {
     Param::SetInt(Param::BMS_BalancingAnyActive, anyBalancing);
     Param::SetFloat(Param::BMS_ActualCurrent, actualCurrent);
     Param::SetFloat(Param::BMS_SOC, soc);
+    Param::SetFloat(Param::BMS_SOH, soh);
     Param::SetFloat(Param::BMS_PackPower, packPower);
     Param::SetInt(Param::BMS_State, state);
+    Param::SetInt(Param::BMS_BalancingStatus, balancingStatus);
     Param::SetInt(Param::BMS_DTC, dtc);
     Param::SetInt(Param::BMS_TimeoutFault, timeout);
     Param::SetFloat(Param::BMS_MaxChargeCurrent, maxChargeCurrent);
@@ -145,6 +158,10 @@ void TeensyBMS::Task100Ms() {
     Param::SetInt(Param::BMS_ShutdownReady, shutdownReady);
     Param::SetInt(Param::BMS_ShutdownAcknowledge, shutdownAck);
     Param::SetInt(Param::BMS_DataValid, bmsValid);
+
+    Param::SetFloat(Param::BMS_AvgEnergyPerHour, averageEnergyPerHour);
+    Param::SetFloat(Param::BMS_RemainingTime, remainingTimeMinutes);
+    Param::SetFloat(Param::BMS_RemainingEnergy, remainingEnergyKWh);
 
     Param::SetInt(Param::BMS_CONT_State, contactorState);
     Param::SetInt(Param::BMS_CONT_DTC, contactorDTC);
