@@ -79,13 +79,12 @@ private:
     float voltage12V = 13.2f; // Cached analog read, 13.2V = typical "full" battery voltage
     bool is12VTooLow = false; // Cached threshold comparison
     bool IsHVTooLow = false;
-    bool chargerPlugged = false;                 // TODO: Add real charger detection via CAN
+    bool chargerPlugged = false;                 // Tracks if external charger is connected
     bool remotePreconditioningRequested = false; // TODO: Add flag/CAN/schedule check via CAN
     bool thermalTaskCompleted = true;            // TODO: Implement or simulate via CAN
     bool criticalFault = false;                  // TODO: Detect via system/BMS via CAN
     bool degradedFault = false;                  // TODO: Detect via system/BMS via CAN
     bool driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
-    bool manualChargePrev = false;               // Tracks previous manual_charge_mode value
     bool bmsBalancing = false;                   // Tracks if BMS is currently balancing
 
     // HV contactor handling via manager
@@ -128,7 +127,8 @@ private:
         bmsBalancing = Param::GetInt(Param::BMS_BalancingAnyActive);
 
         // Still update for possible custom behavior
-        chargerPlugged = false; // TODO: Add real charger detection via CAN
+        int plugStatus = Param::GetInt(Param::mlb_chr_PlugStatus);
+        chargerPlugged = plugStatus > 1; // 0=Init, 1=No Plug, 2=Plug In, 3=Plug Locked
         remotePreconditioningRequested = false; // TODO: Add flag/CAN/schedule check via CAN
         thermalTaskCompleted = true; // TODO: Implement or simulate via CAN
         criticalFault = false; // TODO: Detect via system/BMS via CAN
@@ -161,23 +161,8 @@ private:
             if (state != STATE_STANDBY)
                 TransitionTo(STATE_STANDBY);
 
-            manualChargePrev = false;
             return;
         }
-
-        // Manual override: detect rising/falling edge of manual_charge_mode
-        bool manualCharge = Param::GetInt(Param::manual_charge_mode);
-        if (manualCharge && !manualChargePrev && state != STATE_CHARGE)
-        {
-            hvManager.SetHVRequest(true);
-            if (hvManager.IsHVActive())
-                TransitionTo(STATE_CHARGE);
-        }
-        else if (!manualCharge && manualChargePrev && state == STATE_CHARGE)
-        {
-            TransitionTo(STATE_CONDITIONING);
-        }
-        manualChargePrev = manualCharge;
 
         // For each state, request HV as needed, and only allow transition if HV is acknowledged closed
         switch (state)
