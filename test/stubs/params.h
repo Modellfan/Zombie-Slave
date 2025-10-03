@@ -31,7 +31,7 @@ public:
         BMS_CONT_PrechargeInput,
         BMS_CONT_SupplyVoltageAvailable,
         LVDU_vehicle_state,
-        manual_charge_mode,
+        mlb_chr_PlugStatus,
         manual_standby_mode,
         LVDU_forceVCUsShutdown,
         LVDU_connectHVcommand,
