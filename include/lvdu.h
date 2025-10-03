@@ -125,7 +125,7 @@ private:
         float hvVoltage = Param::GetFloat(Param::BMS_PackVoltage);
         bmsValid = Param::GetInt(Param::BMS_DataValid);
         contState = Param::GetInt(Param::BMS_CONT_State);
-        bmsBalancing = Param::GetInt(Param::BMS_BalancingAnyActive);
+        bmsBalancing = bmsValid && Param::GetInt(Param::BMS_BalancingAnyActive);
 
         // Still update for possible custom behavior
         chargerPlugged = false; // TODO: Add real charger detection via CAN
@@ -212,6 +212,12 @@ private:
                 if (bmsBalancing)
                 {
                     standbyTimeoutCounter = 0; // Stay awake while BMS is balancing
+
+                    // If CAN comms to the BMS fail or LV drops too low while balancing, shut down
+                    if (!bmsValid || is12VTooLow)
+                    {
+                        TransitionTo(STATE_SLEEP);
+                    }
                 }
                 else if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
                 {
