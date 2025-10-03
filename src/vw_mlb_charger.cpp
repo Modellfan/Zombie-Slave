@@ -545,10 +545,10 @@ void VWMLBClass::emulateMLB()
         // HMS_Fehlerstatus = false; //0 "No error" 1 "Stopping_not_possible" 2 "Special operating mode_active" 3 "System restriction" 4 "System fault" ;
     }
 
-    if (charger_status.HVLM_HV_ActivationRequest == 1)
+    if (charger_status.HVLM_HV_ActivationRequest == 1) // 0=No Request, 1=Charging, 2=Balancing, 3=AC/Climate
     {
         mlb_state.HV_Bordnetz_aktiv = true; // Indicates an active high-voltage vehicle electrical system: 0 = Not Active,  1 = Active
-        mlb_state.HVK_BMS_Sollmodus = 4;
+        mlb_state.HVK_BMS_Sollmodus = 4; // BMS requested mode: 0 "HV_Off" 1 "HV_On" 3 "AC_Charging_ext" 4 "AC_Charging" 6 "DC_Charging" 7 "Init"
         mlb_state.BMS_IstModus = 4;  // 0=Standby, 1=HV Active (Driving) 2=Balancing 4=AC charge, 6=DC charge, 7=init
         mlb_state.BMS_HV_Status = 2; // HV System Voltage Detected  // Voltage Status: 0=Init, 1=NoVoltage, 2=Voltage, 3=Fault & Voltage
         mlb_state.HVK_MO_EmSollzustand = 50;
@@ -562,10 +562,10 @@ void VWMLBClass::emulateMLB()
         }
     }
 
-    if (charger_status.HVLM_HV_ActivationRequest == 0)
+    if (charger_status.HVLM_HV_ActivationRequest == 0) // 0=No Request, 1=Charging, 2=Balancing, 3=AC/Climate
     {
         mlb_state.HV_Bordnetz_aktiv = false; // Indicates an active high-voltage vehicle electrical system: 0 = Not Active,  1 = Active
-        mlb_state.HVK_BMS_Sollmodus = 0;
+        mlb_state.HVK_BMS_Sollmodus = 0; // BMS requested mode: 0 "HV_Off" 1 "HV_On" 3 "AC_Charging_ext" 4 "AC_Charging" 6 "DC_Charging" 7 "Init"
         mlb_state.BMS_IstModus = 0;  // 0=Standby, 1=HV Active (Driving) 2=Balancing 4=AC charge, 6=DC charge, 7=init
         mlb_state.BMS_HV_Status = 1; // HV No Voltage // Voltage Status: 0=Init, 1=NoVoltage, 2=Voltage, 3=Fault & Voltage
         mlb_state.HVK_MO_EmSollzustand = 50;
