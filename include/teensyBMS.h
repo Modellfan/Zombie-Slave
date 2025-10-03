@@ -37,9 +37,15 @@ private:
     float maxDischargeCurrent = 0;
     float packPower = 0;
     float soc = 0;
+    float soh = 0;
+    float averageEnergyPerHour = 0;
+    float remainingEnergyKWh = 0;
+
+    float remainingTimeMinutes = 0;
 
     uint8_t state = 0;
     uint8_t dtc = 0;
+    uint8_t balancingStatus = 0;
     bool balancingActive = false;
     bool anyBalancing = false;
 

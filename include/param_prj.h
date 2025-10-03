@@ -159,6 +159,11 @@
    VALUE_ENTRY(BMS_CONT_PositiveInput, "On/Off", 2225)                                    \
    VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
    VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
+   VALUE_ENTRY(BMS_SOH, "%", 2228)                                                        \
+   VALUE_ENTRY(BMS_BalancingStatus, "enum", 2229)                                         \
+   VALUE_ENTRY(BMS_AvgEnergyPerHour, "kW", 2230)                                          \
+   VALUE_ENTRY(BMS_RemainingTime, "min", 2231)                                            \
+   VALUE_ENTRY(BMS_RemainingEnergy, "kWh", 2232)                                          \
                                                                                           \
    PARAM_ENTRY(CAT_HEATER, heater_flap_threshold, "Raw ADC", 0, 4095, 1000, 113)          \
    PARAM_ENTRY(CAT_HEATER, heater_active_manual, "0=Auto, 1=ManualON", 0, 1, 0, 111)      \
