@@ -26,6 +26,8 @@
 #include <libopencm3/stm32/timer.h>
 #include <libopencm3/stm32/dma.h>
 #include <libopencm3/stm32/rtc.h>
+#include <libopencm3/stm32/spi.h>
+#include <libopencm3/stm32/exti.h>
 #include <libopencm3/stm32/crc.h>
 #include <libopencm3/stm32/flash.h>
 #include <libopencm3/stm32/desig.h>
@@ -35,14 +37,15 @@
 #include "my_string.h"
 
 /**
-* Start clocks of all needed peripherals
-*/
+ * Start clocks of all needed peripherals
+ */
 void clock_setup(void)
 {
    RCC_CLOCK_SETUP();
+   rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);
 
-   //The reset value for PRIGROUP (=0) is not actually a defined
-   //value. Explicitly set 16 preemtion priorities
+   // The reset value for PRIGROUP (=0) is not actually a defined
+   // value. Explicitly set 16 preemtion priorities
    SCB_AIRCR = SCB_AIRCR_VECTKEY | SCB_AIRCR_PRIGROUP_GROUP16_NOSUB;
 
    rcc_periph_clock_enable(RCC_GPIOA);
@@ -51,14 +54,21 @@ void clock_setup(void)
    rcc_periph_clock_enable(RCC_GPIOD);
    rcc_periph_clock_enable(RCC_GPIOE);
    rcc_periph_clock_enable(RCC_USART3);
-   rcc_periph_clock_enable(RCC_TIM2); //Scheduler
-   rcc_periph_clock_enable(RCC_TIM4); //Overcurrent / AUX PWM
-   rcc_periph_clock_enable(RCC_DMA1);  //ADC, Encoder and UART receive
+   rcc_periph_clock_enable(RCC_USART2); // GS450H Inverter Comms
+   rcc_periph_clock_enable(RCC_USART1); // LIN Comms
+   rcc_periph_clock_enable(RCC_TIM1);   // GS450H oil pump pwm
+   rcc_periph_clock_enable(RCC_TIM2);   // GS450H 500khz usart clock
+   rcc_periph_clock_enable(RCC_TIM3);   // PWM outputs
+   rcc_periph_clock_enable(RCC_TIM4);   // Scheduler
+   rcc_periph_clock_enable(RCC_DMA1);   // ADC, and UARTS
+   // rcc_periph_clock_enable(RCC_DMA2);
    rcc_periph_clock_enable(RCC_ADC1);
    rcc_periph_clock_enable(RCC_CRC);
-   rcc_periph_clock_enable(RCC_AFIO); // CAN
+   rcc_periph_clock_enable(RCC_AFIO); // CAN AND USART3
    rcc_periph_clock_enable(RCC_CAN1); // CAN1
    rcc_periph_clock_enable(RCC_CAN2); // CAN2
+   rcc_periph_clock_enable(RCC_SPI2); // CAN3
+   rcc_periph_clock_enable(RCC_SPI3); // Digital POTS
 }
 
 /* Some pins should never be left floating at any time
@@ -70,15 +80,15 @@ void write_bootloader_pininit()
 {
    uint32_t flashSize = desig_get_flash_size();
    uint32_t pindefAddr = FLASH_BASE + flashSize * 1024 - PINDEF_BLKNUM * PINDEF_BLKSIZE;
-   const struct pincommands* flashCommands = (struct pincommands*)pindefAddr;
+   const struct pincommands *flashCommands = (struct pincommands *)pindefAddr;
 
    struct pincommands commands;
 
-   memset32((int*)&commands, 0, PINDEF_NUMWORDS);
+   memset32((int *)&commands, 0, PINDEF_NUMWORDS);
 
    //!!! Customize this to match your project !!!
-   //Here we specify that PC13 be initialized to ON
-   //AND PB1 AND PB2 be initialized to OFF
+   // Here we specify that PC13 be initialized to ON
+   // AND PB1 AND PB2 be initialized to OFF
    commands.pindef[0].port = GPIOC;
    commands.pindef[0].pin = GPIO13;
    commands.pindef[0].inout = PIN_OUT;
@@ -89,7 +99,7 @@ void write_bootloader_pininit()
    commands.pindef[1].level = 0;
 
    crc_reset();
-   uint32_t crc = crc_calculate_block(((uint32_t*)&commands), PINDEF_NUMWORDS);
+   uint32_t crc = crc_calculate_block(((uint32_t *)&commands), PINDEF_NUMWORDS);
    commands.crc = crc;
 
    if (commands.crc != flashCommands->crc)
@@ -97,10 +107,10 @@ void write_bootloader_pininit()
       flash_unlock();
       flash_erase_page(pindefAddr);
 
-      //Write flash including crc, therefor <=
+      // Write flash including crc, therefor <=
       for (uint32_t idx = 0; idx <= PINDEF_NUMWORDS; idx++)
       {
-         uint32_t* pData = ((uint32_t*)&commands) + idx;
+         uint32_t *pData = ((uint32_t *)&commands) + idx;
          flash_program_word(pindefAddr + idx * sizeof(uint32_t), *pData);
       }
       flash_lock();
@@ -108,31 +118,41 @@ void write_bootloader_pininit()
 }
 
 /**
-* Enable Timer refresh and break interrupts
-*/
+ * Enable Timer refresh and break interrupts
+ */
 void nvic_setup(void)
 {
-   nvic_enable_irq(NVIC_TIM2_IRQ); //Scheduler
-   nvic_set_priority(NVIC_TIM2_IRQ, 0xe << 4); //second lowest priority
+   nvic_enable_irq(NVIC_TIM2_IRQ);             // Scheduler
+   nvic_set_priority(NVIC_TIM2_IRQ, 0xe << 4); // second lowest priority
+
+    nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ); //CAN RX
+    nvic_set_priority(NVIC_USB_LP_CAN_RX0_IRQ, 0xe << 4); //second lowest priority
+
+    nvic_enable_irq(NVIC_USB_HP_CAN_TX_IRQ); //CAN TX
+    nvic_set_priority(NVIC_USB_HP_CAN_TX_IRQ, 0xe << 4); //second lowest priority
+
+    /* Without this the RTC interrupt routine will never be called. */
+    nvic_enable_irq(NVIC_RTC_IRQ);
+    nvic_set_priority(NVIC_RTC_IRQ, 0x20);
 }
 
 void rtc_setup()
 {
-   //Base clock is HSE/128 = 8MHz/128 = 62.5kHz
-   //62.5kHz / (624 + 1) = 100Hz
-   rtc_auto_awake(RCC_HSE, 624); //10ms tick
+   // Base clock is HSE/128 = 8MHz/128 = 62.5kHz
+   // 62.5kHz / (624 + 1) = 100Hz
+   rtc_auto_awake(RCC_HSE, 624); // 10ms tick
    rtc_set_counter_val(0);
 }
 
 /**
-* Setup main PWM timer and timer for generating over current
-* reference values and external PWM
-*/
+ * Setup main PWM timer and timer for generating over current
+ * reference values and external PWM
+ */
 void tim_setup()
 {
    /*** Setup over/undercurrent and PWM output timer */
    timer_disable_counter(OVER_CUR_TIMER);
-   //edge aligned PWM
+   // edge aligned PWM
    timer_set_alignment(OVER_CUR_TIMER, TIM_CR1_CMS_EDGE);
    timer_enable_preload(OVER_CUR_TIMER);
    /* PWM mode 1 and preload enable */
@@ -162,4 +182,3 @@ void tim_setup()
    /** setup gpio */
    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO7 | GPIO8 | GPIO9);
 }
-

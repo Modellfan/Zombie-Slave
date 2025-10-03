@@ -21,7 +21,6 @@
 #define vw_mlb_charger_h
 
 #include "chargerhw.h"
-#include "chargerint.h"
 #include "canhardware.h"
 #include <stdint.h>
 #include "my_fp.h"

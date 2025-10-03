@@ -53,7 +53,6 @@
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
    PARAM_ENTRY(CAT_COMM, canperiod, CANPERIODS, 0, 1, 0, 2)                               \
-   PARAM_ENTRY(CAT_SETUP, chargemodes, CHGMODS, 0, 8, 0, 37)                              \
                                                                                           \
    VALUE_ENTRY(version, VERSTR, 2001)                                                     \
    VALUE_ENTRY(lasterr, errorListString, 2002)                                            \

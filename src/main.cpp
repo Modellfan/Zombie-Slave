@@ -130,14 +130,6 @@ static void Ms10Task(void)
    // Set timestamp of error message
    ErrorMessage::SetTime(rtc_get_counter_val());
 
-   // Param::SetInt(Param::ignition_drive_in, DigIo::ignition_drive_input_pin.Get());
-
-   // if (DigIo::test_in.Get())
-   // {
-   //    // Post a test error message when our test input is high
-   //   ErrorMessage::Post(ERR_TESTERROR);
-   // }
-
    // If we chose to send CAN messages every 10 ms, do this here.
    if (Param::GetInt(Param::canperiod) == CAN_PERIOD_10MS)
       canMap->SendAll();
@@ -189,6 +181,7 @@ extern "C" int main(void)
 
    clock_setup(); // Must always come first
    rtc_setup();
+   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
    ANA_IN_CONFIGURE(ANA_IN_LIST);
    DIG_IO_CONFIGURE(DIG_IO_LIST);
    AnaIn::Start();             // Starts background ADC conversion via DMA
@@ -200,7 +193,7 @@ extern "C" int main(void)
 
    // Initialize CAN1, including interrupts. Clock must be enabled in clock_setup()
    Stm32Can c(CAN1, (CanHardware::baudrates)Param::GetInt(Param::canspeed));
-   Stm32Can c2(CAN2, (CanHardware::baudrates)Param::GetInt(Param::canspeed));
+   Stm32Can c2(CAN2, (CanHardware::baudrates)Param::GetInt(Param::canspeed), true);
    FunctionPointerCallback cb(CanCallback, SetCanFilters);
    CanMap cm(&c);
    CanSdo sdo(&c, &cm);
