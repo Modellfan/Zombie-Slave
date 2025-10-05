@@ -155,10 +155,6 @@
    VALUE_ENTRY(BMS_DataValid, YESNO, 2221)                                                \
    VALUE_ENTRY(BMS_CONT_State, CONT_STATE, 2222)                                          \
    VALUE_ENTRY(BMS_CONT_DTC, CONT_DTC_FLAGS, 2223)                                        \
-   VALUE_ENTRY(BMS_CONT_NegativeInput, "On/Off", 2224)                                    \
-   VALUE_ENTRY(BMS_CONT_PositiveInput, "On/Off", 2225)                                    \
-   VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
-   VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
    VALUE_ENTRY(BMS_SOH, "%", 2228)                                                        \
    VALUE_ENTRY(BMS_BalancingStatus, "enum", 2229)                                         \
    VALUE_ENTRY(BMS_AvgEnergyPerHour, "kW", 2230)                                          \
@@ -173,12 +169,8 @@
    VALUE_ENTRY(heater_active, "On/Off", 2130)                                             \
    VALUE_ENTRY(heater_flap_in, "Raw ADC", 2134)                                           \
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
-   VALUE_ENTRY(heater_thermal_switch_boot_fault, "0=OK, 1=OvertempOnBoot", 2140)          \
-   VALUE_ENTRY(heater_thermal_switch_does_not_open_fault, "0=OK, 1=StuckClosed", 2141)    \
-   VALUE_ENTRY(heater_thermal_switch_overheat_fault, "0=OK, 1=TooLongOpen", 2142)         \
    VALUE_ENTRY(heater_contactor_feedback_in, "0=Open, 1=Closed", 2132)                    \
    VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
-   VALUE_ENTRY(heater_contactor_fault, "0=OK, 1=No Feedback, 2=Welded", 2138)             \
    VALUE_ENTRY(heater_fault, "0=OK, 1=Fault", 2143)                                       \
    VALUE_ENTRY(hv_comfort_functions_allowed, "0=No, 1=Yes", 2144)                         \
                                                                                           \

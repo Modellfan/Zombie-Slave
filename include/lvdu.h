@@ -176,7 +176,10 @@ private:
             if (ignitionOn)
             {
                 hvManager.SetHVRequest(true);
-                if (hvManager.IsHVActive())
+                // When no external charger is connected we can enter READY immediately
+                // instead of waiting for the HV contactor feedback. This avoids a visible
+                // delay when the driver turns the ignition on without a plug attached.
+                if (!chargerPlugged || hvManager.IsHVActive())
                     TransitionTo(STATE_READY);
             }
             else if (remotePreconditioningRequested)
@@ -248,6 +251,22 @@ private:
         case STATE_CHARGE:
         {
             hvManager.SetHVRequest(true);
+
+            // When the driver turns the ignition on while charging and the plug is
+            // removed, jump straight to READY without waiting on contactor feedback.
+            // This mirrors the unplugged standby behavior and avoids a perceived
+            // hand-off delay when leaving charge mode.
+            if (!chargerPlugged)
+            {
+                if (ignitionOn)
+                    TransitionTo(STATE_READY);
+                else
+                    TransitionTo(STATE_CONDITIONING);
+
+                chargeDoneCounter = 0;
+                break;
+            }
+
             // if (!chargerPlugged)
             // {
             //     TransitionTo(STATE_CONDITIONING);
