@@ -155,10 +155,6 @@
    VALUE_ENTRY(BMS_DataValid, YESNO, 2221)                                                \
    VALUE_ENTRY(BMS_CONT_State, CONT_STATE, 2222)                                          \
    VALUE_ENTRY(BMS_CONT_DTC, CONT_DTC_FLAGS, 2223)                                        \
-   VALUE_ENTRY(BMS_CONT_NegativeInput, "On/Off", 2224)                                    \
-   VALUE_ENTRY(BMS_CONT_PositiveInput, "On/Off", 2225)                                    \
-   VALUE_ENTRY(BMS_CONT_PrechargeInput, "On/Off", 2226)                                   \
-   VALUE_ENTRY(BMS_CONT_SupplyVoltageAvailable, "On/Off", 2227)                           \
    VALUE_ENTRY(BMS_SOH, "%", 2228)                                                        \
    VALUE_ENTRY(BMS_BalancingStatus, "enum", 2229)                                         \
    VALUE_ENTRY(BMS_AvgEnergyPerHour, "kW", 2230)                                          \
