@@ -142,8 +142,8 @@ void TeensyBMS::Task100Ms() {
     Param::SetFloat(Param::BMS_PackVoltage, packVoltage);
     Param::SetFloat(Param::BMS_DeltaCellVoltage, deltaVoltage);
     Param::SetFloat(Param::BMS_BalancingVoltage, balancingVoltage);
-    Param::SetInt(Param::BMS_BalancingActive, balancingActive);
-    Param::SetInt(Param::BMS_BalancingAnyActive, anyBalancing);
+    Param::SetInt(Param::BMS_BalancingActive, bmsValid && balancingActive);
+    Param::SetInt(Param::BMS_BalancingAnyActive, bmsValid && anyBalancing);
     Param::SetFloat(Param::BMS_ActualCurrent, actualCurrent);
     Param::SetFloat(Param::BMS_SOC, soc);
     Param::SetFloat(Param::BMS_SOH, soh);
