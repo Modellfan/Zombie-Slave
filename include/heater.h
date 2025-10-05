@@ -5,6 +5,7 @@
 #include "hwdefs.h"
 #include "digio.h"
 #include "lvdu.h"
+#include "errormessage.h"
 
 /*
     Heater Control Function – Logic Overview
@@ -59,6 +60,11 @@ private:
     bool heater_active = false;
     bool thermal_switch_boot_checked = false;
 
+    bool fault_thermal_switch_boot = false;
+    bool fault_contactor = false;
+    bool fault_thermal_switch_does_not_open = false;
+    bool fault_thermal_switch_overheat = false;
+
     uint8_t contactor_fault_timer_on = 0;
     uint8_t contactor_fault_timer_off = 0;
     uint16_t thermal_open_timer = 0;
@@ -76,7 +82,11 @@ public:
         {
             bool thermal_ok = DigIo::heater_thermal_switch_in.Get(); // High = OK
             if (!thermal_ok)
-                Param::SetInt(Param::heater_thermal_switch_boot_fault, 1);
+            {
+                if (!fault_thermal_switch_boot)
+                    ErrorMessage::Post(ERR_HEATER_THERMAL_SWITCH_BOOT);
+                fault_thermal_switch_boot = true;
+            }
             thermal_switch_boot_checked = true;
         }
     }
@@ -108,11 +118,8 @@ public:
         Param::SetInt(Param::heater_contactor_out, contactor_out ? 1 : 0);
 
         // Aggregate fault flag
-        int fault_present =
-            Param::GetInt(Param::heater_thermal_switch_boot_fault) ||
-            Param::GetInt(Param::heater_contactor_fault) ||
-            Param::GetInt(Param::heater_thermal_switch_does_not_open_fault) ||
-            Param::GetInt(Param::heater_thermal_switch_overheat_fault);
+        bool fault_present = fault_thermal_switch_boot || fault_contactor ||
+                             fault_thermal_switch_does_not_open || fault_thermal_switch_overheat;
 
         Param::SetInt(Param::heater_fault, fault_present ? 1 : 0);
 
@@ -166,17 +173,19 @@ public:
 private:
     void DiagnoseContactor()
     {
-        bool cmd_on = (DigIo::heater_contactor_out.Get() == 1);              
-        bool feedback_closed = (DigIo::heater_contactor_feedback_in.Get() == 1); 
+        bool cmd_on = (DigIo::heater_contactor_out.Get() == 1);
+        bool feedback_closed = (DigIo::heater_contactor_feedback_in.Get() == 1);
         bool thermal_closed = DigIo::heater_thermal_switch_in.Get();        // High = closed
-
-        int fault = Param::GetInt(Param::heater_contactor_fault); // Keep current state
 
         // Fault: Commanded ON, no feedback, but only if thermal switch is closed (i.e., power allowed)
         if (cmd_on && !feedback_closed && thermal_closed)
         {
             if (++contactor_fault_timer_on >= CONTACTOR_FAULT_DEBOUNCE_COUNT)
-                fault = 1;
+            {
+                if (!fault_contactor)
+                    ErrorMessage::Post(ERR_HEATER_CONTACTOR_FAULT);
+                fault_contactor = true;
+            }
         }
         else
         {
@@ -187,14 +196,16 @@ private:
         if (!cmd_on && feedback_closed)
         {
             if (++contactor_fault_timer_off >= CONTACTOR_FAULT_DEBOUNCE_COUNT)
-                fault = 2;
+            {
+                if (!fault_contactor)
+                    ErrorMessage::Post(ERR_HEATER_CONTACTOR_FAULT);
+                fault_contactor = true;
+            }
         }
         else
         {
             contactor_fault_timer_off = 0;
         }
-
-        Param::SetInt(Param::heater_contactor_fault, fault);
     }
 
     void DiagnoseThermalSwitch()
@@ -209,7 +220,11 @@ private:
         if (contactor_on && thermal_closed)
         {
             if (++thermal_open_timer >= open_timeout_steps)
-                Param::SetInt(Param::heater_thermal_switch_does_not_open_fault, 1);
+            {
+                if (!fault_thermal_switch_does_not_open)
+                    ErrorMessage::Post(ERR_HEATER_THERMAL_SWITCH_STUCK_CLOSED);
+                fault_thermal_switch_does_not_open = true;
+            }
         }
         else
         {
@@ -220,7 +235,11 @@ private:
         if (!contactor_on && !thermal_closed)
         {
             if (++thermal_close_timer >= close_timeout_steps)
-                Param::SetInt(Param::heater_thermal_switch_overheat_fault, 1);
+            {
+                if (!fault_thermal_switch_overheat)
+                    ErrorMessage::Post(ERR_HEATER_THERMAL_SWITCH_STUCK_OPEN);
+                fault_thermal_switch_overheat = true;
+            }
         }
         else
         {
