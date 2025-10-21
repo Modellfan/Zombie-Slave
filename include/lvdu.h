@@ -31,12 +31,14 @@ enum VehicleState
 };
 
 // HV contactor handshake manager: cleanly separates request/feedback logic
-class HvContactorManager {
+class HvContactorManager
+{
 public:
     HvContactorManager() : requestHV(false), hvActive(false) {}
 
     // Update with new BMS info (call each cycle)
-    void Update(bool bmsValid, int contState) {
+    void Update(bool bmsValid, int contState)
+    {
         hvActive = bmsValid && (contState == 4); // 4 = CLOSED
     }
 
@@ -50,8 +52,8 @@ public:
     bool ShouldConnectHV() const { return requestHV; }
 
 private:
-    bool requestHV;  // Latest request from the state machine
-    bool hvActive;   // BMS feedback: contactors closed
+    bool requestHV; // Latest request from the state machine
+    bool hvActive;  // BMS feedback: contactors closed
 };
 
 class LVDU
@@ -103,7 +105,6 @@ public:
         UpdateState();
         HandleReadyDiagnosis();
         UpdateOutputs();
-        HandleLow12V();
         UpdateParams();
     }
 
@@ -128,12 +129,12 @@ private:
 
         // Still update for possible custom behavior
         int plugStatus = Param::GetInt(Param::mlb_chr_PlugStatus);
-        chargerPlugged = plugStatus > 1; // 0=Init, 1=No Plug, 2=Plug In, 3=Plug Locked
+        chargerPlugged = plugStatus > 1;        // 0=Init, 1=No Plug, 2=Plug In, 3=Plug Locked
         remotePreconditioningRequested = false; // TODO: Add flag/CAN/schedule check via CAN
-        thermalTaskCompleted = true; // TODO: Implement or simulate via CAN
-        criticalFault = false; // TODO: Detect via system/BMS via CAN
-        degradedFault = false; // TODO: Detect via system/BMS via CAN
-        driverequestreceived = false; // TODO: Detect via system/BMS via CAN (fixed typo)
+        thermalTaskCompleted = true;            // TODO: Implement or simulate via CAN
+        criticalFault = false;                  // TODO: Detect via system/BMS via CAN
+        degradedFault = false;                  // TODO: Detect via system/BMS via CAN
+        driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
 
         IsHVTooLow = bmsValid && hvVoltage < Param::GetFloat(Param::LVDU_hv_low_threshold);
 
@@ -321,9 +322,6 @@ private:
             break;
         }
 
-        if (state != STATE_CHARGE)
-            chargeDoneCounter = 0;
-
         // --- Safe decrement for force timers to prevent underflow
 
         // Check HV too low during READY or CONDITIONING
@@ -401,6 +399,11 @@ private:
         {
             diagnosePending = true;
             diagnoseTimer = LVDU_DIAGNOSE_DELAY_STEPS;
+        }
+
+        if (newState == STATE_CHARGE)
+        {
+            chargeDoneCounter = 0;
         }
     }
 
@@ -531,18 +534,6 @@ private:
             DigIo::condition_out.Set();
             DigIo::ready_out.Set();
             break;
-        }
-    }
-
-    void HandleLow12V()
-    {
-        if (state != STATE_READY && state != STATE_DRIVE && state != STATE_LIMP_HOME)
-        {
-            float threshold = Param::GetFloat(Param::LVDU_12v_low_threshold);
-            if (voltage12V < threshold)
-            {
-                DigIo::vcu_out.Clear();
-            }
         }
     }
 

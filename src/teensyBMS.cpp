@@ -165,10 +165,6 @@ void TeensyBMS::Task100Ms() {
 
     Param::SetInt(Param::BMS_CONT_State, contactorState);
     Param::SetInt(Param::BMS_CONT_DTC, contactorDTC);
-    Param::SetInt(Param::BMS_CONT_NegativeInput, contactorNegativeInput);
-    Param::SetInt(Param::BMS_CONT_PositiveInput, contactorPositiveInput);
-    Param::SetInt(Param::BMS_CONT_PrechargeInput, contactorPrechargeInput);
-    Param::SetInt(Param::BMS_CONT_SupplyVoltageAvailable, contactorSupplyAvailable);
 
     // Send VCU status back to the BMS every cycle (100ms)
     if (can) {
