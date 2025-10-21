@@ -253,6 +253,31 @@ private:
         {
             hvManager.SetHVRequest(true);
 
+            float doneCurrent = Param::GetFloat(Param::charge_done_current);
+            float actualCurrent = Param::GetFloat(Param::BMS_ActualCurrent);
+            if (actualCurrent < 0)
+                actualCurrent = -actualCurrent;
+            int delaySteps = Param::GetInt(Param::charge_done_delay) * 10;
+
+            bool chargeFinished = false;
+            if (delaySteps <= 0)
+            {
+                chargeFinished = true;
+                chargeDoneCounter = 0;
+            }
+            else if (actualCurrent < doneCurrent)
+            {
+                if (chargeDoneCounter < delaySteps)
+                    ++chargeDoneCounter;
+
+                if (chargeDoneCounter >= delaySteps)
+                    chargeFinished = true;
+            }
+            else
+            {
+                chargeDoneCounter = 0;
+            }
+
             // When the driver turns the ignition on while charging and the plug is
             // removed, jump straight to READY without waiting on contactor feedback.
             // This mirrors the unplugged standby behavior and avoids a perceived
@@ -260,20 +285,19 @@ private:
             if (!chargerPlugged)
             {
                 if (ignitionOn)
+                {
                     TransitionTo(STATE_READY);
-                else
+                    chargeDoneCounter = 0;
+                }
+                else if (chargeFinished)
+                {
                     TransitionTo(STATE_CONDITIONING);
+                    chargeDoneCounter = 0;
+                }
 
-                chargeDoneCounter = 0;
                 break;
             }
 
-            // if (!chargerPlugged)
-            // {
-            //     TransitionTo(STATE_CONDITIONING);
-            //     chargeDoneCounter = 0;
-            //     break;
-            // }
             if (criticalFault)
             {
                 TransitionTo(STATE_ERROR);
@@ -281,23 +305,7 @@ private:
                 break;
             }
 
-            float doneCurrent = Param::GetFloat(Param::charge_done_current);
-            float actualCurrent = Param::GetFloat(Param::BMS_ActualCurrent);
-            if (actualCurrent < 0)
-                actualCurrent = -actualCurrent;
-            int delaySteps = Param::GetInt(Param::charge_done_delay) * 10;
-
-            if (actualCurrent < doneCurrent)
-            {
-                if (chargeDoneCounter < delaySteps)
-                    ++chargeDoneCounter;
-            }
-            else
-            {
-                chargeDoneCounter = 0;
-            }
-
-            if (chargeDoneCounter >= delaySteps && delaySteps > 0)
+            if (chargeFinished)
             {
                 TransitionTo(STATE_CONDITIONING);
                 chargeDoneCounter = 0;
