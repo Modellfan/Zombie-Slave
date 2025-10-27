@@ -142,7 +142,7 @@
    VALUE_ENTRY(BMS_State, BMS_STATE, 2208)                                                \
    VALUE_ENTRY(BMS_DTC, BMS_DTC_FLAGS, 2209)                                              \
    VALUE_ENTRY(BMS_TimeoutFault, YESNO, 2210)                                             \
-   VALUE_ENTRY(BMS_DeltaCellVoltage, "V", 2211)                                           \
+   VALUE_ENTRY(BMS_DeltaCellVoltage, "mV", 2211)                                          \
    VALUE_ENTRY(BMS_BalancingVoltage, "V", 2212)                                           \
    VALUE_ENTRY(BMS_BalancingActive, "On/Off", 2213)                                       \
    VALUE_ENTRY(BMS_BalancingAnyActive, "On/Off", 2214)                                    \

@@ -71,7 +71,8 @@ void TeensyBMS::parseMsg2(uint8_t* d) {
     tMin = static_cast<float>(d[0]) - 40.0f;
     tMax = static_cast<float>(d[1]) - 40.0f;
     balancingVoltage = d[2] / 50.0f;
-    deltaVoltage = d[3] / 100.0f;
+    // Delta cell voltage is sent with a 500x gain (0.002 V/LSB). Report it in mV.
+    deltaVoltageMv = static_cast<float>(d[3]) * 2.0f;
 
     const uint16_t rawPackPower = static_cast<uint16_t>(d[4]) | (static_cast<uint16_t>(d[5]) << 8);
     const float packPowerKw = (static_cast<int32_t>(rawPackPower) - 30000) / 100.0f;
@@ -140,7 +141,7 @@ void TeensyBMS::Task100Ms() {
     Param::SetFloat(Param::BMS_Tmin, tMin);
     Param::SetFloat(Param::BMS_Tmax, tMax);
     Param::SetFloat(Param::BMS_PackVoltage, packVoltage);
-    Param::SetFloat(Param::BMS_DeltaCellVoltage, deltaVoltage);
+    Param::SetFloat(Param::BMS_DeltaCellVoltage, deltaVoltageMv);
     Param::SetFloat(Param::BMS_BalancingVoltage, balancingVoltage);
     Param::SetInt(Param::BMS_BalancingActive, bmsValid && balancingActive);
     Param::SetInt(Param::BMS_BalancingAnyActive, bmsValid && anyBalancing);
