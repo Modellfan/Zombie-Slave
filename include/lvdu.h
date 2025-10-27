@@ -227,7 +227,7 @@ private:
                 TransitionTo(STATE_CONDITIONING);
             else if (driverequestreceived)
                 TransitionTo(STATE_DRIVE);
-            else if (chargerPlugged && !chargeFinishedLatched)
+            else if (chargerPlugged)
                 TransitionTo(STATE_CHARGE);
             else if (criticalFault)
                 TransitionTo(STATE_ERROR);
@@ -249,7 +249,7 @@ private:
             hvManager.SetHVRequest(true);
             if (!ignitionOn)
                 TransitionTo(STATE_CONDITIONING);
-            else if (chargerPlugged && !chargeFinishedLatched)
+            else if (chargerPlugged)
                 TransitionTo(STATE_CHARGE);
             else if (degradedFault)
                 TransitionTo(STATE_LIMP_HOME);
@@ -262,8 +262,6 @@ private:
             // Charge done definition on no current. That can also be the case, when the plug is removed
             float doneCurrent = Param::GetFloat(Param::charge_done_current);
             float actualCurrent = Param::GetFloat(Param::BMS_ActualCurrent);
-            if (actualCurrent < 0)
-                actualCurrent = -actualCurrent;
             int delaySteps = Param::GetInt(Param::charge_done_delay) * 10;
 
             bool chargeFinished = false;
