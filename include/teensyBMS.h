@@ -30,7 +30,7 @@ private:
     float tMin = 0;
     float tMax = 0;
     float packVoltage = 0;
-    float deltaVoltage = 0;
+    float deltaVoltageMv = 0;
     float balancingVoltage = 0;
     float actualCurrent = 0;
     float maxChargeCurrent = 0;
