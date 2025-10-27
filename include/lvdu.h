@@ -75,6 +75,7 @@ private:
     uint16_t forceSleepTimer = 0;
     uint16_t standbyTimeoutCounter = 0;
     uint16_t chargeDoneCounter = 0;
+    bool chargeFinishedLatched = false; // Remembers that the last charge cycle completed while plug stays inserted
 
     // Interne Flags
     bool ignitionOn = false;
@@ -135,6 +136,11 @@ private:
         criticalFault = false;                  // TODO: Detect via system/BMS via CAN
         degradedFault = false;                  // TODO: Detect via system/BMS via CAN
         driverequestreceived = false;           // TODO: Detect via system/BMS via CAN (fixed typo)
+
+        if (!chargerPlugged)
+        {
+            chargeFinishedLatched = false; // Reset latch once the plug is removed
+        }
 
         IsHVTooLow = bmsValid && hvVoltage < Param::GetFloat(Param::LVDU_hv_low_threshold);
 
@@ -221,7 +227,7 @@ private:
                 TransitionTo(STATE_CONDITIONING);
             else if (driverequestreceived)
                 TransitionTo(STATE_DRIVE);
-            else if (chargerPlugged)
+            else if (chargerPlugged && !chargeFinishedLatched)
                 TransitionTo(STATE_CHARGE);
             else if (criticalFault)
                 TransitionTo(STATE_ERROR);
@@ -231,7 +237,7 @@ private:
             hvManager.SetHVRequest(true);
             if (ignitionOn)
                 TransitionTo(STATE_READY);
-            else if (chargerPlugged)
+            else if (chargerPlugged && !chargeFinishedLatched)
                 TransitionTo(STATE_CHARGE);
             else if (thermalTaskCompleted && !diagnosePending)
                 TransitionTo(STATE_STANDBY);
@@ -243,7 +249,7 @@ private:
             hvManager.SetHVRequest(true);
             if (!ignitionOn)
                 TransitionTo(STATE_CONDITIONING);
-            else if (chargerPlugged)
+            else if (chargerPlugged && !chargeFinishedLatched)
                 TransitionTo(STATE_CHARGE);
             else if (degradedFault)
                 TransitionTo(STATE_LIMP_HOME);
@@ -296,6 +302,7 @@ private:
             // Only jump to conditioning, when finished and no ignition on. When ever a plug is inserted and ignition is on, it should not transition to ready. This will avoid later to drive away with a plug inserted.
             if ((chargeFinished) && (!ignitionOn))
             {
+                chargeFinishedLatched = true;
                 TransitionTo(STATE_CONDITIONING);
                 chargeDoneCounter = 0;
             }
@@ -402,6 +409,7 @@ TransitionTo(VehicleState newState)
     if (newState == STATE_CHARGE)
     {
         chargeDoneCounter = 0;
+        chargeFinishedLatched = false;
     }
 }
 
