@@ -71,8 +71,8 @@ void TeensyBMS::parseMsg2(uint8_t* d) {
     tMin = static_cast<float>(d[0]) - 40.0f;
     tMax = static_cast<float>(d[1]) - 40.0f;
     balancingVoltage = d[2] / 50.0f;
-    // Delta cell voltage is sent with a 100x gain (0.01 V/LSB). Report it in mV.
-    deltaVoltageMv = static_cast<float>(d[3]) * 10.0f;
+    // Delta cell voltage is sent with a 500x gain (0.002 V/LSB). Report it in mV.
+    deltaVoltageMv = static_cast<float>(d[3]) * 2.0f;
 
     const uint16_t rawPackPower = static_cast<uint16_t>(d[4]) | (static_cast<uint16_t>(d[5]) << 8);
     const float packPowerKw = (static_cast<int32_t>(rawPackPower) - 30000) / 100.0f;
@@ -83,9 +83,8 @@ void TeensyBMS::parseMsg3(uint8_t* d) {
     if (!checkCrc(d)) return;
     maxDischargeCurrent = (d[0] | (d[1] << 8)) / 10.0f;
     maxChargeCurrent = (d[2] | (d[3] << 8)) / 10.0f;
-    contactorState = d[4] & 0x07;
-    dtc = d[5] & 0x7F;
-    contactorDTC = dtc;
+    contactorState = d[4];
+    contactorDTC = d[5];
 }
 
 void TeensyBMS::parseMsg4(uint8_t* d) {

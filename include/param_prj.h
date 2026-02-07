@@ -39,7 +39,7 @@
  */
 
 // Define a version string of your firmware here
-#define VER 2.01.R
+#define VER 2.20.R
 #define VERSTR STRINGIFY(4 = VER)
 
 /* Entries must be ordered as follows:
