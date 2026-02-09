@@ -131,6 +131,11 @@ private:
         // Still update for possible custom behavior
         int plugStatus = Param::GetInt(Param::mlb_chr_PlugStatus);
         chargerPlugged = plugStatus > 1;        // 0=Init, 1=No Plug, 2=Plug In, 3=Plug Locked
+        // Use only in case a charge plug is recognized faultly
+        if (Param::GetInt(Param::Charger_Plug_Override))
+        {
+            chargerPlugged = false;
+        }
         remotePreconditioningRequested = false; // TODO: Add flag/CAN/schedule check via CAN
         thermalTaskCompleted = true;            // TODO: Implement or simulate via CAN
         criticalFault = false;                  // TODO: Detect via system/BMS via CAN
@@ -154,6 +159,7 @@ private:
 
     void UpdateState()
     {
+        // Manually force into Standby Mode. Important for Firmware flashing, because the Contactors open and close if not in standby.
         bool manualStandby = Param::GetInt(Param::manual_standby_mode);
         if (manualStandby)
         {

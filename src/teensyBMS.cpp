@@ -175,20 +175,8 @@ void TeensyBMS::Task100Ms() {
         bytes[2] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_connectHVcommand));
         bytes[3] = 0; // reserved
 
-        float hvVoltage = Param::GetFloat(Param::mlb_chr_Charger_VoltageOut_HV);
-        if (hvVoltage <= 0.0f) {
-            hvVoltage = Param::GetFloat(Param::BMS_PackVoltage);
-        }
-        if (hvVoltage < 0.0f) {
-            hvVoltage = 0.0f;
-        }
-        if (hvVoltage > 6553.5f) {
-            hvVoltage = 6553.5f;
-        }
-
-        const uint16_t hvRaw = static_cast<uint16_t>((hvVoltage * 10.0f) + 0.5f);
-        bytes[4] = static_cast<uint8_t>(hvRaw & 0xFF);
-        bytes[5] = static_cast<uint8_t>(hvRaw >> 8);
+        bytes[4] = 0; // reserved
+        bytes[5] = 0; // reserved
 
         bytes[6] = txCounter & 0x0F;
         // Calculate CRC over the first 7 bytes and place the result in the last
@@ -203,4 +191,3 @@ void TeensyBMS::Task100Ms() {
         txCounter = (txCounter + 1) & 0x0F;
     }
 }
-

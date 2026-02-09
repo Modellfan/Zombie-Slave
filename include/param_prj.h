@@ -47,7 +47,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-// Next param id (increase when adding new parameter!): 166
+// Next param id (increase when adding new parameter!): 167
 // Next value Id: 2333
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST                                                                        \
@@ -179,6 +179,7 @@
    PARAM_ENTRY(CAT_LVDU, manual_standby_mode, YESNO, 0, 1, 0, 121)                        \
    PARAM_ENTRY(CAT_LVDU, charge_done_current, "A", 0, 10, 0.5, 119)                       \
    PARAM_ENTRY(CAT_LVDU, charge_done_delay, "s", 0, 600, 30, 120)                         \
+   PARAM_ENTRY(CAT_LVDU, Charger_Plug_Override, YESNO, 0, 1, 0, 166)                      \
    VALUE_ENTRY(LVDU_ignition_in, "On/Off", 2145)                                          \
    VALUE_ENTRY(LVDU_ready_safety_in, "On/Off", 2146)                                      \
    VALUE_ENTRY(LVDU_vehicle_state, VEHICLE_STATE, 2147)                                   \
