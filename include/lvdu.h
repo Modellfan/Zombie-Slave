@@ -12,6 +12,7 @@
 #define LVDU_READY_DELAY_STEPS 20           // 2000 ms - How long is the hysteresis, after that the ready_in should follow the ignition
 #define LVDU_FORCE_DELAY_STEPS 200          // 20s - How long after force should down because of low HV or LV
 #define LVDU_STANDBY_TIMEOUT_STEPS 100      // 10s @ 100ms - How long in standby to shut down
+#define LVDU_READY_SAFETY_OFF_DELAY_STEPS 5 // 500 ms @ 100ms - ready_safety_in must be low before standby
 #define VOLTAGE_DIVIDER_RATIO_12V 0.004559f // Conversion factor for dc_power_supply analog input
                                             // 12V line is scaled to the 5V ADC using an 8.2k/1.8k resistor divider
                                             // AnaIn::dc_power_supply returns millivolts, multiply by this factor to get
@@ -76,9 +77,11 @@ private:
     uint16_t standbyTimeoutCounter = 0;
     uint16_t chargeDoneCounter = 0;
     bool chargeFinishedLatched = false; // Remembers that the last charge cycle completed while plug stays inserted
+    uint8_t readySafetyOffCounter = 0;
 
     // Interne Flags
     bool ignitionOn = false;
+    bool readySafetyIn = false;
     float voltage12V = 13.2f; // Cached analog read, 13.2V = typical "full" battery voltage
     bool is12VTooLow = false; // Cached threshold comparison
     bool IsHVTooLow = false;
@@ -114,7 +117,7 @@ private:
     {
         // Read digital inputs
         ignitionOn = DigIo::ignition_in.Get();
-        bool readySafety = DigIo::ready_safety_in.Get();
+        readySafetyIn = DigIo::ready_safety_in.Get();
 
         // Read 12V analog input and apply voltage divider ratio
         voltage12V = AnaIn::dc_power_supply.Get() * VOLTAGE_DIVIDER_RATIO_12V;
@@ -151,7 +154,7 @@ private:
 
         // Update runtime value parameters
         Param::SetInt(Param::LVDU_ignition_in, ignitionOn ? 1 : 0);
-        Param::SetInt(Param::LVDU_ready_safety_in, readySafety ? 1 : 0);
+        Param::SetInt(Param::LVDU_ready_safety_in, readySafetyIn ? 1 : 0);
         Param::SetFloat(Param::LVDU_12v_battery_voltage, voltage12V);
 
         hvManager.Update(bmsValid, contState); // Always keep HV manager current
@@ -238,14 +241,44 @@ private:
 
         case STATE_CONDITIONING:
             hvManager.SetHVRequest(true);
-            if (ignitionOn)
-                TransitionTo(STATE_READY);
-            else if (chargerPlugged && !chargeFinishedLatched)
-                TransitionTo(STATE_CHARGE);
-            else if (thermalTaskCompleted && !diagnosePending)
-                TransitionTo(STATE_STANDBY);
-            else if (criticalFault)
+            if (criticalFault)
+            {
                 TransitionTo(STATE_ERROR);
+                break;
+            }
+            if (ignitionOn)
+            {
+                TransitionTo(STATE_READY);
+                break;
+            }
+            if (chargerPlugged && !chargeFinishedLatched)
+            {
+                TransitionTo(STATE_CHARGE);
+                break;
+            }
+            if (thermalTaskCompleted && !diagnosePending)
+            {
+                // Ensure ready_safety_in is low for a defined period before standby.
+                // This helps ensure the inverter is off; otherwise it can hold the
+                // precharge relay and damage the precharge resistor while heater/DCDC
+                // still draw current.
+                if (!readySafetyIn)
+                {
+                    if (readySafetyOffCounter < LVDU_READY_SAFETY_OFF_DELAY_STEPS)
+                        readySafetyOffCounter++;
+
+                    if (readySafetyOffCounter >= LVDU_READY_SAFETY_OFF_DELAY_STEPS)
+                        TransitionTo(STATE_STANDBY);
+                }
+                else
+                {
+                    readySafetyOffCounter = 0;
+                }
+            }
+            else
+            {
+                readySafetyOffCounter = 0;
+            }
             break;
 
         case STATE_DRIVE:
@@ -398,6 +431,10 @@ TransitionTo(VehicleState newState)
     if (newState == STATE_STANDBY)
     {
         standbyTimeoutCounter = 0;
+    }
+    if (newState != STATE_CONDITIONING)
+    {
+        readySafetyOffCounter = 0;
     }
 
     // READY → CONDITIONING: Start diagnosis
