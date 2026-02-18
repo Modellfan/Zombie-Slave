@@ -38,8 +38,10 @@
      CanHardware* can;
  
  private:
+     void UpdateInputPowerOffConfirmed(bool monitorOffCondition);
      uint8_t timer500 = 0;
      uint8_t timeoutCounter = 0;
+     uint8_t dcdcOffCounter = 0;
  };
  
  #endif // TeslaDCDC_H

@@ -36,7 +36,7 @@ int main() {
 
         Param::SetInt(Param::LVDU_vehicle_state, 3);
         Param::SetInt(Param::LVDU_forceVCUsShutdown, 1);
-        Param::SetInt(Param::LVDU_connectHVcommand, 0);
+        Param::SetInt(Param::HVCM_to_bms_hv_request, 0);
         for (int i = 0; i < 5; ++i)
             bms.Task100Ms();
 

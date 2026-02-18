@@ -38,10 +38,13 @@ public:
         LVDU_vehicle_state,
         mlb_chr_PlugStatus,
         manual_standby_mode,
+        LVDU_dcdc_input_power_off_threshold,
         LVDU_forceVCUsShutdown,
-        LVDU_connectHVcommand,
+        HVCM_to_bms_hv_request,
         LVDU_hv_request_pending,
-        LVDU_hv_contactors_closed,
+        HVCM_state,
+        dcdc_input_power_off_confirmed,
+        heater_off_confirmed,
         hv_comfort_functions_allowed
     };
     static void SetFloat(int, float) {}

@@ -172,7 +172,7 @@ void TeensyBMS::Task100Ms() {
         uint8_t bytes[8] = {0};
         bytes[0] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_vehicle_state));
         bytes[1] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_forceVCUsShutdown));
-        bytes[2] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_connectHVcommand));
+        bytes[2] = static_cast<uint8_t>(Param::GetInt(Param::HVCM_to_bms_hv_request));
         bytes[3] = 0; // reserved
 
         bytes[4] = 0; // reserved

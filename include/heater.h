@@ -14,7 +14,7 @@
     Start
      |
      v
-    Check hv_comfort_functions_allowed and vehicle state?
+    Check HVCM_state == HV_CONNECTED?
        ├─ No  → Heater OFF
        └─ Yes → Continue
                 |
@@ -43,8 +43,7 @@
                                 Set heater_active = true
 
     Conditions causing heater OFF:
-      - hv_comfort_functions_allowed == 0
-      - LVDU state not READY/CONDITIONING/DRIVE/CHARGE/LIMP_HOME
+      - HVCM_state != HV_CONNECTED
       - Any fault active
       - Flap below threshold and no manual override
       - Thermal switch open
@@ -53,6 +52,7 @@
 
 // Constants
 #define CONTACTOR_FAULT_DEBOUNCE_COUNT         2      // 2 x 10ms = 20ms
+#define HEATER_OFF_CONFIRM_STEPS              5      // 5 x 10ms = 50ms
 
 class Heater
 {
@@ -70,6 +70,7 @@ private:
     uint16_t thermal_open_timer = 0;
     uint16_t thermal_close_timer = 0;
     uint16_t contactor_on_delay_timer = 0;
+    uint8_t heater_off_confirm_counter = 0;
 
     bool thermal_switch_was_open = true;
 
@@ -102,11 +103,8 @@ public:
         int flap_signal       = Param::GetInt(Param::valve_in_raw);
         int flap_threshold    = Param::GetInt(Param::heater_flap_threshold);
         bool manual_override  = Param::GetInt(Param::heater_active_manual);
-        bool comfort_allowed  = Param::GetInt(Param::hv_comfort_functions_allowed);
-        VehicleState vehicle_state = static_cast<VehicleState>(Param::GetInt(Param::LVDU_vehicle_state));
-        bool lvdu_ok = vehicle_state == STATE_READY || vehicle_state == STATE_CONDITIONING ||
-                       vehicle_state == STATE_DRIVE || vehicle_state == STATE_CHARGE ||
-                       vehicle_state == STATE_LIMP_HOME;
+        int hvState = Param::GetInt(Param::HVCM_state);
+        bool heaterEnableAllowed = (hvState == HvContactorManager::HV_CONNECTED);
         bool thermal_closed   = DigIo::heater_thermal_switch_in.Get(); // High = closed
         bool contactor_feedback = (DigIo::heater_contactor_feedback_in.Get() == 1); 
         bool contactor_out      = (DigIo::heater_contactor_out.Get() == 1);         
@@ -116,6 +114,19 @@ public:
         Param::SetInt(Param::heater_thermal_switch_in, thermal_closed ? 1 : 0);
         Param::SetInt(Param::heater_contactor_feedback_in, contactor_feedback ? 1 : 0);
         Param::SetInt(Param::heater_contactor_out, contactor_out ? 1 : 0);
+        if (!contactor_out && !contactor_feedback)
+        {
+            if (heater_off_confirm_counter < HEATER_OFF_CONFIRM_STEPS)
+            {
+                heater_off_confirm_counter++;
+            }
+        }
+        else
+        {
+            heater_off_confirm_counter = 0;
+        }
+        Param::SetInt(Param::heater_off_confirmed,
+                      heater_off_confirm_counter >= HEATER_OFF_CONFIRM_STEPS ? 1 : 0);
 
         // Aggregate fault flag
         bool fault_present = fault_thermal_switch_boot || fault_contactor ||
@@ -133,7 +144,7 @@ public:
         }
         thermal_switch_was_open = !thermal_closed;
 
-        if (comfort_allowed && lvdu_ok && !fault_present && heater_should_run)
+        if (heaterEnableAllowed && !fault_present && heater_should_run)
         {
             if (thermal_closed)
             {

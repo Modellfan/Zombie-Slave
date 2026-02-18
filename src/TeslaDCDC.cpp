@@ -28,6 +28,35 @@
  #define TESLA_DCDC_STATUS_ID     0x210
  #define TESLA_DCDC_CMD_ID        0x3D8
  #define TESLA_DCDC_TIMEOUT_TICKS 10  // 10 x 100ms = 1000ms
+#define DCDC_OFF_CONFIRM_STEPS 5
+#define DCDC_INPUT_POWER_OFF_THRESHOLD_W 50.0f
+
+void TeslaDCDC::UpdateInputPowerOffConfirmed(bool monitorOffCondition)
+{
+    if (monitorOffCondition)
+    {
+        const float dcdcInputPower = Param::GetFloat(Param::dcdc_input_power);
+        const float offThreshold = DCDC_INPUT_POWER_OFF_THRESHOLD_W;
+
+        if (dcdcInputPower <= offThreshold)
+        {
+            if (dcdcOffCounter < DCDC_OFF_CONFIRM_STEPS)
+            {
+                dcdcOffCounter++;
+            }
+        }
+        else
+        {
+            dcdcOffCounter = 0;
+        }
+    }
+    else
+    {
+        dcdcOffCounter = 0;
+    }
+
+    Param::SetInt(Param::dcdc_input_power_off_confirmed, dcdcOffCounter >= DCDC_OFF_CONFIRM_STEPS ? 1 : 0);
+}
  
  void TeslaDCDC::SetCanInterface(CanHardware* c)
  {
@@ -123,11 +152,10 @@
         Param::SetInt(Param::dcdc_fault_any, 1);
     }
 
-    // Determine if DC output should be enabled based on vehicle state
-    int vehicleState = Param::GetInt(Param::LVDU_vehicle_state);
-    bool outputEnabled = (vehicleState == STATE_READY || vehicleState == STATE_DRIVE || vehicleState == STATE_CHARGE ||
-                          vehicleState == STATE_CONDITIONING ||
-                          vehicleState == STATE_LIMP_HOME);
+    // Enable DC output only when HV is connected
+    int hvState = Param::GetInt(Param::HVCM_state);
+    bool outputEnabled = (hvState == HvContactorManager::HV_CONNECTED);
+    UpdateInputPowerOffConfirmed(hvState == HvContactorManager::HV_CONNECTED_STOP_CONSUMERS);
 
    //  if ((opmode == MOD_RUN || opmode == MOD_CHARGE) && can)
    //  {

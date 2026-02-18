@@ -18,11 +18,15 @@
                                             // AnaIn::dc_power_supply returns millivolts, multiply by this factor to get
                                             // the actual battery voltage in volts
 #define LVDU_DIAGNOSE_COOLDOWN_STEPS 2      // 200 ms cooldown after diagnosis ends
+#define LVDU_HV_CONTACTOR_TIMEOUT_STEPS 100  // 10s @ 100ms - HV contactor handshake sub-state timeout
 
 enum VehicleState
 {
+    STATE_INVALID = -1,
     STATE_SLEEP = 0,
     STATE_STANDBY,
+    STATE_HV_CONNECTING,
+    STATE_HV_DISCONNECTING,
     STATE_READY,
     STATE_CONDITIONING,
     STATE_DRIVE,
@@ -31,37 +35,166 @@ enum VehicleState
     STATE_LIMP_HOME
 };
 
+enum class VehicleTriggerEvent
+{
+    UNKNOWN = 0,
+    MANUAL_STANDBY_MODE, // manual_standby_mode == true
+    AUTO_WAKE_SLEEP_TO_STANDBY, // unconditional: STATE_SLEEP -> STATE_STANDBY
+    IGNITION_ON, // ignitionOn == true
+    IGNITION_OFF, // ignitionOn == false
+    IGNITION_ON_AND_CHARGER_NOT_PLUGGED, // ignitionOn && !chargerPlugged
+    REMOTE_PRECONDITIONING_REQUESTED, // remotePreconditioningRequested == true
+    CHARGER_PLUGGED_IN, // chargerPlugged == true
+    CHARGER_PLUGGED_IN_AND_NOT_CHARGE_FINISHED_LATCHED, // chargerPlugged && !chargeFinishedLatched
+    CHARGE_FINISHED_AND_IGNITION_OFF, // chargeFinished && !ignitionOn
+    DRIVER_REQUEST_RECEIVED, // driverequestreceived == true
+    CRITICAL_FAULT_DETECTED, // criticalFault == true
+    DEGRADED_FAULT_DETECTED, // degradedFault == true
+    THERMAL_TASK_COMPLETED_AND_READY_SAFETY_OFF_DELAY, // thermalTaskCompleted && !diagnosePending && readySafetyIn low for delay
+    BMS_BALANCING_AND_BMS_INVALID_OR_LV_TOO_LOW, // bmsBalancing && (!bmsValid || is12VTooLow)
+    STANDBY_TIMEOUT_EXPIRED, // standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS
+    HV_TOO_LOW_FORCE_STANDBY_TIMEOUT, // IsHVTooLow for LVDU_FORCE_DELAY_STEPS
+    LV_TOO_LOW_FORCE_SLEEP_TIMEOUT, // is12VTooLow for LVDU_FORCE_DELAY_STEPS
+    IGNITION_OFF_IN_ERROR, // !ignitionOn in ERROR
+    HVCM_FAULT_WHILE_CONNECTING, // HVCM entered HV_FAULT while STATE_HV_CONNECTING
+    HVCM_FAULT_WHILE_DISCONNECTING // HVCM entered HV_FAULT while STATE_HV_DISCONNECTING
+};
+
 // HV contactor handshake manager: cleanly separates request/feedback logic
 class HvContactorManager
 {
 public:
-    HvContactorManager() : requestHV(false), hvActive(false) {}
-
-    // Update with new BMS info (call each cycle)
-    void Update(bool bmsValid, int contState)
+    enum State
     {
-        hvActive = bmsValid && (contState == 4); // 4 = CLOSED
+        HV_DISCONNECTED = 0,
+        HV_REQUESTED,
+        HV_CONNECTED,
+        HV_CONNECTED_STOP_CONSUMERS,
+        HV_OPEN_CONTACTORS,
+        HV_FAULT
+    };
+
+    HvContactorManager() : requestHV(false), state(HV_DISCONNECTED) {}
+
+    // Update contactor handshake state (call each cycle)
+    void Update()
+    {
+        // Read all parameters needed by the HV contactor manager.
+        const bool bmsValid = Param::GetInt(Param::BMS_DataValid) != 0;
+        const int contState = Param::GetInt(Param::BMS_CONT_State);
+        const bool dcdcOffConfirmed = Param::GetInt(Param::dcdc_input_power_off_confirmed) != 0;
+        const bool heaterOffConfirmed = Param::GetInt(Param::heater_off_confirmed) != 0;
+
+        const bool hvClosed = bmsValid && (contState == 4); // 4 = CLOSED
+        const bool hvOpen = bmsValid && (contState == 1);   // 1 = OPEN
+
+        switch (state)
+        {
+        case HV_DISCONNECTED:
+            if (requestHV)
+            {
+                SetState(HV_REQUESTED);
+            }
+            break;
+
+        case HV_REQUESTED:
+            if (hvClosed)
+            {
+                SetState(HV_CONNECTED);
+            }
+            else
+            {
+                if (stateTimeoutCounter < LVDU_HV_CONTACTOR_TIMEOUT_STEPS)
+                    stateTimeoutCounter++;
+                if (stateTimeoutCounter >= LVDU_HV_CONTACTOR_TIMEOUT_STEPS)
+                {
+                    ErrorMessage::Post(ERR_HV_CONTACTOR_TIMEOUT_CLOSING);
+                    SetState(HV_FAULT);
+                }
+            }
+            break;
+
+        case HV_CONNECTED:
+            if (!requestHV)
+            {
+                SetState(HV_CONNECTED_STOP_CONSUMERS);
+            }
+            break;
+
+        case HV_CONNECTED_STOP_CONSUMERS:
+        {
+            // Transition to HV_OPEN_CONTACTORS when "stop consumers" is confirmed.
+            if (dcdcOffConfirmed && heaterOffConfirmed)
+            {
+                SetState(HV_OPEN_CONTACTORS);
+            }
+            else
+            {
+                if (stateTimeoutCounter < LVDU_HV_CONTACTOR_TIMEOUT_STEPS)
+                    stateTimeoutCounter++;
+                if (stateTimeoutCounter >= LVDU_HV_CONTACTOR_TIMEOUT_STEPS)
+                {
+                    ErrorMessage::Post(ERR_HV_CONTACTOR_TIMEOUT_STOP_CONSUMERS);
+                    SetState(HV_FAULT);
+                }
+            }
+            break;
+        }
+
+        case HV_OPEN_CONTACTORS:
+            if (hvOpen)
+            {
+                SetState(HV_DISCONNECTED);
+            }
+            else
+            {
+                if (stateTimeoutCounter < LVDU_HV_CONTACTOR_TIMEOUT_STEPS)
+                    stateTimeoutCounter++;
+                if (stateTimeoutCounter >= LVDU_HV_CONTACTOR_TIMEOUT_STEPS)
+                {
+                    ErrorMessage::Post(ERR_HV_CONTACTOR_TIMEOUT_OPENING);
+                    SetState(HV_FAULT);
+                }
+            }
+            break;
+
+        case HV_FAULT:
+            break;
+        }
+
+        // Publish all parameters provided by the HV contactor manager.
+        const bool hvRequestToBms = (state == HV_REQUESTED || state == HV_CONNECTED || state == HV_CONNECTED_STOP_CONSUMERS);
+        Param::SetInt(Param::HVCM_to_bms_hv_request, hvRequestToBms ? 1 : 0);
+        Param::SetInt(Param::HVCM_state, static_cast<int>(state));
     }
 
     // Request HV (on/off); idempotent
     void SetHVRequest(bool enable) { requestHV = enable; }
 
-    // Returns true if HV is physically closed (BMS ack)
-    bool IsHVActive() const { return hvActive; }
-
-    // Returns true if HV should be enabled (for output)
-    bool ShouldConnectHV() const { return requestHV; }
-
 private:
+    void SetState(State newState)
+    {
+        if (state != newState)
+        {
+            state = newState;
+            stateTimeoutCounter = 0;
+        }
+    }
+
     bool requestHV; // Latest request from the state machine
-    bool hvActive;  // BMS feedback: contactors closed
+    State state;
+    uint16_t stateTimeoutCounter = 0;
 };
 
 class LVDU
 {
 private:
     VehicleState state = STATE_SLEEP;
-    VehicleState lastState = STATE_SLEEP;
+    VehicleState prevState = STATE_SLEEP;
+    VehicleState prevPrevState = STATE_SLEEP;
+    VehicleState queuedState = STATE_INVALID;
+    VehicleTriggerEvent prevTriggerEvent = VehicleTriggerEvent::UNKNOWN;
+    VehicleTriggerEvent prevPrevTriggerEvent = VehicleTriggerEvent::UNKNOWN;
 
     // Diagnose
     bool diagnosePending = false;
@@ -96,9 +229,8 @@ private:
     // HV contactor handling via manager
     HvContactorManager hvManager;
 
-    // Store BMS state for passing to HV manager
+    // Store BMS state for LVDU logic
     bool bmsValid = false;
-    int contState = 0;
 
 public:
     LVDU() {}
@@ -128,7 +260,6 @@ private:
         // Read BMS information for HV management
         float hvVoltage = Param::GetFloat(Param::BMS_PackVoltage);
         bmsValid = Param::GetInt(Param::BMS_DataValid);
-        contState = Param::GetInt(Param::BMS_CONT_State);
         bmsBalancing = bmsValid && Param::GetInt(Param::BMS_BalancingAnyActive);
 
         // Still update for possible custom behavior
@@ -157,7 +288,7 @@ private:
         Param::SetInt(Param::LVDU_ready_safety_in, readySafetyIn ? 1 : 0);
         Param::SetFloat(Param::LVDU_12v_battery_voltage, voltage12V);
 
-        hvManager.Update(bmsValid, contState); // Always keep HV manager current
+        hvManager.Update(); // Always keep HV manager current
     }
 
     void UpdateState()
@@ -166,7 +297,6 @@ private:
         bool manualStandby = Param::GetInt(Param::manual_standby_mode);
         if (manualStandby)
         {
-            hvManager.SetHVRequest(false);
             forceStandbyActive = false;
             forceStandbyTimer = 0;
             forceSleepActive = false;
@@ -175,41 +305,72 @@ private:
             chargeDoneCounter = 0;
 
             if (state != STATE_STANDBY)
-                TransitionTo(STATE_STANDBY);
+            {
+                const bool hvShouldBeActive =
+                    (state == STATE_CONDITIONING ||
+                     state == STATE_CHARGE ||
+                     state == STATE_READY ||
+                     state == STATE_DRIVE ||
+                     state == STATE_LIMP_HOME);
 
-            return;
+                if (hvShouldBeActive && state != STATE_HV_DISCONNECTING)
+                {
+                    TransitionTo(STATE_HV_DISCONNECTING, STATE_STANDBY, VehicleTriggerEvent::MANUAL_STANDBY_MODE);
+                }
+                else if (state != STATE_HV_DISCONNECTING)
+                {
+                    TransitionTo(STATE_STANDBY, VehicleTriggerEvent::MANUAL_STANDBY_MODE);
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
         }
 
         // For each state, request HV as needed, and only allow transition if HV is acknowledged closed
         switch (state)
         {
+        case STATE_INVALID:
+            break;
+
         case STATE_SLEEP:
             // Automatically transition to Standby (e.g., from wake sources)
-            TransitionTo(STATE_STANDBY);
+            TransitionTo(STATE_STANDBY, VehicleTriggerEvent::AUTO_WAKE_SLEEP_TO_STANDBY);
+            break;
+
+        case STATE_HV_CONNECTING:
+            hvManager.SetHVRequest(true);
+            if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_CONNECTED && queuedState != STATE_INVALID)
+                TransitionTo(queuedState, prevTriggerEvent);
+            else if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_FAULT)
+                TransitionTo(STATE_ERROR, VehicleTriggerEvent::HVCM_FAULT_WHILE_CONNECTING);
+            break;
+
+        case STATE_HV_DISCONNECTING:
+            hvManager.SetHVRequest(false);
+            if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_DISCONNECTED && queuedState != STATE_INVALID)
+                TransitionTo(queuedState, prevTriggerEvent);
+            else if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_FAULT)
+                TransitionTo(STATE_ERROR, VehicleTriggerEvent::HVCM_FAULT_WHILE_DISCONNECTING);
             break;
 
         case STATE_STANDBY:
-            if (ignitionOn)
+            if (ignitionOn && !chargerPlugged)
             {
-                hvManager.SetHVRequest(true);
-                if (!chargerPlugged && hvManager.IsHVActive())
-                    TransitionTo(STATE_READY);
+                TransitionTo(STATE_HV_CONNECTING, STATE_READY, VehicleTriggerEvent::IGNITION_ON_AND_CHARGER_NOT_PLUGGED);
             }
             else if (remotePreconditioningRequested)
             {
-                hvManager.SetHVRequest(true);
-                if (hvManager.IsHVActive())
-                    TransitionTo(STATE_CONDITIONING);
+                TransitionTo(STATE_HV_CONNECTING, STATE_CONDITIONING, VehicleTriggerEvent::REMOTE_PRECONDITIONING_REQUESTED);
             }
             else if (chargerPlugged)
             {
-                hvManager.SetHVRequest(true);
-                if (hvManager.IsHVActive())
-                    TransitionTo(STATE_CHARGE);
+                TransitionTo(STATE_HV_CONNECTING, STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN);
             }
             else
             {
-                hvManager.SetHVRequest(false);
                 if (bmsBalancing)
                 {
                     standbyTimeoutCounter = 0; // Stay awake while BMS is balancing
@@ -217,43 +378,41 @@ private:
                     // If CAN comms to the BMS fail or LV drops too low while balancing, shut down
                     if (!bmsValid || is12VTooLow)
                     {
-                        TransitionTo(STATE_SLEEP);
+                        TransitionTo(STATE_SLEEP, VehicleTriggerEvent::BMS_BALANCING_AND_BMS_INVALID_OR_LV_TOO_LOW);
                     }
                 }
                 else if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
                 {
-                    TransitionTo(STATE_SLEEP);
+                    TransitionTo(STATE_SLEEP, VehicleTriggerEvent::STANDBY_TIMEOUT_EXPIRED);
                 }
             }
             break;
 
         case STATE_READY:
-            hvManager.SetHVRequest(true);
             if (!ignitionOn)
-                TransitionTo(STATE_CONDITIONING);
+                TransitionTo(STATE_CONDITIONING, VehicleTriggerEvent::IGNITION_OFF);
             else if (driverequestreceived)
-                TransitionTo(STATE_DRIVE);
+                TransitionTo(STATE_DRIVE, VehicleTriggerEvent::DRIVER_REQUEST_RECEIVED);
             else if (chargerPlugged)
-                TransitionTo(STATE_CHARGE);
+                TransitionTo(STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN);
             else if (criticalFault)
-                TransitionTo(STATE_ERROR);
+                TransitionTo(STATE_HV_DISCONNECTING, STATE_ERROR, VehicleTriggerEvent::CRITICAL_FAULT_DETECTED);
             break;
 
         case STATE_CONDITIONING:
-            hvManager.SetHVRequest(true);
             if (criticalFault)
             {
-                TransitionTo(STATE_ERROR);
+                TransitionTo(STATE_HV_DISCONNECTING, STATE_ERROR, VehicleTriggerEvent::CRITICAL_FAULT_DETECTED);
                 break;
             }
             if (ignitionOn)
             {
-                TransitionTo(STATE_READY);
+                TransitionTo(STATE_READY, VehicleTriggerEvent::IGNITION_ON);
                 break;
             }
             if (chargerPlugged && !chargeFinishedLatched)
             {
-                TransitionTo(STATE_CHARGE);
+                TransitionTo(STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN_AND_NOT_CHARGE_FINISHED_LATCHED);
                 break;
             }
             if (thermalTaskCompleted && !diagnosePending)
@@ -268,7 +427,9 @@ private:
                         readySafetyOffCounter++;
 
                     if (readySafetyOffCounter >= LVDU_READY_SAFETY_OFF_DELAY_STEPS)
-                        TransitionTo(STATE_STANDBY);
+                    {
+                        TransitionTo(STATE_HV_DISCONNECTING, STATE_STANDBY, VehicleTriggerEvent::THERMAL_TASK_COMPLETED_AND_READY_SAFETY_OFF_DELAY);
+                    }
                 }
                 else
                 {
@@ -282,19 +443,16 @@ private:
             break;
 
         case STATE_DRIVE:
-            hvManager.SetHVRequest(true);
             if (!ignitionOn)
-                TransitionTo(STATE_CONDITIONING);
+                TransitionTo(STATE_CONDITIONING, VehicleTriggerEvent::IGNITION_OFF);
             else if (chargerPlugged)
-                TransitionTo(STATE_CHARGE);
+                TransitionTo(STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN);
             else if (degradedFault)
-                TransitionTo(STATE_LIMP_HOME);
+                TransitionTo(STATE_LIMP_HOME, VehicleTriggerEvent::DEGRADED_FAULT_DETECTED);
             break;
 
         case STATE_CHARGE:
         {
-            hvManager.SetHVRequest(true);
-
             // Charge done definition on no current. That can also be the case, when the plug is removed
             float doneCurrent = Param::GetFloat(Param::charge_done_current);
             float actualCurrent = Param::GetFloat(Param::BMS_ActualCurrent);
@@ -322,13 +480,13 @@ private:
             // Directly jump to ready when unplugged and ignition is on
             if ((!chargerPlugged) && (ignitionOn))
             {
-                TransitionTo(STATE_READY);
+                TransitionTo(STATE_READY, VehicleTriggerEvent::IGNITION_ON_AND_CHARGER_NOT_PLUGGED);
                 chargeDoneCounter = 0;
             }
 
             if (criticalFault)
             {
-                TransitionTo(STATE_ERROR);
+                TransitionTo(STATE_HV_DISCONNECTING, STATE_ERROR, VehicleTriggerEvent::CRITICAL_FAULT_DETECTED);
                 chargeDoneCounter = 0;
                 break;
             }
@@ -337,26 +495,22 @@ private:
             if ((chargeFinished) && (!ignitionOn))
             {
                 chargeFinishedLatched = true;
-                TransitionTo(STATE_CONDITIONING);
+                TransitionTo(STATE_CONDITIONING, VehicleTriggerEvent::CHARGE_FINISHED_AND_IGNITION_OFF);
                 chargeDoneCounter = 0;
             }
         }
         break;
 
     case STATE_ERROR:
-        hvManager.SetHVRequest(false);
         if (!ignitionOn)
-            TransitionTo(STATE_SLEEP);
+            TransitionTo(STATE_HV_DISCONNECTING, STATE_SLEEP, VehicleTriggerEvent::IGNITION_OFF_IN_ERROR);
         break;
 
     case STATE_LIMP_HOME:
-        hvManager.SetHVRequest(true);
         if (!ignitionOn)
-            TransitionTo(STATE_CONDITIONING);
+            TransitionTo(STATE_CONDITIONING, VehicleTriggerEvent::IGNITION_OFF);
         else if (chargerPlugged)
-            TransitionTo(STATE_CHARGE);
-        else if (degradedFault)
-            TransitionTo(STATE_ERROR);
+            TransitionTo(STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN);
         break;
     }
 
@@ -383,7 +537,7 @@ private:
         if (forceStandbyTimer == 0)
         {
             forceStandbyActive = false;
-            TransitionTo(STATE_STANDBY);
+            TransitionTo(STATE_HV_DISCONNECTING, STATE_STANDBY, VehicleTriggerEvent::HV_TOO_LOW_FORCE_STANDBY_TIMEOUT);
         }
     }
 
@@ -408,25 +562,22 @@ private:
         if (forceSleepTimer == 0)
         {
             forceSleepActive = false;
-            TransitionTo(STATE_SLEEP);
+            TransitionTo(STATE_SLEEP, VehicleTriggerEvent::LV_TOO_LOW_FORCE_SLEEP_TIMEOUT);
         }
     }
 }
 
-void
-TransitionTo(VehicleState newState)
+void TransitionTo(VehicleState newState, VehicleState queuedStateNext, VehicleTriggerEvent triggerEvent)
 {
-    lastState = state;
+    prevPrevState = prevState;
+    prevState = state;
     state = newState;
-
-    if (!(newState == STATE_READY || newState == STATE_CONDITIONING ||
-          newState == STATE_DRIVE || newState == STATE_CHARGE ||
-          newState == STATE_LIMP_HOME))
-    {
-        // No more HV request if leaving any HV-using state
-        hvManager.SetHVRequest(false);
-    }
-
+    prevPrevTriggerEvent = prevTriggerEvent;
+    prevTriggerEvent = triggerEvent;
+    if (newState == STATE_HV_CONNECTING || newState == STATE_HV_DISCONNECTING)
+        queuedState = queuedStateNext;
+    else
+        queuedState = STATE_INVALID;
     // Reset standbyTimeoutCounter when entering STANDBY
     if (newState == STATE_STANDBY)
     {
@@ -438,7 +589,7 @@ TransitionTo(VehicleState newState)
     }
 
     // READY → CONDITIONING: Start diagnosis
-    if (lastState == STATE_READY && newState == STATE_CONDITIONING)
+    if (prevState == STATE_READY && newState == STATE_CONDITIONING)
     {
         diagnosePending = true;
         diagnoseTimer = LVDU_DIAGNOSE_DELAY_STEPS;
@@ -449,6 +600,11 @@ TransitionTo(VehicleState newState)
         chargeDoneCounter = 0;
         chargeFinishedLatched = false;
     }
+}
+
+void TransitionTo(VehicleState newState, VehicleTriggerEvent triggerEvent)
+{
+    TransitionTo(newState, STATE_INVALID, triggerEvent);
 }
 
 void HandleReadyDiagnosis()
@@ -520,6 +676,9 @@ void UpdateOutputs()
 {
     switch (state)
     {
+    case STATE_INVALID:
+        break;
+
     case STATE_SLEEP:
         // Deep power-down: all off
         DigIo::vcu_out.Clear();
@@ -532,6 +691,20 @@ void UpdateOutputs()
         DigIo::vcu_out.Set();
         DigIo::condition_out.Clear();
         DigIo::ready_out.Clear();
+        break;
+
+    case STATE_HV_CONNECTING:
+        // Handshake phase: keep control power on, but do not assert condition/ready yet.
+        DigIo::vcu_out.Set();
+        DigIo::condition_out.Set();
+        DigIo::ready_out.Clear(); //This hopefully removes all interferences with SDU activating the precharge
+        break;
+
+    case STATE_HV_DISCONNECTING:
+        // Handshake phase: keep control power on until HV is safely opened.
+        DigIo::vcu_out.Set();
+        DigIo::condition_out.Set();
+        DigIo::ready_out.Clear(); //This hopefully removes all interferences with SDU activating the precharge
         break;
 
     case STATE_READY:
@@ -584,7 +757,11 @@ void UpdateOutputs()
 void UpdateParams()
 {
     Param::SetInt(Param::LVDU_vehicle_state, static_cast<int>(state));
-    Param::SetInt(Param::LVDU_last_vehicle_state, static_cast<int>(lastState));
+    Param::SetInt(Param::LVDU_last_vehicle_state, static_cast<int>(prevState));
+    Param::SetInt(Param::LVDU_prev_prev_vehicle_state, static_cast<int>(prevPrevState));
+    Param::SetInt(Param::LVDU_queued_vehicle_state, static_cast<int>(queuedState));
+    Param::SetInt(Param::LVDU_prev_trigger_event, static_cast<int>(prevTriggerEvent));
+    Param::SetInt(Param::LVDU_prev_prev_trigger_event, static_cast<int>(prevPrevTriggerEvent));
 
     Param::SetInt(Param::LVDU_diagnose_pending, diagnosePending ? 1 : 0);
 
@@ -592,13 +769,9 @@ void UpdateParams()
     Param::SetInt(Param::LVDU_condition_out, DigIo::condition_out.Get() ? 1 : 0);
     Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
 
-    // For now comfort functions are always permitted
-    Param::SetInt(Param::hv_comfort_functions_allowed, 1);
-
-    int connectHV = hvManager.ShouldConnectHV() ? 1 : 0;
-    Param::SetInt(Param::LVDU_connectHVcommand, connectHV);
-
-    Param::SetInt(Param::LVDU_hv_contactors_closed, hvManager.IsHVActive() ? 1 : 0);
+    // Comfort functions only allowed when HV is connected.
+    const int hvState = Param::GetInt(Param::HVCM_state);
+    Param::SetInt(Param::hv_comfort_functions_allowed, hvState == HvContactorManager::HV_CONNECTED ? 1 : 0);
 }
 }
 ;

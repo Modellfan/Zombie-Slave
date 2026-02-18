@@ -48,7 +48,7 @@
    3. Display values
  */
 // Next param id (increase when adding new parameter!): 167
-// Next value Id: 2333
+// Next value Id: 2334
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
@@ -82,6 +82,7 @@
    VALUE_ENTRY(dcdc_output_voltage, "V", 2114)                                            \
    VALUE_ENTRY(dcdc_output_current, "A", 2115)                                            \
    VALUE_ENTRY(dcdc_fault_any, YESNO, 2116)                                               \
+   VALUE_ENTRY(dcdc_input_power_off_confirmed, YESNO, 2333)                               \
                                                                                           \
    PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_SOC, "%", 0, 100, 50, 153)                        \
    PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_SOC_Target, "%", 0, 100, 100, 154)                \
@@ -171,6 +172,7 @@
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
    VALUE_ENTRY(heater_contactor_feedback_in, "0=Open, 1=Closed", 2132)                    \
    VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
+   VALUE_ENTRY(heater_off_confirmed, "0=No, 1=Yes", 2142)                                 \
    VALUE_ENTRY(heater_fault, "0=OK, 1=Fault", 2143)                                       \
    VALUE_ENTRY(hv_comfort_functions_allowed, "0=No, 1=Yes", 2144)                         \
                                                                                           \
@@ -184,14 +186,18 @@
    VALUE_ENTRY(LVDU_ready_safety_in, "On/Off", 2146)                                      \
    VALUE_ENTRY(LVDU_vehicle_state, VEHICLE_STATE, 2147)                                   \
    VALUE_ENTRY(LVDU_last_vehicle_state, VEHICLE_STATE, 2148)                              \
+   VALUE_ENTRY(LVDU_prev_prev_vehicle_state, VEHICLE_STATE, 2150)                         \
+   VALUE_ENTRY(LVDU_queued_vehicle_state, VEHICLE_STATE, 2151)                            \
+   VALUE_ENTRY(LVDU_prev_trigger_event, LVDU_TRIGGER_EVENT, 2152)                         \
+   VALUE_ENTRY(LVDU_prev_prev_trigger_event, LVDU_TRIGGER_EVENT, 2153)                    \
    VALUE_ENTRY(LVDU_diagnose_pending, "On/Off", 2149)                                     \
    VALUE_ENTRY(LVDU_12v_battery_voltage, "V", 2155)                                       \
    VALUE_ENTRY(LVDU_vcu_out, "On/Off", 2158)                                              \
    VALUE_ENTRY(LVDU_condition_out, "On/Off", 2159)                                        \
    VALUE_ENTRY(LVDU_ready_out, "On/Off", 2160)                                            \
    VALUE_ENTRY(LVDU_forceVCUsShutdown, "On/Off", 2162)                                    \
-   VALUE_ENTRY(LVDU_connectHVcommand, "On/Off", 2163)                                     \
-   VALUE_ENTRY(LVDU_hv_contactors_closed, "On/Off", 2168)                                 \
+   VALUE_ENTRY(HVCM_to_bms_hv_request, "On/Off", 2163)                                    \
+   VALUE_ENTRY(HVCM_state, HV_CONTACTOR_STATE, 2169)                         \
                                                                                           \
    PARAM_ENTRY(CAT_EPS, eps_spoolup_delay, "ms", 0, 5000, 500, 106)                       \
    VALUE_ENTRY(eps_state, EPS_STATE, 2164)                                                \
@@ -239,12 +245,22 @@
     "0=NONE,1=DTC_COM_NO_CONTACTOR_POWER_SUPPLY,2=DTC_COM_NEGATIVE_CONTACTOR_FAULT,4=DTC_COM_PRECHARGE_CONTACTOR_FAULT," \
     "8=DTC_COM_POSITIVE_CONTACTOR_FAULT,16=DTC_COM_PRECHARGE_VOLTAGE_TIMEOUT,32=DTC_COM_EXTERNAL_HV_VOLTAGE_MISSING," \
     "64=DTC_COM_PACK_VOLTAGE_MISSING"
-#define CONT_STATE "0=INIT,1=OPEN,2=CLOSING_PRE,3=CLOSING_POS,4=CLOSED,5=OPENING_POS,6=OPENING_PRE,7=FAULT"
+#define CONT_STATE "0=INIT,1=OPEN,2=CLOSING_PRECHARGE,3=CLOSING_POSITIVE,4=CLOSED,5=OPENING_POSITIVE,6=OPENING_PRECHARGE,7=FAULT"
 #define CONT_DTC_FLAGS \
     "0=NONE,1=DTC_COM_NO_CONTACTOR_POWER_SUPPLY,2=DTC_COM_NEGATIVE_CONTACTOR_FAULT,4=DTC_COM_PRECHARGE_CONTACTOR_FAULT," \
     "8=DTC_COM_POSITIVE_CONTACTOR_FAULT,16=DTC_COM_PRECHARGE_VOLTAGE_TIMEOUT,32=DTC_COM_EXTERNAL_HV_VOLTAGE_MISSING," \
     "64=DTC_COM_PACK_VOLTAGE_MISSING"
-#define VEHICLE_STATE "0=SLEEP,1=STANDBY,2=READY,3=CONDITIONING,4=DRIVE,5=CHARGE,6=ERROR,7=LIMP_HOME"
+#define HV_CONTACTOR_STATE "0=HV_DISCONNECTED,1=HV_REQUESTED,2=HV_CONNECTED,3=HV_CONNECTED_STOP_CONSUMERS,4=HV_OPEN_CONTACTORS,5=HV_FAULT"
+#define VEHICLE_STATE "-1=INVALID,0=SLEEP,1=STANDBY,2=HV_CONNECTING,3=HV_DISCONNECTING,4=READY,5=CONDITIONING,6=DRIVE,7=CHARGE,8=ERROR,9=LIMP_HOME"
+#define LVDU_TRIGGER_EVENT \
+    "0=UNKNOWN,1=MANUAL_STANDBY_MODE,2=AUTO_WAKE_SLEEP_TO_STANDBY,3=IGNITION_ON," \
+    "4=IGNITION_OFF,5=IGNITION_ON_AND_CHARGER_NOT_PLUGGED,6=REMOTE_PRECONDITIONING_REQUESTED," \
+    "7=CHARGER_PLUGGED_IN,8=CHARGER_PLUGGED_IN_AND_NOT_CHARGE_FINISHED_LATCHED," \
+    "9=CHARGE_FINISHED_AND_IGNITION_OFF,10=DRIVER_REQUEST_RECEIVED,11=CRITICAL_FAULT_DETECTED," \
+    "12=DEGRADED_FAULT_DETECTED,13=THERMAL_TASK_COMPLETED_AND_READY_SAFETY_OFF_DELAY," \
+    "14=BMS_BALANCING_AND_BMS_INVALID_OR_LV_TOO_LOW,15=STANDBY_TIMEOUT_EXPIRED," \
+    "16=HV_TOO_LOW_FORCE_STANDBY_TIMEOUT,17=LV_TOO_LOW_FORCE_SLEEP_TIMEOUT," \
+    "18=IGNITION_OFF_IN_ERROR,19=HVCM_FAULT_WHILE_CONNECTING,20=HVCM_FAULT_WHILE_DISCONNECTING"
 
 /***** enums ******/
 

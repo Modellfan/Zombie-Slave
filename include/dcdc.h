@@ -36,4 +36,3 @@ class DCDC
       CanHardware* can;
 };
 #endif // DCDC_H
-
