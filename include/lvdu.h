@@ -263,7 +263,7 @@ private:
         bmsBalancing = bmsValid && Param::GetInt(Param::BMS_BalancingAnyActive);
 
         // Still update for possible custom behavior
-        int plugStatus = Param::GetInt(Param::mlb_chr_PlugStatus);
+        int plugStatus = Param::GetInt(Param::mlb_chr_HVLM_Stecker_Status);
         chargerPlugged = plugStatus > 1;        // 0=Init, 1=No Plug, 2=Plug In, 3=Plug Locked
         // Use only in case a charge plug is recognized faultly
         if (Param::GetInt(Param::Charger_Plug_Override))

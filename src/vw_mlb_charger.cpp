@@ -128,7 +128,7 @@ bool VWMLBClass::ControlCharge(bool RunCh, bool ACReq)
     charger_params.activate = Param::GetInt(Param::mlb_chr_sim_Activation_Crg);
     return charger_params.activate;
 #else
-    if (charger_status.HVLM_Plug_Status > 1 && RunCh)
+    if (charger_status.HVLM_Stecker_Status > 1 && RunCh)
     {
         charger_params.activate = 1;
         return true;
@@ -251,39 +251,42 @@ void VWMLBClass::TagParams() // To make code portable between standalone (more p
 {
 
     // copy charger state into values
-    Param::SetInt(Param::mlb_chr_DC_Max_ChargePower, charger_status.HVLM_MaxDC_ChargePower);
-    Param::SetInt(Param::mlb_chr_DC_Max_ChargeVoltage, charger_status.HVLM_Max_DC_Voltage_DCLS);
-    Param::SetInt(Param::mlb_chr_DC_Actual_Current, charger_status.HVLM_Actual_DC_Current_DCLS);
-    Param::SetInt(Param::mlb_chr_DC_Max_ChargeCurrent, charger_status.HVLM_Max_DC_Current_DCLS);
-    Param::SetInt(Param::mlb_chr_DC_Min_ChargeVoltage, charger_status.HVLM_Min_DC_Voltage_DCLS);
-    Param::SetInt(Param::mlb_chr_DC_Min_ChargeCurrent, charger_status.HVLM_Min_DC_Current_DCLS);
-    Param::SetInt(Param::mlb_chr_Status_Grid, charger_status.HVLM_EnergyFlowType);
-    Param::SetInt(Param::mlb_chr_ChargeManagerMode, charger_status.HVLM_OperationalMode);
-    Param::SetInt(Param::mlb_chr_ChargerRequestingHV, charger_status.HVLM_HV_ActivationRequest);
-    Param::SetInt(Param::mlb_chr_ChargerErrorStatus, charger_status.HVLM_ChargerErrorStatus);
-    Param::SetInt(Param::mlb_chr_PlugStatus, charger_status.HVLM_Plug_Status);
-    Param::SetInt(Param::mlb_chr_LoadRequest, charger_status.HVLM_LoadRequest);
-    Param::SetInt(Param::mlb_chr_ChargerState, charger_status.mode);
-    Param::SetInt(Param::mlb_chr_Charger_AC_Volt_RMS, charger_status.ACvoltage);
-    Param::SetInt(Param::mlb_chr_Charger_VoltageOut_HV, charger_status.HVVoltage);
-    Param::SetInt(Param::mlb_chr_Charger_CurrentOut_HV, charger_status.current);
-    Param::SetInt(Param::mlb_chr_Charger_Temperature, charger_status.temperature);
-    Param::SetInt(Param::mlb_chr_ChargerSystemState, charger_status.HVLM_ChargeSystemState);
-    Param::SetInt(Param::mlb_chr_Status_LED, charger_status.HVLM_Status_LED);
-    Param::SetInt(Param::mlb_chr_MaxCurrent_AC, charger_status.MaxACAmps);
-    Param::SetInt(Param::mlb_chr_LockRequest, charger_status.HVLM_RequestConnectorLock);
-    Param::SetInt(Param::mlb_chr_Charger_Ready, charger_status.HVLM_ChargeReadyStatus);
-    Param::SetInt(Param::mlb_chr_ChargerTemp_Reduction, charger_status.LAD_Reduction_ChargerTemp);
-    Param::SetInt(Param::mlb_chr_ChargerCurrent_Reduction, charger_status.LAD_Reduction_Current);
-    Param::SetInt(Param::mlb_chr_SocketTemp_Reduction, charger_status.LAD_Reduction_SocketTemp);
-    Param::SetInt(Param::mlb_chr_MaxChargerOutput, charger_status.LAD_MaxChargerPower_HV);
-    Param::SetInt(Param::mlb_chr_CableCurrentLimit, charger_status.PPLim);
-    Param::SetInt(Param::mlb_chr_ControlPilotStatus, charger_status.LAD_ControlPilotStatus);
-    Param::SetInt(Param::mlb_chr_LockState, charger_status.LAD_LockFeedback);
-    Param::SetInt(Param::mlb_chr_ChargerWarning, charger_status.LAD_ChargerWarning);
-    Param::SetInt(Param::mlb_chr_ChargerFault, charger_status.LAD_ChargerFault);
-    Param::SetInt(Param::mlb_chr_OutputVolts, charger_status.HVLM_Output_Voltage_HV);
+    Param::SetInt(Param::mlb_chr_HVLM_MaxLadeLeistung, charger_status.HVLM_MaxLadeLeistung);
+    Param::SetInt(Param::mlb_chr_HVLM_MaxSpannung_DCLS, charger_status.HVLM_MaxSpannung_DCLS);
+    Param::SetInt(Param::mlb_chr_HVLM_IstStrom_DCLS, charger_status.HVLM_IstStrom_DCLS);
+    Param::SetInt(Param::mlb_chr_HVLM_MaxStrom_DCLS, charger_status.HVLM_MaxStrom_DCLS);
+    Param::SetInt(Param::mlb_chr_HVLM_MinSpannung_DCLS, charger_status.HVLM_MinSpannung_DCLS);
+    Param::SetInt(Param::mlb_chr_HVLM_MinStrom_DCLS, charger_status.HVLM_MinStrom_DCLS);
+    Param::SetInt(Param::mlb_chr_HVLM_Status_Netz, charger_status.HVLM_Status_Netz);
+    Param::SetInt(Param::mlb_chr_HVLM_IstModus_02, charger_status.HVLM_IstModus_02);
+    Param::SetInt(Param::mlb_chr_HVLM_HV_Anf, charger_status.HVLM_HV_Anf);
+    Param::SetInt(Param::mlb_chr_HVLM_Fehlerstatus, charger_status.HVLM_Fehlerstatus);
+    Param::SetInt(Param::mlb_chr_HVLM_Stecker_Status, charger_status.HVLM_Stecker_Status);
+    Param::SetInt(Param::mlb_chr_HVLM_LadeAnforderung, charger_status.HVLM_LadeAnforderung);
+    Param::SetInt(Param::mlb_chr_LAD_IstModus, charger_status.LAD_IstModus);
+    Param::SetInt(Param::mlb_chr_LAD_AC_Istspannung, charger_status.LAD_AC_Istspannung);
+    Param::SetInt(Param::mlb_chr_LAD_IstSpannung_HV, charger_status.LAD_IstSpannung_HV);
+    Param::SetInt(Param::mlb_chr_LAD_IstStrom_HV, static_cast<int>(charger_status.LAD_IstStrom_HV));
+    Param::SetInt(Param::mlb_chr_LAD_Temperatur, charger_status.LAD_Temperatur);
+    Param::SetInt(Param::mlb_chr_HVLM_Ladesystemhinweise, charger_status.HVLM_Ladesystemhinweise);
+    Param::SetInt(Param::mlb_chr_HVLM_Zustand_LED, charger_status.HVLM_Zustand_LED);
+    Param::SetInt(Param::mlb_chr_HVLM_MaxStrom_Netz, static_cast<int>(charger_status.HVLM_MaxStrom_Netz));
+    Param::SetInt(Param::mlb_chr_HVLM_LG_Sollmodus, charger_status.HVLM_LG_Sollmodus);
+    Param::SetInt(Param::mlb_chr_HVLM_Stecker_Verriegeln, charger_status.HVLM_Stecker_Verriegeln);
+    Param::SetInt(Param::mlb_chr_HVLM_Ladetexte, charger_status.HVLM_Ladetexte);
+    Param::SetInt(Param::mlb_chr_LAD_Abregelung_Temperatur, charger_status.LAD_Abregelung_Temperatur);
+    Param::SetInt(Param::mlb_chr_LAD_Abregelung_IU_Ein_Aus, charger_status.LAD_Abregelung_IU_Ein_Aus);
+    Param::SetInt(Param::mlb_chr_LAD_Abregelung_BuchseTemp, charger_status.LAD_Abregelung_BuchseTemp);
+    Param::SetInt(Param::mlb_chr_LAD_MaxLadLeistung_HV, charger_status.LAD_MaxLadLeistung_HV);
+    Param::SetInt(Param::mlb_chr_LAD_PRX_Stromlimit, charger_status.LAD_PRX_Stromlimit);
+    Param::SetInt(Param::mlb_chr_LAD_CP_Erkennung, charger_status.LAD_CP_Erkennung);
+    Param::SetInt(Param::mlb_chr_LAD_Stecker_Verriegelt, charger_status.LAD_Stecker_Verriegelt);
+    Param::SetInt(Param::mlb_chr_LAD_Warnzustand, charger_status.LAD_Warnzustand);
+    Param::SetInt(Param::mlb_chr_LAD_Fehlerzustand, charger_status.LAD_Fehlerzustand);
+    Param::SetInt(Param::mlb_chr_HVLM_IstSpannung_HV, charger_status.HVLM_IstSpannung_HV);
     Param::SetInt(Param::mlb_chr_ActivationState, charger_params.activate);
+    Param::SetInt(Param::mlb_chr_LG_KompSchutz, charger_status.LG_KompSchutz);
+    Param::SetInt(Param::mlb_chr_LG_Abschaltstufe, charger_status.LG_Abschaltstufe);
 
 #ifdef MLB_CHARGER_STANDALONE
     // in standalone mode the vw mlb charger class has no interaction with other class of zombie e.g. via parameters.
@@ -323,10 +326,10 @@ void VWMLBClass::TagParams() // To make code portable between standalone (more p
     vehicle_status.locked = Param::GetInt(Param::VehLockSt);
 
     // backward mapping into ZombieVCU
-    Param::SetInt(Param::CableLim, charger_status.MaxACAmps);
-    Param::SetInt(Param::AC_Volts, charger_status.ACvoltage);
-    Param::SetInt(Param::ChgTemp, charger_status.temperature);
-    switch (charger_status.HVLM_Plug_Status)
+    Param::SetInt(Param::CableLim, static_cast<int>(charger_status.HVLM_MaxStrom_Netz));
+    Param::SetInt(Param::AC_Volts, charger_status.LAD_AC_Istspannung);
+    Param::SetInt(Param::ChgTemp, charger_status.LAD_Temperatur);
+    switch (charger_status.HVLM_Stecker_Status)
     {
     case 0:
         Param::SetInt(Param::PlugDet, 0);
@@ -342,7 +345,7 @@ void VWMLBClass::TagParams() // To make code portable between standalone (more p
         break;
     }
 
-    switch (charger_status.PPLim)
+    switch (charger_status.LAD_PRX_Stromlimit)
     {
     case 0:
         Param::SetInt(Param::PilotLim, 13);
@@ -398,7 +401,7 @@ void VWMLBClass::emulateMLB()
     mlb_state.BMS_EnergyCount = 0;
 
     // BMS SOC:
-    mlb_state.BMS_Batt_Curr = charger_status.current + 2047;
+    mlb_state.BMS_Batt_Curr = static_cast<uint16_t>(charger_status.LAD_IstStrom_HV + 2047.0f);
     mlb_state.BMS_SOC = battery_status.SOCx10 / 5;
     mlb_state.BMS_SOC_HiRes = battery_status.SOCx10 * 2;
     mlb_state.BMS_SOC_Kaltstart = battery_status.SOCx10 * 2;
@@ -442,18 +445,18 @@ void VWMLBClass::emulateMLB()
     mlb_state.HMS_Systemstatus = 3;   // 0 "No_function_active" 1 "Hold_active" 2 "Parking_requested" 3 "Parking_active" 4 "Keep parking_active" 5 "Start_active" 6 "Release_request_active" 7 "Release_request_by_driver" 8 "Slipping_detected" 9 "Hold_standby_active" 10 "Start_standby_active" 14 "Init" 15 "Error " ;
     mlb_state.HMS_aktives_System = 6; // 0 "No_System__Init_Error" 1 "Driver request_active" 2 "HMS_internal_active" 3 "ACC_active" 4 "Autohold_active" 5 "HHC_active" 6 "HVLM_active" 7 "Getriebe_aktiv" 8 "EBKV_aktiv" 9 "ParkAssist_aktiv" 10 "ARA_aktiv" 12 "Autonomous_Hold_aktiv" 13 "STA_aktiv " 14 "Motor_aktiv" 15 "EA_aktiv" 16 "VLK_aktiv" ;
 
-    // // Lock Status:
-    // if (vehicle_status.locked == 0)
-    // {
-    //     mlb_state.ZV_verriegelt_soll = 1;
-    // }
-    // if (vehicle_status.locked == 1)
-    // {
-    //     mlb_state.ZV_verriegelt_soll = 2;
-    // }
+    // Lock Status:
+    if (vehicle_status.locked == 0)
+    {
+        mlb_state.ZV_verriegelt_soll = 1;
+    }
+    if (vehicle_status.locked == 1)
+    {
+        mlb_state.ZV_verriegelt_soll = 2;
+    }
 
     // // Charger Activation State Logic:
-    // if (charger_status.HVLM_HV_ActivationRequest == 1)
+    // if (charger_status.HVLM_HV_Anf == 1)
     // {
     //     mlb_state.HV_Bordnetz_aktiv = true; // Indicates an active high-voltage vehicle electrical system: 0 = Not Active,  1 = Active
     //     // HVK_BMS_Sollmodus = 4;
@@ -464,7 +467,7 @@ void VWMLBClass::emulateMLB()
     //     charger_params.HVActiveDelayOff = 20;
     // }
 
-    // if (charger_status.HVLM_HV_ActivationRequest == 0)
+    // if (charger_status.HVLM_HV_Anf == 0)
     // {
     //     mlb_state.BMS_Charger_Active = 0;
     //     if (charger_params.HVActiveDelayOff >= 1)
@@ -483,8 +486,8 @@ void VWMLBClass::emulateMLB()
     //         //   mlb_state.BMS_IstModus = 0; // 0=Standby, 1=HV Active (Driving) 2=Balancing 4=AC charge, 6=DC charge, 7=init
     //         //   mlb_state.HVK_BMS_Sollmodus = 0;
     //         //   mlb_state.HVK_MO_EmSollzustand = 0;
-    //         //   mlb_state.BMS_Batt_Volt = charger_status.HVVoltage*4; // Modify after testing to actual values from BMS/VCU
-    //         //   mlb_state.BMS_Batt_Volt_HVterm = charger_status.HVVoltage*2; // Modify after testing to actual values from BMS/VCU
+    //         //   mlb_state.BMS_Batt_Volt = charger_status.LAD_IstSpannung_HV*4; // Modify after testing to actual values from BMS/VCU
+    //         //   mlb_state.BMS_Batt_Volt_HVterm = charger_status.LAD_IstSpannung_HV*2; // Modify after testing to actual values from BMS/VCU
 
     //         mlb_state.BMS_HV_Status = 2; // Voltage Applied // Voltage Status: 0=Init, 1=NoVoltage, 2=Voltage, 3=Fault & Voltage
     //         mlb_state.BMS_IstModus = 1;  // 0=Standby, 1=HV Active (Driving) 2=Balancing 4=AC charge, 6=DC charge, 7=init
@@ -526,7 +529,7 @@ void VWMLBClass::emulateMLB()
     // HVEM_SollStrom_HV =;  // Target current charging on the HV side
     // HVEM_MaxSpannung_HV =; // Maximum charging voltage to the charger or DC charging station
 
-    if (charger_status.HVLM_Park_Request == 1)
+    if (charger_status.HVLM_Anforderung_HMS == 1)
     {
         if (mlb_state.HMS_Systemstatus == 2)
         {
@@ -547,7 +550,7 @@ void VWMLBClass::emulateMLB()
         // HMS_Fehlerstatus = false; //0 "No error" 1 "Stopping_not_possible" 2 "Special operating mode_active" 3 "System restriction" 4 "System fault" ;
     }
 
-    if (charger_status.HVLM_HV_ActivationRequest == 1) // 0=No Request, 1=Charging, 2=Balancing, 3=AC/Climate
+    if (charger_status.HVLM_HV_Anf == 1) // 0=keine_Anforderung, 1=Laden_angefordert, 2=Batteriekonditionierung_angefordert, 3=Standklimatisierung_angefordert
     {
         mlb_state.HV_Bordnetz_aktiv = true; // Indicates an active high-voltage vehicle electrical system: 0 = Not Active,  1 = Active
         mlb_state.HVK_BMS_Sollmodus = 4; // BMS requested mode: 0 "HV_Off" 1 "HV_On" 3 "AC_Charging_ext" 4 "AC_Charging" 6 "DC_Charging" 7 "Init"
@@ -557,14 +560,14 @@ void VWMLBClass::emulateMLB()
         mlb_state.BMS_Charger_Active = 1;
         mlb_state.BMS_Batt_Volt = 400 * 4;
         mlb_state.BMS_Batt_Volt_HVterm = 400 * 2;
-        if (charger_status.HVVoltage > 250)
+        if (charger_status.LAD_IstSpannung_HV > 250)
         {
-            mlb_state.BMS_Batt_Volt = (charger_status.HVVoltage) * 4;
-            mlb_state.BMS_Batt_Volt_HVterm = (charger_status.HVVoltage) * 2;
+            mlb_state.BMS_Batt_Volt = (charger_status.LAD_IstSpannung_HV) * 4;
+            mlb_state.BMS_Batt_Volt_HVterm = (charger_status.LAD_IstSpannung_HV) * 2;
         }
     }
 
-    if (charger_status.HVLM_HV_ActivationRequest == 0) // 0=No Request, 1=Charging, 2=Balancing, 3=AC/Climate
+    if (charger_status.HVLM_HV_Anf == 0) // 0=keine_Anforderung, 1=Laden_angefordert, 2=Batteriekonditionierung_angefordert, 3=Standklimatisierung_angefordert
     {
         mlb_state.HV_Bordnetz_aktiv = false; // Indicates an active high-voltage vehicle electrical system: 0 = Not Active,  1 = Active
         mlb_state.HVK_BMS_Sollmodus = 0; // BMS requested mode: 0 "HV_Off" 1 "HV_On" 3 "AC_Charging_ext" 4 "AC_Charging" 6 "DC_Charging" 7 "Init"
@@ -572,8 +575,8 @@ void VWMLBClass::emulateMLB()
         mlb_state.BMS_HV_Status = 1; // HV No Voltage // Voltage Status: 0=Init, 1=NoVoltage, 2=Voltage, 3=Fault & Voltage
         mlb_state.HVK_MO_EmSollzustand = 50;
         mlb_state.BMS_Charger_Active = 0;
-        mlb_state.BMS_Batt_Volt = (charger_status.HVVoltage) * 4;
-        mlb_state.BMS_Batt_Volt_HVterm = (charger_status.HVVoltage) * 2;
+        mlb_state.BMS_Batt_Volt = (charger_status.LAD_IstSpannung_HV) * 4;
+        mlb_state.BMS_Batt_Volt_HVterm = (charger_status.LAD_IstSpannung_HV) * 2;
     }
 
     if (mlb_state.BMS_HV_Status == 1)
@@ -616,83 +619,345 @@ void VWMLBClass::SetCanInterface(CanHardware *c)
     can->RegisterUserMessage(0x564); // LAD_01
     can->RegisterUserMessage(0x565); // HVLM_03
     can->RegisterUserMessage(0x67E); // LAD_02
+    can->RegisterUserMessage(0x9A55549D); // HVLM_08
+    can->RegisterUserMessage(0x9A555515); // HVLM_09
+    can->RegisterUserMessage(0x92DD5472); // HVLM_10
+    can->RegisterUserMessage(0x92DD5491); // HVLM_11
+    can->RegisterUserMessage(0x9A55554D); // HVLM_15
+    can->RegisterUserMessage(0x97F00044); // KN_Ladegeraet
 }
 
 void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
 {
     uint8_t *bytes = (uint8_t *)data; // arrgghhh this converts the two 32bit array into bytes. See comments are useful:) ... Stolen from Zombie, Left comments as they're now famous.
-    switch (id)
+    uint32_t can_id = static_cast<uint32_t>(id);
+    switch (can_id)
     {
-    case 0x488: // HVLM_06
-        charger_status.HVLM_MaxDC_ChargePower = (((bytes[2] & (0x3FU)) << 4) | ((bytes[1] >> 4) & (0x0FU))) * 250;
-        charger_status.HVLM_Max_DC_Voltage_DCLS = ((bytes[3] & (0xFFU)) << 2) | ((bytes[2] >> 6) & (0x03U));
-        charger_status.HVLM_Actual_DC_Current_DCLS = ((bytes[5] & (0x01U)) << 8) | (bytes[4] & (0xFFU));
-        charger_status.HVLM_Max_DC_Current_DCLS = ((bytes[6] & (0x03U)) << 7) | ((bytes[5] >> 1) & (0x7FU));
-        charger_status.HVLM_Min_DC_Voltage_DCLS = ((bytes[7] & (0x07U)) << 6) | ((bytes[6] >> 2) & (0x3FU));
-        charger_status.HVLM_Min_DC_Current_DCLS = ((bytes[7] >> 3) & (0x1FU));
+    case 0x488: // HVLM_06 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 1160 HVLM_MaxLadeLeistung "maximale DC Ladeleistung";
+        charger_status.HVLM_MaxLadeLeistung = (((bytes[2] & (0x3FU)) << 4) | ((bytes[1] >> 4) & (0x0FU))) * 250; // Receiver: Gateway,Gateway_PAG,TME
+
+        // CM_ SG_ 1160 HVLM_MaxSpannung_DCLS "maximale DC Ladespannung";
+        charger_status.HVLM_MaxSpannung_DCLS = ((bytes[3] & (0xFFU)) << 2) | ((bytes[2] >> 6) & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1160 HVLM_IstStrom_DCLS "aktueller DC Ladestrom";
+        charger_status.HVLM_IstStrom_DCLS = ((bytes[5] & (0x01U)) << 8) | (bytes[4] & (0xFFU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1160 HVLM_MaxStrom_DCLS "maximaler DC Ladestrom";
+        charger_status.HVLM_MaxStrom_DCLS = ((bytes[6] & (0x03U)) << 7) | ((bytes[5] >> 1) & (0x7FU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1160 HVLM_MinSpannung_DCLS "minimale DC Ladespannung";
+        charger_status.HVLM_MinSpannung_DCLS = ((bytes[7] & (0x07U)) << 6) | ((bytes[6] >> 2) & (0x3FU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1160 HVLM_MinStrom_DCLS "minimaler DC Ladestrom";
+        charger_status.HVLM_MinStrom_DCLS = ((bytes[7] >> 3) & (0x1FU)); // Receiver: Gateway,Gateway_PAG
         break;
 
-    case 0x53C: // HVLM_04
-        // HVLM_ParkingHeater_Mode = ((HVLM_04[1] >> 4) & (0x07U));
-        // HVLM_StationaryClimat_Timer_Stat = ((HVLM_04[1] >> 7) & (0x01U));
-        // HVLM_HVEM_MaxPower = ((HVLM_04[3] & (0x01U)) << 8) | (HVLM_04[2] & (0xFFU));
-        charger_status.HVLM_Status_Grid = ((bytes[3] >> 1) & (0x01U));
-        // HVLM_BEV_LoadingScreen = ((HVLM_04[3] >> 2) & (0x01U));
-        charger_status.HVLM_EnergyFlowType = ((bytes[3] >> 3) & (0x03U));
-        // HVLM_VK_ParkingHeaterStatus = ((HVLM_04[3] >> 5) & (0x07U));
-        // HVLM_VK_ClimateConditioningStat = (HVLM_04[4] & (0x03U));
-        charger_status.HVLM_OperationalMode = ((bytes[4] >> 2) & (0x03U));
-        charger_status.HVLM_HV_ActivationRequest = ((bytes[4] >> 4) & (0x03U));
-        charger_status.HVLM_ChargerErrorStatus = ((bytes[5] & (0x01U)) << 2) | ((bytes[4] >> 6) & (0x03U));
-        charger_status.HVLM_Park_Request = ((bytes[5] >> 1) & (0x07U));
-        charger_status.HVLM_Park_Request_Maintain = ((bytes[5] >> 4) & (0x03U));
-        // HVLM_AWC_Mode = (HVLM_04[6] & (0x07U));
-        charger_status.HVLM_Plug_Status = ((bytes[6] >> 3) & (0x03U));
-        charger_status.HVLM_LoadRequest = ((bytes[6] >> 5) & (0x07U));
-        charger_status.HVLM_MaxBattChargeCurrent = (bytes[7] & (0xFFU));
+    case 0x53C: // HVLM_04 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 1340 HVLM_04_CRC "Berechnung siehe Lastenheft Kommunikationsabsicherung / End-to-End Kommunikationsabsicherung";
+        charger_status.HVLM_04_CRC = (bytes[0] & (0xFFU)); // Receiver: AWC,BMC_MLBevo,DCDC_HV,Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_04_BZ "Fortlaufender Botschaftszaehler";
+        charger_status.HVLM_04_BZ = (bytes[1] & (0x0FU)); // Receiver: AWC,BMC_MLBevo,DCDC_HV,Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_STH_Betriebsmodus "Betriebsmodus der Standheizung fuer Vorkonditionierung und Timerklimatisierung";
+        charger_status.HVLM_STH_Betriebsmodus = ((bytes[1] >> 4) & (0x07U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_Standklima_Timer_Status "Signalisierung an KBT ob ein Timer programmiert ist";
+        charger_status.HVLM_Standklima_Timer_Status = ((bytes[1] >> 7) & (0x01U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_HVEM_MaxLeistung "Maximal zulaessige Leistung, die HVEM vom Lader nutzen darf";
+        charger_status.HVLM_HVEM_MaxLeistung = (((bytes[3] & (0x01U)) << 8) | (bytes[2] & (0xFFU))) * 50; // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_Status_Netz "Information, ob Fahrzeug mit Stromnetz verbunden ist";
+        charger_status.HVLM_Status_Netz = ((bytes[3] >> 1) & (0x01U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_Anf_Ladescreen "Anforderung fuer Ladescreen (BEV)";
+        charger_status.HVLM_Anf_Ladescreen = ((bytes[3] >> 2) & (0x01U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_Ladeart "Anzeige, ob Strom in Fahrzeug fliesst und wofuer";
+        charger_status.HVLM_Ladeart = ((bytes[3] >> 3) & (0x03U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_VK_STH_Einsatz "Auswahl der PHEV Standheizung";
+        charger_status.HVLM_VK_STH_Einsatz = ((bytes[3] >> 5) & (0x07U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_VK_Modus "aktueller Konditionierungs-Status";
+        charger_status.HVLM_VK_Modus = (bytes[4] & (0x03U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_IstModus_02 "aktueller Modus";
+        charger_status.HVLM_IstModus_02 = ((bytes[4] >> 2) & (0x03U)); // Receiver: DCDC_800V_PAG,DCDC_HV,Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_HV_Anf "HV-Aktivierung Anforderung und Grund";
+        charger_status.HVLM_HV_Anf = ((bytes[4] >> 4) & (0x03U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_Fehlerstatus "aktueller Fehlerstatus des Ladegeraetes";
+        charger_status.HVLM_Fehlerstatus = ((bytes[5] & (0x01U)) << 2) | ((bytes[4] >> 6) & (0x03U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_Anforderung_HMS "Anforderung zur Verriegelung des Triebstrangs";
+        charger_status.HVLM_Anforderung_HMS = ((bytes[5] >> 1) & (0x07U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_Parken_beibehalten_HMS "Anforderung Triebstrang verriegelt zu halten";
+        charger_status.HVLM_Parken_beibehalten_HMS = ((bytes[5] >> 4) & (0x03U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_AWC_Sollmodus "Sollmodus AWC Ladegeraet";
+        charger_status.HVLM_AWC_Sollmodus = (bytes[6] & (0x07U)); // Receiver: AWC,Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 1340 HVLM_Stecker_Status "Status der Steckererkennung";
+        charger_status.HVLM_Stecker_Status = ((bytes[6] >> 3) & (0x03U)); // Receiver: BMC_MLBevo,Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_LadeAnforderung "Mitteilung Lademanagement an MSG";
+        charger_status.HVLM_LadeAnforderung = ((bytes[6] >> 5) & (0x07U)); // Receiver: AWC,Gateway,Gateway_PAG,Sub_Gateway,TME
+
+        // CM_ SG_ 1340 HVLM_MaxBatLadestromHV "Empfohlener HV Batterieladestrom";
+        charger_status.HVLM_MaxBatLadestromHV = (bytes[7] & (0xFFU)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
         break;
 
-    case 0X564: // LAD_01
-        // SerialDEBUG.print("Current charger mode: ");
-        // 0=standby,1=AC charging,3=DC charging,4=Precharge,5=Fail,7=init
-        charger_status.mode = ((bytes[1] >> 4) & (0x07U));
-        charger_status.ACvoltage = ((bytes[2] & (0xFFU)) << 1) | ((bytes[1] >> 7) & (0x01U));
-        charger_status.HVVoltage = (((bytes[4] & (0x03U)) << 8) | (bytes[3] & (0xFFU)));
-        charger_status.current = ((((bytes[5] & (0x0FU)) << 6) | ((bytes[4] >> 2) & (0x3FU))) * 0.2) - 102;
-        charger_status.LAD_Status_Voltage = ((bytes[5] >> 4) & (0x03U));
-        charger_status.temperature = bytes[6] - 40;
-        charger_status.LAD_PowerLossVal = ((bytes[7] & (0xFFU))) * 20;
+    case 0X564: // LAD_01 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 1380 LAD_01_CRC "Ab MQB und MLBevo: Berechnung siehe Lastenheft End-to-End Kommunikationsabsicherung.";
+        charger_status.LAD_01_CRC = (bytes[0] & (0xFFU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1380 LAD_01_BZ "freilaufender Botschaftszaehler";
+        charger_status.LAD_01_BZ = (bytes[1] & (0x0FU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1380 LAD_IstModus "Betriebsmodus des Ladegeraetes";
+        charger_status.LAD_IstModus = ((bytes[1] >> 4) & (0x07U)); // Receiver: Gateway,Gateway_PAG,Ladegeraet_2,TME
+
+        // CM_ SG_ 1380 LAD_AC_Istspannung "Istwert AC-Netzspannung (RMS)";
+        charger_status.LAD_AC_Istspannung = ((bytes[2] & (0xFFU)) << 1) | ((bytes[1] >> 7) & (0x01U)); // Receiver: Gateway_PAG
+
+        // CM_ SG_ 1380 LAD_IstSpannung_HV "Ausgangsspannung Lader";
+        charger_status.LAD_IstSpannung_HV = ((bytes[4] & (0x03U)) << 8) | (bytes[3] & (0xFFU)); // Receiver: Gateway_PAG
+
+        // CM_ SG_ 1380 LAD_IstStrom_HV "Ausgangsstrom Lader";
+        charger_status.LAD_IstStrom_HV =
+            ((((bytes[5] & (0x0FU)) << 6) | ((bytes[4] >> 2) & (0x3FU))) * 0.2f) - 102.0f; // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1380 LAD_Status_Spgfreiheit "0=Init, 1=HV-Komponenten spannungsfrei, 2=HV-Komponenten nicht spannungsfrei, 3=Fehler";
+        charger_status.LAD_Status_Spgfreiheit = ((bytes[5] >> 4) & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1380 LAD_Temperatur "Momentanwert: Temperatur Ladegeraet";
+        charger_status.LAD_Temperatur = static_cast<int16_t>(bytes[6]) - 40; // Receiver: Gateway_PAG,TME
+
+        // CM_ SG_ 1380 LAD_Verlustleistung "Momentanwert: Verlustleistung Ladegeraet";
+        charger_status.LAD_Verlustleistung = (bytes[7] & (0xFFU)) * 20; // Receiver: Gateway_PAG,TME
         break;
 
-    case 0x565: // HVLM_03
-        charger_status.HVLM_HV_StaleTime = ((bytes[0] & (0xFFU))) * 4;
-        charger_status.HVLM_ChargeSystemState = (bytes[1] & (0x03U));
-        // HVLM_KESSY_KeySearch = ((HVLM_03[1] >> 2) & (0x03U));
-        charger_status.HVLM_Status_LED = ((bytes[1] >> 4) & (0x0FU));
-        charger_status.MaxACAmps = ((bytes[3] & (0x7FU))) / 2;
-        charger_status.HVLM_LG_ChargerTargetMode = ((bytes[3] >> 7) & (0x01U));
-        charger_status.HVLM_TankCapReleaseRequest = (bytes[4] & (0x03U));
-        charger_status.HVLM_RequestConnectorLock = ((bytes[4] >> 2) & (0x03U));
-        charger_status.HVLM_Start_VoltageMeasure_DCLS = ((bytes[4] >> 4) & (0x03U));
-        // PnC_Trigger_OBC_cGW = ((HVLM_03[5] & (0x03U)) << 2) | ((HVLM_03[4] >> 6) & (0x03U));
-        // HVLM_ReleaseAirConditioning = ((HVLM_03[5] >> 2) & (0x03U));
-        charger_status.HVLM_ChargeReadyStatus = ((bytes[6] >> 1) & (0x07U));
-        // HVLM_IsolationRequest = ((HVLM_03[6] >> 5) & (0x01U));
-        charger_status.HVLM_Output_Voltage_HV = ((bytes[7] & (0xFFU)) << 2) | ((bytes[6] >> 6) & (0x03U));
+    case 0x565: // HVLM_03 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 1381 HVLM_HV_Abstellzeit "Zeitraum zwischen HV-Deaktiviert und HV-Aktiviert";
+        charger_status.HVLM_HV_Abstellzeit = (bytes[0] & (0xFFU)) * 4; // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_Ladesystemhinweise "Anzeigen von Hinweisen zum Ladesystem";
+        charger_status.HVLM_Ladesystemhinweise = (bytes[1] & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_Schluessel_Anfrage "Anforderung HVLM an BCM fuer Schluesselsuche ueber Kessy";
+        charger_status.HVLM_Schluessel_Anfrage = ((bytes[1] >> 2) & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_Zustand_LED "Zustand der Lade-LED";
+        charger_status.HVLM_Zustand_LED = ((bytes[1] >> 4) & (0x0FU)); // Receiver: AWC,Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_MaxStrom_Netz "maximal zulaessiger Strom auf Primaerseite (AC) des Ladegeraetes";
+        charger_status.HVLM_MaxStrom_Netz = (bytes[3] & (0x7FU)) * 0.5f; // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_LG_Sollmodus "Sollmodus AC Ladegeraet";
+        charger_status.HVLM_LG_Sollmodus = ((bytes[3] >> 7) & (0x01U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_FreigabeTankdeckel "Tankdeckelfreigabe";
+        charger_status.HVLM_FreigabeTankdeckel = (bytes[4] & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_Stecker_Verriegeln "Anforderung Steckerverriegelung";
+        charger_status.HVLM_Stecker_Verriegeln = ((bytes[4] >> 2) & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_Start_Spannungsmessung_DCLS "Meldung an das BMS, dass eine Messspannung aufgeschaltet wird";
+        charger_status.HVLM_Start_Spannungsmessung_DCLS = ((bytes[4] >> 4) & (0x03U)); // Receiver: BMC_MLBevo,Gateway,Gateway_PAG
+
+        charger_status.PnC_Trigger_OBC_cGW = ((bytes[5] & (0x03U)) << 2) | ((bytes[4] >> 6) & (0x03U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_FreigabeKlimatisierung "Klimatisierung freigeben";
+        charger_status.HVLM_FreigabeKlimatisierung = ((bytes[5] >> 2) & (0x03U)); // Receiver: Gateway,Gateway_PAG,TME
+
+        // CM_ SG_ 1381 HVLM_Ladetexte "Anzeige, ob AC- oder DC-Laden nicht moeglich ist";
+        charger_status.HVLM_Ladetexte = ((bytes[6] >> 1) & (0x07U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_IsoMessung_Anf "Signalisierung, ob waehrend des Ladens eine Iso-Messung durchgefuehrt werden muss";
+        charger_status.HVLM_IsoMessung_Anf = ((bytes[6] >> 5) & (0x01U)); // Receiver: BMC_MLBevo,DCDC_HV_02,Gateway,Gateway_PAG
+
+        // CM_ SG_ 1381 HVLM_IstSpannung_HV "Ausgangsspannung des Ladegeraetes und DC-Spannung der Ladesaeule";
+        charger_status.HVLM_IstSpannung_HV = ((bytes[7] & (0xFFU)) << 2) | ((bytes[6] >> 6) & (0x03U)); // Receiver: Gateway,Gateway_PAG
         break;
 
-    case 0x67E: // LAD_02
-        charger_status.LAD_Reduction_ChargerTemp = ((bytes[1] >> 4) & (0x01U));
-        charger_status.LAD_Reduction_Current = ((bytes[1] >> 5) & (0x01U));
-        charger_status.LAD_Reduction_SocketTemp = ((bytes[1] >> 6) & (0x01U));
-        charger_status.LAD_MaxChargerPower_HV = (((bytes[3] & (0x01U)) << 8) | (bytes[2] & (0xFFU))) * 100;
-        charger_status.PPLim = (bytes[4] & (0x07U));
-        charger_status.LAD_ControlPilotStatus = ((bytes[4] >> 3) & (0x01U));
-        charger_status.LAD_LockFeedback = ((bytes[4] >> 4) & (0x01U));
-        charger_status.LAD_ChargerCoolingDemand = ((bytes[4] >> 6) & (0x03U));
-        // LAD_MaxLadLeistung_HV_Offset = ((LAD_02[7] >> 1) & (0x03U));
-        charger_status.LAD_ChargerWarning = ((bytes[7] >> 6) & (0x01U));
-        charger_status.LAD_ChargerFault = ((bytes[7] >> 7) & (0x01U));
+    case 0x67E: // LAD_02 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 1662 LAD_02_CRC "Ab MQB und MLBevo: Berechnung siehe Lastenheft End-to-End Kommunikationsabsicherung.";
+        charger_status.LAD_02_CRC = (bytes[0] & (0xFFU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1662 LAD_02_BZ "freilaufender Botschaftszaehler";
+        charger_status.LAD_02_BZ = (bytes[1] & (0x0FU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 1662 LAD_Abregelung_Temperatur "Abregelung aufgrund interner Uebertemperatur im Ladegeraet";
+        charger_status.LAD_Abregelung_Temperatur = ((bytes[1] >> 4) & (0x01U)); // Receiver: TME
+
+        // CM_ SG_ 1662 LAD_Abregelung_IU_Ein_Aus "Abregelung aufgrund Strom oder Spannung am Eingang oder Ausgang";
+        charger_status.LAD_Abregelung_IU_Ein_Aus = ((bytes[1] >> 5) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_Abregelung_BuchseTemp "Reduzierung aufgrund zu hoher Temperatur der Ladebuchse";
+        charger_status.LAD_Abregelung_BuchseTemp = ((bytes[1] >> 6) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_MaxLadLeistung_HV "Maximale Leistung Ladegeraet (inkl. Infrastruktur/Wirkungsgrad)";
+        charger_status.LAD_MaxLadLeistung_HV = (((bytes[3] & (0x01U)) << 8) | (bytes[2] & (0xFFU))) * 100; // Receiver: TME
+
+        // CM_ SG_ 1662 LAD_PRX_Stromlimit "AC-Stromlimit aufgrund der PRX Kabelkodierung";
+        charger_status.LAD_PRX_Stromlimit = (bytes[4] & (0x07U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_CP_Erkennung "Status Control Pilot Ueberwachung";
+        charger_status.LAD_CP_Erkennung = ((bytes[4] >> 3) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_Stecker_Verriegelt "Status Steckerverriegelung";
+        charger_status.LAD_Stecker_Verriegelt = ((bytes[4] >> 4) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_Kuehlbedarf "Kuehlbedarf des Ladegeraetes";
+        charger_status.LAD_Kuehlbedarf = ((bytes[4] >> 6) & (0x03U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_MaxLadLeistung_HV_Offset "Offset zur 100W-Skalierung in 25W-Schritten";
+        charger_status.LAD_MaxLadLeistung_HV_Offset = ((bytes[7] >> 1) & (0x03U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_Warnzustand "Sammelwarnung Ladegeraet";
+        charger_status.LAD_Warnzustand = ((bytes[7] >> 6) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 1662 LAD_Fehlerzustand "Sammelfehler Ladegeraet - kein Laden moeglich";
+        charger_status.LAD_Fehlerzustand = ((bytes[7] >> 7) & (0x01U)); // Receiver: Vector__XXX
+        break;
+
+    case 0x9A55549D: // HVLM_08 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 2589283485 HVLM_Funktion_Dauer_BattKond "Funktion Dauerkonditionierung HV-Batterie.";
+        charger_status.HVLM_Funktion_Dauer_BattKond = ((bytes[6] >> 6) & (0x01U)); // Receiver: BMC_MLBevo,Gateway,Gateway_PAG
+
+        // CM_ SG_ 2589283485 HVLM_BattKond_Anf "Anforderung Batteriekonditionierung";
+        charger_status.HVLM_BattKond_Anf = ((bytes[6] >> 7) & (0x01U)) | ((bytes[7] & (0x03U)) << 1); // Receiver: Gateway,Gateway_PAG,TME
+
+        // CM_ SG_ 2589283485 HVLM_Dauer_Klima_02 "Dauer der Innenraumklimatisierung.";
+        charger_status.HVLM_Dauer_Klima_02 = ((bytes[7] >> 2) & (0x3FU)); // Receiver: Gateway,Gateway_PAG,TME
+        break;
+
+    case 0x9A555515: // HVLM_09 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 2589283605 HVLM_AWC_Sollstrom "Angeforderter Sollstrom fuer AWC Laden";
+        charger_status.HVLM_AWC_Sollstrom =
+            ((((bytes[6] >> 7) & (0x01U)) | ((bytes[7] & (0xFFU)) << 1)) * 0.1f); // Receiver: AWC
+        break;
+
+    case 0x92DD5472: // HVLM_10 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 2463978610 HVLM_RtmWarnLadeverbindung "RTM Charging connection fault";
+        charger_status.HVLM_RtmWarnLadeverbindung = ((bytes[3] >> 7) & (0x01U)) | ((bytes[4] & (0x03U)) << 1); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_RtmWarnLadesystem "RTM Electrical machine CAN communication fault";
+        charger_status.HVLM_RtmWarnLadesystem = ((bytes[4] >> 2) & (0x07U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_RtmWarnLadestatus "RTM Warning of charging status fault";
+        charger_status.HVLM_RtmWarnLadestatus = ((bytes[4] >> 5) & (0x07U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_RtmWarnLadeKommunikation "RTM Warning of charging communction fault";
+        charger_status.HVLM_RtmWarnLadeKommunikation = (bytes[5] & (0x07U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_Ladeanzeige_Anf "Lichtmuster fuer Charge Check";
+        charger_status.HVLM_Ladeanzeige_Anf = ((bytes[5] >> 3) & (0x01U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_Ladeanzeige_Status "Funktionsstatus ChargeCheck";
+        charger_status.HVLM_Ladeanzeige_Status = ((bytes[5] >> 4) & (0x03U)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_Ladeanzeige_Rampzeit "Zeit, innerhalb der die Intensitaet erreicht werden soll";
+        charger_status.HVLM_Ladeanzeige_Rampzeit = ((((bytes[6] & (0x03U)) << 2) | ((bytes[5] >> 6) & (0x03U))) * 50); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_Ladeanzeige_Intens_Heck "Helligkeit Heck-Fahrzeug-Lichtelemente";
+        charger_status.HVLM_Ladeanzeige_Intens_Heck = (((bytes[7] & (0x01U)) << 6) | ((bytes[6] >> 2) & (0x3FU))); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+
+        // CM_ SG_ 2463978610 HVLM_Ladeanzeige_Intens_Front "Helligkeit Front-Fahrzeug-Lichtelemente";
+        charger_status.HVLM_Ladeanzeige_Intens_Front = ((bytes[7] >> 1) & (0x7FU)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
+        break;
+
+    case 0x92DD5491: // HVLM_11 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 2463978641 HVLM_11_CRC "Berechnung siehe Lastenheft Kommunikationsabsicherung / End-to-End Kommunikationsabsicherung";
+        charger_status.HVLM_11_CRC = (bytes[0] & (0xFFU)); // Receiver: DCDC_HV_02
+
+        // CM_ SG_ 2463978641 HVLM_11_BZ "4bit Botschaftszaehler, wird mit jeder Sendebotschaft inkrementiert";
+        charger_status.HVLM_11_BZ = (bytes[1] & (0x0FU)); // Receiver: DCDC_HV_02
+
+        // CM_ SG_ 2463978641 HVLM_HVLB_SollSpannung_HVLS "Vorgabe SollSpannung Eingangsseite vom HVLM an HVLB";
+        charger_status.HVLM_HVLB_SollSpannung_HVLS =
+            ((((bytes[2] & (0xFFU)) << 4) | ((bytes[1] >> 4) & (0x0FU))) * 0.25f); // Receiver: DCDC_HV_02
+
+        // CM_ SG_ 2463978641 HVLM_HVLB_Status "Statusuebermittlung von Ladesaeulenspezifika";
+        charger_status.HVLM_HVLB_Status = ((bytes[4] & (0x0FU)) << 8) | (bytes[3] & (0xFFU)); // Receiver: DCDC_HV_02
+
+        // CM_ SG_ 2463978641 HVLM_HVLB_SollModus "Vorgabe SollModus vom HVLM an HVLB";
+        charger_status.HVLM_HVLB_SollModus = ((bytes[4] >> 4) & (0x07U)); // Receiver: DCDC_HV_02
+        break;
+
+    case 0x9A55554D: // HVLM_15 Sender: Ladegeraet_Konzern
+        // CM_ SG_ 2589283661 HVLM_PlanAnfr_Leistung "Ladeplan-Anfrage fuer die Ladeplanung: Leistung";
+        charger_status.HVLM_PlanAnfr_Leistung = ((bytes[0] & (0xFFU)) | ((bytes[1] & (0x0FU)) << 8)) * 200; // Receiver: AWC,DCDC_HV_02,TME
+
+        // CM_ SG_ 2589283661 HVLM_PlanAnfr_Zaehler "Ladeplan-Anfrage fuer die Ladeplanung: Zaehler";
+        charger_status.HVLM_PlanAnfr_Zaehler = ((bytes[1] >> 4) & (0x0FU)); // Receiver: AWC,DCDC_HV_02,TME
+
+        // CM_ SG_ 2589283661 HVLM_PlanAnfr_Dauer "Ladeplan-Anfrage fuer die Ladeplanung: Dauer";
+        charger_status.HVLM_PlanAnfr_Dauer = ((bytes[2] & (0xFFU)) | ((bytes[3] & (0x03U)) << 8)); // Receiver: AWC,DCDC_HV_02,TME
+
+        // CM_ SG_ 2589283661 HVLM_PlanAnfr_Ladeart "Anfrage Ladeart fuer Ladeplanerstellung";
+        charger_status.HVLM_PlanAnfr_Ladeart = ((bytes[3] >> 2) & (0x07U)); // Receiver: AWC,DCDC_HV_02,TME
+
+        // CM_ SG_ 2589283661 HVLM_EnergieAnfr_SocStart "Energieanfrage fuer die Ladeplanung: Start-SoC";
+        charger_status.HVLM_EnergieAnfr_SocStart = ((bytes[3] >> 5) & (0x07U)) | ((bytes[4] & (0x0FU)) << 3); // Receiver: BMC_MLBevo
+
+        // CM_ SG_ 2589283661 HVLM_EnergieAnfr_SocZiel "Energieanfrage fuer die Ladeplanung: Ziel-SOC";
+        charger_status.HVLM_EnergieAnfr_SocZiel = ((bytes[4] >> 4) & (0x0FU)) | ((bytes[5] & (0x07U)) << 4); // Receiver: BMC_MLBevo
+
+        // CM_ SG_ 2589283661 HVLM_EnergieAnfr_Zaehler "Fortlaufender Zaehler fuer die Anfrage Energie";
+        charger_status.HVLM_EnergieAnfr_Zaehler = ((bytes[5] >> 3) & (0x0FU)); // Receiver: BMC_MLBevo
+
+        // CM_ SG_ 2589283661 HVLM_LadegrenzeAnfr_Leistung "Anfrage Ladeleistung mit welcher bis zu SOC geladen werden kann";
+        charger_status.HVLM_LadegrenzeAnfr_Leistung = ((bytes[6] & (0xFFU)) | ((bytes[7] & (0x0FU)) << 8)) * 200; // Receiver: BMC_MLBevo
+
+        // CM_ SG_ 2589283661 HVLM_LadegrenzeAnfr_Zaehler "Fortlaufender Zaehler fuer die Anfrage Ladegrenze";
+        charger_status.HVLM_LadegrenzeAnfr_Zaehler = ((bytes[7] >> 4) & (0x0FU)); // Receiver: BMC_MLBevo
+        break;
+
+    case 0x97F00044: // KN_Ladegeraet Sender: Ladegeraet_Konzern
+        // CM_ SG_ 2549088324 LG_KompSchutz "Funktionseinschraenkung aufgrund Komponentenschutz aktiv";
+        charger_status.LG_KompSchutz = (bytes[0] & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 2549088324 LG_Abschaltstufe "Funktionseinschraenkung aufgrund aktiver Abschaltstufe";
+        charger_status.LG_Abschaltstufe = ((bytes[0] >> 1) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 2549088324 LG_Transport_Mode "Funktionseinschraenkung aufgrund aktivem Transport Mode/Schutz";
+        charger_status.LG_Transport_Mode = ((bytes[0] >> 2) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 2549088324 LG_Nachlauftyp "von Hardware vorgegebene Moeglichkeit, Kommunikation nach KL15=AUS aufrecht zu halten";
+        charger_status.LG_Nachlauftyp = ((bytes[0] >> 4) & (0x0FU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 2549088324 LG_SNI "Source Node Identifier";
+        charger_status.LG_SNI = (bytes[1] & (0xFFU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 2549088324 KN_Ladegeraet_ECUKnockOutTimer "Ausgabe ECUKnockOut-Timer";
+        charger_status.KN_Ladegeraet_ECUKnockOutTimer = (bytes[4] & (0x3FU)); // Receiver: Gateway
+
+        // CM_ SG_ 2549088324 KN_Ladegeraet_BusKnockOut "Ausgabe BusKnockOut-Status";
+        charger_status.KN_Ladegeraet_BusKnockOut = ((bytes[4] >> 6) & (0x03U)); // Receiver: Gateway
+
+        // CM_ SG_ 2549088324 KN_Ladegeraet_BusKnockOutTimer "Ausgabe BusKnockOut-Timer";
+        charger_status.KN_Ladegeraet_BusKnockOutTimer = (bytes[5] & (0xFFU)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 2549088324 NM_Ladegeraet_Wakeup "enthaelt Weckursache";
+        charger_status.NM_Ladegeraet_Wakeup = (bytes[6] & (0xFFU)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 2549088324 KN_Ladegeraet_ECUKnockOut "Ausgabe ECUKnockOut-Status";
+        charger_status.KN_Ladegeraet_ECUKnockOut = (bytes[7] & (0x03U)); // Receiver: Gateway
+
+        // CM_ SG_ 2549088324 NMH_Ladegeraet_Lokalaktiv "Zeigt an ob Steuergeraet lokal aktiv war";
+        charger_status.NMH_Ladegeraet_Lokalaktiv = ((bytes[7] >> 5) & (0x01U)); // Receiver: Gateway,Gateway_PAG
+
+        // CM_ SG_ 2549088324 NMH_Ladegeraet_Subsystemaktiv "Zeigt an ob ein Subsystem nach Klemme15 AUS noch aktiv war";
+        charger_status.NMH_Ladegeraet_Subsystemaktiv = ((bytes[7] >> 6) & (0x01U)); // Receiver: Vector__XXX
+
+        // CM_ SG_ 2549088324 LG_KD_Fehler "Bei gesetztem Bit ist mindestens ein Kundendienstfehler eingetragen";
+        charger_status.LG_KD_Fehler = ((bytes[7] >> 7) & (0x01U)); // Receiver: Gateway,Gateway_PAG
         break;
     }
 }

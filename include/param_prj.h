@@ -48,7 +48,7 @@
    3. Display values
  */
 // Next param id (increase when adding new parameter!): 167
-// Next value Id: 2334
+// Next value Id: 2337
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
@@ -98,39 +98,42 @@
    PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_Activation_Crg, "dig", 0, 1, 0, 164)              \
    PARAM_ENTRY(CAT_MLB_SIM, mlb_chr_sim_Lock, "dig", 0, 1, 0, 165)                        \
    PARAM_ENTRY(CAT_SETUP, charger_can, CAN_DEV, 0, 1, 1, 180)                             \
-   VALUE_ENTRY(mlb_chr_DC_Max_ChargePower, "W", 2300)                                     \
-   VALUE_ENTRY(mlb_chr_DC_Max_ChargeVoltage, "V", 2301)                                   \
-   VALUE_ENTRY(mlb_chr_DC_Actual_Current, "A", 2302)                                      \
-   VALUE_ENTRY(mlb_chr_DC_Max_ChargeCurrent, "A", 2303)                                   \
-   VALUE_ENTRY(mlb_chr_DC_Min_ChargeVoltage, "V", 2304)                                   \
-   VALUE_ENTRY(mlb_chr_DC_Min_ChargeCurrent, "A", 2305)                                   \
-   VALUE_ENTRY(mlb_chr_Status_Grid, "dig", 2306)                                          \
-   VALUE_ENTRY(mlb_chr_ChargeManagerMode, HVLM_OPMODE, 2307)                              \
-   VALUE_ENTRY(mlb_chr_ChargerRequestingHV, HVLM_ACTREQ, 2308)                            \
-   VALUE_ENTRY(mlb_chr_ChargerErrorStatus, HVLM_ERRORSTATUS, 2309)                        \
-   VALUE_ENTRY(mlb_chr_PlugStatus, HVLM_PLUGSTATUS, 2310)                                 \
-   VALUE_ENTRY(mlb_chr_LoadRequest, HVLM_LOADREQ, 2311)                                   \
-   VALUE_ENTRY(mlb_chr_ChargerState, HVLM_CHARGERMODE, 2312)                              \
-   VALUE_ENTRY(mlb_chr_Charger_AC_Volt_RMS, "V", 2313)                                    \
-   VALUE_ENTRY(mlb_chr_Charger_VoltageOut_HV, "V", 2314)                                  \
-   VALUE_ENTRY(mlb_chr_Charger_CurrentOut_HV, "A", 2315)                                  \
-   VALUE_ENTRY(mlb_chr_Charger_Temperature, "°C", 2316)                                   \
-   VALUE_ENTRY(mlb_chr_ChargerSystemState, HVLM_CHARGESYSSTATE, 2317)                     \
-   VALUE_ENTRY(mlb_chr_Status_LED, "dig", 2318)                                           \
-   VALUE_ENTRY(mlb_chr_MaxCurrent_AC, "A", 2319)                                          \
-   VALUE_ENTRY(mlb_chr_LockRequest, HVLM_CONNECTORLOCK, 2320)                             \
-   VALUE_ENTRY(mlb_chr_Charger_Ready, HVLM_CHGREADY, 2321)                                \
-   VALUE_ENTRY(mlb_chr_ChargerTemp_Reduction, "dig", 2322)                                \
-   VALUE_ENTRY(mlb_chr_ChargerCurrent_Reduction, "dig", 2323)                             \
-   VALUE_ENTRY(mlb_chr_SocketTemp_Reduction, "dig", 2324)                                 \
-   VALUE_ENTRY(mlb_chr_MaxChargerOutput, "W", 2325)                                       \
-   VALUE_ENTRY(mlb_chr_CableCurrentLimit, "A", 2326)                                      \
-   VALUE_ENTRY(mlb_chr_ControlPilotStatus, "dig", 2327)                                   \
-   VALUE_ENTRY(mlb_chr_LockState, "dig", 2328)                                            \
-   VALUE_ENTRY(mlb_chr_ChargerWarning, "dig", 2329)                                       \
-   VALUE_ENTRY(mlb_chr_ChargerFault, "dig", 2330)                                         \
-   VALUE_ENTRY(mlb_chr_OutputVolts, "V", 2331)                                            \
+   VALUE_ENTRY(mlb_chr_HVLM_MaxLadeLeistung, "W", 2300)                                   \
+   VALUE_ENTRY(mlb_chr_HVLM_MaxSpannung_DCLS, "V", 2301)                                  \
+   VALUE_ENTRY(mlb_chr_HVLM_IstStrom_DCLS, "A", 2302)                                     \
+   VALUE_ENTRY(mlb_chr_HVLM_MaxStrom_DCLS, "A", 2303)                                     \
+   VALUE_ENTRY(mlb_chr_HVLM_MinSpannung_DCLS, "V", 2304)                                  \
+   VALUE_ENTRY(mlb_chr_HVLM_MinStrom_DCLS, "A", 2305)                                     \
+   VALUE_ENTRY(mlb_chr_HVLM_Status_Netz, HVLM_STATUS_NETZ, 2306)                          \
+   VALUE_ENTRY(mlb_chr_HVLM_IstModus_02, HVLM_ISTMODUS_02, 2307)                          \
+   VALUE_ENTRY(mlb_chr_HVLM_HV_Anf, HVLM_HV_ANF, 2308)                                    \
+   VALUE_ENTRY(mlb_chr_HVLM_Fehlerstatus, HVLM_FEHLERSTATUS, 2309)                        \
+   VALUE_ENTRY(mlb_chr_HVLM_Stecker_Status, HVLM_STECKER_STATUS, 2310)                    \
+   VALUE_ENTRY(mlb_chr_HVLM_LadeAnforderung, HVLM_LADEANFORDERUNG, 2311)                  \
+   VALUE_ENTRY(mlb_chr_LAD_IstModus, LAD_ISTMODUS, 2312)                                  \
+   VALUE_ENTRY(mlb_chr_LAD_AC_Istspannung, "V", 2313)                                     \
+   VALUE_ENTRY(mlb_chr_LAD_IstSpannung_HV, "V", 2314)                                     \
+   VALUE_ENTRY(mlb_chr_LAD_IstStrom_HV, "A", 2315)                                        \
+   VALUE_ENTRY(mlb_chr_LAD_Temperatur, "°C", 2316)                                        \
+   VALUE_ENTRY(mlb_chr_HVLM_Ladesystemhinweise, HVLM_LADESYSTEMHINWEISE, 2317)            \
+   VALUE_ENTRY(mlb_chr_HVLM_Zustand_LED, HVLM_ZUSTAND_LED, 2318)                          \
+   VALUE_ENTRY(mlb_chr_HVLM_MaxStrom_Netz, "Unit_Amper", 2319)                            \
+   VALUE_ENTRY(mlb_chr_HVLM_LG_Sollmodus, HVLM_LG_SOLLMODUS, 2334)                        \
+   VALUE_ENTRY(mlb_chr_HVLM_Stecker_Verriegeln, HVLM_STECKER_VERRIEGELN, 2320)            \
+   VALUE_ENTRY(mlb_chr_HVLM_Ladetexte, HVLM_LADETEXTE, 2321)                              \
+   VALUE_ENTRY(mlb_chr_LAD_Abregelung_Temperatur, LAD_ABREGELUNG_TEMPERATUR, 2322)        \
+   VALUE_ENTRY(mlb_chr_LAD_Abregelung_IU_Ein_Aus, LAD_ABREGELUNG_IU_EIN_AUS, 2323)        \
+   VALUE_ENTRY(mlb_chr_LAD_Abregelung_BuchseTemp, LAD_ABREGELUNG_BUCHSETEMP, 2324)        \
+   VALUE_ENTRY(mlb_chr_LAD_MaxLadLeistung_HV, "W", 2325)                                  \
+   VALUE_ENTRY(mlb_chr_LAD_PRX_Stromlimit, LAD_PRX_STROMLIMIT, 2326)                      \
+   VALUE_ENTRY(mlb_chr_LAD_CP_Erkennung, LAD_CP_ERKENNUNG, 2327)                          \
+   VALUE_ENTRY(mlb_chr_LAD_Stecker_Verriegelt, LAD_STECKER_VERRIEGELT, 2328)              \
+   VALUE_ENTRY(mlb_chr_LAD_Warnzustand, LAD_WARNZUSTAND, 2329)                            \
+   VALUE_ENTRY(mlb_chr_LAD_Fehlerzustand, LAD_FEHLERZUSTAND, 2330)                        \
+   VALUE_ENTRY(mlb_chr_HVLM_IstSpannung_HV, "V", 2331)                                    \
    VALUE_ENTRY(mlb_chr_ActivationState, "dig", 2332)                                      \
+   VALUE_ENTRY(mlb_chr_LG_KompSchutz, LG_KOMPSCHUTZ, 2335)                                \
+   VALUE_ENTRY(mlb_chr_LG_Abschaltstufe, LG_ABSCHALTSTUFE, 2336)                          \
                                                                                           \
    PARAM_ENTRY(CAT_SETUP, BMS_CAN, CAN_DEV, 0, 1, 1, 110)                                 \
    VALUE_ENTRY(BMS_Vmin, "V", 2201)                                                       \
@@ -228,15 +231,28 @@
 #define CAT_LVDU "Low Voltage Distribution"
 #define CAT_MLB_SIM "MLB Charger Sim"
 #define CHGMODS "0=Off, 1=EXT_DIGI, 2=Volt_Ampera, 3=Leaf_PDM, 4=TeslaOI, 5=Out_lander, 6=Elcon, 7=MGgen2, 8=MLBEvo"
-#define HVLM_OPMODE "0=Inactive, 1=Active, 2=Init, 3=Error"
-#define HVLM_ACTREQ "0=No Request, 1=Charging, 2=Balancing, 3=AC/Climate"
-#define HVLM_ERRORSTATUS "0=No Error, 1=DC-NotOK, 2=AC-NotOK, 3=Interlock, 4=Reserved, 5=Reserved, 6=NoComponentFunction, 7=Init"
-#define HVLM_PLUGSTATUS "0=Init, 1=NoPlug, 2=PlugIn, 3=PlugLocked"
-#define HVLM_LOADREQ "0=NoRequest, 1=ACCharge, 2=DCCharge, 3=Recharge12V, 4=ACAWCCharge, 5=Reserved, 6=Init, 7=Error"
-#define HVLM_CHARGERMODE "0=Standby, 1=ACCharging, 3=DCCharging, 4=Precharge, 5=Fail, 7=Init"
-#define HVLM_CHARGESYSSTATE "0=OK, 1=Defective, 2=Incompatible, 3=DCChargeNotPossible"
-#define HVLM_CONNECTORLOCK "0=Unlock, 1=Lock, 2=Init, 3=NoRequest"
-#define HVLM_CHGREADY "0=NoError, 1=ACNotPossible, 2=DCNotPossible, 3=AC&DCNotPossible"
+#define HVLM_STATUS_NETZ "0=Fzg_nicht_am_Netz, 1=Fzg_ist_am_Stromnetz"
+#define HVLM_ISTMODUS_02 "0=inaktiv, 1=aktiv, 2=Init, 3=Fehler"
+#define HVLM_HV_ANF "0=keine_Anforderung, 1=Laden_angefordert, 2=Batteriekonditionierung_angefordert, 3=Standklimatisierung_angefordert"
+#define HVLM_FEHLERSTATUS "0=Komponente_IO, 1=Eingeschr_KompFkt_DC_Lad_NIO, 2=Eingeschr_KompFkt_AC_Lad_NIO, 3=Eingeschr_KompFkt_Interlock, 4=Eingeschr_KompFkt_reserve, 5=Eingeschr_KompFkt_reserve, 6=Keine_Komponentenfunktion, 7=Init"
+#define HVLM_STECKER_STATUS "0=Init, 1=kein_Stecker_gesteckt, 2=Stecker_erkannt_nicht_verriegelt, 3=Stecker_erkannt_und_verriegelt"
+#define HVLM_LADEANFORDERUNG "0=keine_Anforderung, 1=AC_Laden, 2=DC_Laden, 3=Nachladen_12V, 4=AC_Laden_AWC, 5=Reserve, 6=Init, 7=Fehler"
+#define LAD_ISTMODUS "0=Standby, 1=AC_Netzladung, 3=DC_Netzladung, 4=PreCharge_aktiv, 5=Fehler, 7=Init"
+#define HVLM_LADESYSTEMHINWEISE "0=kein_Hinweis, 1=Ladesystem_defekt, 2=Ladesaeule_inkompatibel, 3=DC_Laden_nicht_moeglich"
+#define HVLM_ZUSTAND_LED "0=Farbe_1_aus, 1=Farbe_2_weiss, 2=Farbe_3_gelb, 3=Farbe_4_gruen, 4=Farbe_5_rot, 5=Farbe_3_pulsierend, 6=Farbe_4_pulsierend, 7=Farbe_5_pulsierend, 8=Farbe_4_5_pulsierend, 9=Farbe_4_gruen_blinkend, 14=Init, 15=Fehler"
+#define HVLM_LG_SOLLMODUS "0=Standby, 1=Netzladung"
+#define HVLM_STECKER_VERRIEGELN "0=Stecker_entriegeln, 1=Stecker_verriegeln, 2=Init, 3=keine_Anforderung"
+#define HVLM_LADETEXTE "0=Keine_Anzeige, 1=AC_Laden_nicht_moeglich, 2=DC_Laden_nicht_moeglich, 3=AC_und_DC_Laden_nicht_moeglich"
+#define LAD_ABREGELUNG_TEMPERATUR "0=keine_Begrenzung, 1=Abregelung_Temp"
+#define LAD_ABREGELUNG_IU_EIN_AUS "0=keine_Abregelung, 1=Abregelung_UI"
+#define LAD_ABREGELUNG_BUCHSETEMP "0=keine_Abregelung, 1=Abregelung_Buchsentemp"
+#define LAD_PRX_STROMLIMIT "0=13_Ampere, 1=20_Ampere, 2=32_Ampere, 3=63_Ampere, 6=Init, 7=Fehler"
+#define LAD_CP_ERKENNUNG "0=CP_nicht_erkannt, 1=CP_erkannt"
+#define LAD_STECKER_VERRIEGELT "0=nicht_verriegelt, 1=verriegelt"
+#define LAD_WARNZUSTAND "0=keine_Warnung, 1=Warnung_aktiv"
+#define LAD_FEHLERZUSTAND "0=kein_Fehler_aktiv, 1=Fehler_aktiv_Laden_beendet"
+#define LG_KOMPSCHUTZ "0=inaktiv, 1=aktiv"
+#define LG_ABSCHALTSTUFE "0=keine_Einschraenkung, 1=Funktionseinschraenkung"
 
 #define BMS_STATE "0=INIT, 1=OPERATING, 2=FAULT"
 #define BMS_BALANCING_STATUS "0=idle, 1=balancing, 2=finished"
