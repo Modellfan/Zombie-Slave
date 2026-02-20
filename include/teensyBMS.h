@@ -41,7 +41,7 @@ private:
     float averageEnergyPerHour = 0;
     float remainingEnergyKWh = 0;
 
-    float remainingTimeMinutes = 0;
+    float remainingTimeSeconds = 0;
 
     uint8_t state = 0;
     uint8_t dtc = 0;
@@ -56,7 +56,6 @@ private:
 
     // Contactor manager
     uint8_t contactorState = 0;
-    uint8_t contactorDTC = 0;
     bool contactorNegativeInput = false;
     bool contactorPositiveInput = false;
     bool contactorPrechargeInput = false;

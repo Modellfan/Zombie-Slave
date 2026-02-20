@@ -84,7 +84,8 @@ void TeensyBMS::parseMsg3(uint8_t* d) {
     maxDischargeCurrent = (d[0] | (d[1] << 8)) / 10.0f;
     maxChargeCurrent = (d[2] | (d[3] << 8)) / 10.0f;
     contactorState = d[4];
-    contactorDTC = d[5];
+    // Byte 5 is BMS-level DTC bits in current TeensyVCU firmware.
+    dtc = d[5];
 }
 
 void TeensyBMS::parseMsg4(uint8_t* d) {
@@ -92,7 +93,7 @@ void TeensyBMS::parseMsg4(uint8_t* d) {
     soc = (d[0] | (d[1] << 8)) / 100.0f;
     soh = (d[2] | (d[3] << 8)) / 100.0f;
     balancingStatus = d[4];
-    balancingActive = balancingStatus != 0;
+    balancingActive = balancingStatus == 1;
     anyBalancing = balancingActive;
     state = d[5];
 }
@@ -103,9 +104,7 @@ void TeensyBMS::parseMsg5(uint8_t* d) {
                                                          (static_cast<uint16_t>(d[1]) << 8));
     averageEnergyPerHour = rawEnergyPerHour / 100.0f; // kWh per hour == kW
 
-    const uint16_t rawRemainingTimeSeconds =
-        static_cast<uint16_t>(d[2]) | (static_cast<uint16_t>(d[3]) << 8);
-    remainingTimeMinutes = rawRemainingTimeSeconds / 60.0f;
+    remainingTimeSeconds = static_cast<uint16_t>(d[2]) | (static_cast<uint16_t>(d[3]) << 8);
 
     const uint16_t rawRemainingEnergyWh =
         static_cast<uint16_t>(d[4]) | (static_cast<uint16_t>(d[5]) << 8);
@@ -123,7 +122,7 @@ void TeensyBMS::Task100Ms() {
 
     const bool timeout = timeoutCounter == 0;
     const bool fault = dtc != 0;
-    const bool contactorFault = contactorDTC != 0;
+    const bool contactorFault = (dtc & 0x08) != 0; // DTC_BMS_CONTACTOR_FAULT
     const bool bmsValid = !timeout && !fault && !contactorFault;
 
     if (timeout) {
@@ -161,11 +160,12 @@ void TeensyBMS::Task100Ms() {
     Param::SetInt(Param::BMS_DataValid, bmsValid);
 
     Param::SetFloat(Param::BMS_AvgEnergyPerHour, averageEnergyPerHour);
-    Param::SetFloat(Param::BMS_RemainingTime, remainingTimeMinutes);
+    Param::SetFloat(Param::BMS_RemainingTime, remainingTimeSeconds);
     Param::SetFloat(Param::BMS_RemainingEnergy, remainingEnergyKWh);
 
     Param::SetInt(Param::BMS_CONT_State, contactorState);
-    Param::SetInt(Param::BMS_CONT_DTC, contactorDTC);
+    // Current firmware does not publish contactor-manager specific DTCs on 0x41C byte 5.
+    Param::SetInt(Param::BMS_CONT_DTC, 0);
 
     // Send VCU status back to the BMS every cycle (100ms)
     if (can) {

@@ -345,7 +345,7 @@ private:
             if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_CONNECTED && queuedState != STATE_INVALID)
                 TransitionTo(queuedState, prevTriggerEvent);
             else if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_FAULT)
-                TransitionTo(STATE_ERROR, VehicleTriggerEvent::HVCM_FAULT_WHILE_CONNECTING);
+                TransitionTo(STATE_HV_DISCONNECTING, STATE_ERROR, VehicleTriggerEvent::HVCM_FAULT_WHILE_CONNECTING);
             break;
 
         case STATE_HV_DISCONNECTING:
@@ -503,7 +503,7 @@ private:
 
     case STATE_ERROR:
         if (!ignitionOn)
-            TransitionTo(STATE_HV_DISCONNECTING, STATE_SLEEP, VehicleTriggerEvent::IGNITION_OFF_IN_ERROR);
+            TransitionTo(STATE_SLEEP, VehicleTriggerEvent::IGNITION_OFF_IN_ERROR);
         break;
 
     case STATE_LIMP_HOME:

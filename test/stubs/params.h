@@ -52,7 +52,7 @@ public:
     static int  GetInt(int idx) { return values[idx]; }
 
 private:
-    static int values[64];
+    static int values[256];
 };
 
 // Storage for parameters will be defined in params.cpp

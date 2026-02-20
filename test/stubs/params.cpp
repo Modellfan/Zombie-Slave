@@ -1,2 +1,2 @@
 #include "params.h"
-int Param::values[64] = {0};
+int Param::values[256] = {0};
