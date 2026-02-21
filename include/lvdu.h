@@ -365,9 +365,9 @@ private:
             {
                 TransitionTo(STATE_HV_CONNECTING, STATE_CONDITIONING, VehicleTriggerEvent::REMOTE_PRECONDITIONING_REQUESTED);
             }
-            else if (chargerPlugged)
+            else if (chargerPlugged && !chargeFinishedLatched)
             {
-                TransitionTo(STATE_HV_CONNECTING, STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN);
+                TransitionTo(STATE_HV_CONNECTING, STATE_CHARGE, VehicleTriggerEvent::CHARGER_PLUGGED_IN_AND_NOT_CHARGE_FINISHED_LATCHED);
             }
             else
             {

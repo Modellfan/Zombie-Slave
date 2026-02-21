@@ -62,13 +62,9 @@ private:
 
     bool fault_thermal_switch_boot = false;
     bool fault_contactor = false;
-    bool fault_thermal_switch_does_not_open = false;
-    bool fault_thermal_switch_overheat = false;
 
     uint8_t contactor_fault_timer_on = 0;
     uint8_t contactor_fault_timer_off = 0;
-    uint16_t thermal_open_timer = 0;
-    uint16_t thermal_close_timer = 0;
     uint16_t contactor_on_delay_timer = 0;
     uint8_t heater_off_confirm_counter = 0;
 
@@ -97,7 +93,6 @@ public:
         CheckThermalSwitchBootFault();
 
         DiagnoseContactor();
-        DiagnoseThermalSwitch();
 
         // Read control inputs
         int flap_signal       = Param::GetInt(Param::valve_in_raw);
@@ -129,8 +124,7 @@ public:
                       heater_off_confirm_counter >= HEATER_OFF_CONFIRM_STEPS ? 1 : 0);
 
         // Aggregate fault flag
-        bool fault_present = fault_thermal_switch_boot || fault_contactor ||
-                             fault_thermal_switch_does_not_open || fault_thermal_switch_overheat;
+        bool fault_present = fault_thermal_switch_boot || fault_contactor;
 
         Param::SetInt(Param::heater_fault, fault_present ? 1 : 0);
 
@@ -219,44 +213,6 @@ private:
         }
     }
 
-    void DiagnoseThermalSwitch()
-    {
-        bool contactor_on = (DigIo::heater_contactor_out.Get() == 1); 
-        bool thermal_closed = DigIo::heater_thermal_switch_in.Get();  // High = closed
-
-        int open_timeout_steps  = Param::GetInt(Param::heater_thermal_open_timeout) * 100;  // seconds -> 10ms steps
-        int close_timeout_steps = Param::GetInt(Param::heater_thermal_close_timeout) * 100; // seconds -> 10ms steps
-
-        // Fault: Should open after contactor ON
-        if (contactor_on && thermal_closed)
-        {
-            if (++thermal_open_timer >= open_timeout_steps)
-            {
-                if (!fault_thermal_switch_does_not_open)
-                    ErrorMessage::Post(ERR_HEATER_THERMAL_SWITCH_STUCK_CLOSED);
-                fault_thermal_switch_does_not_open = true;
-            }
-        }
-        else
-        {
-            thermal_open_timer = 0;
-        }
-
-        // Fault: Should close after contactor OFF
-        if (!contactor_on && !thermal_closed)
-        {
-            if (++thermal_close_timer >= close_timeout_steps)
-            {
-                if (!fault_thermal_switch_overheat)
-                    ErrorMessage::Post(ERR_HEATER_THERMAL_SWITCH_STUCK_OPEN);
-                fault_thermal_switch_overheat = true;
-            }
-        }
-        else
-        {
-            thermal_close_timer = 0;
-        }
-    }
 };
 
 #endif // HEATER_H
