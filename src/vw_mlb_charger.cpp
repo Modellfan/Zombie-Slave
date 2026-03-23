@@ -143,7 +143,7 @@ bool VWMLBClass::ControlCharge(bool RunCh, bool ACReq)
 
 void VWMLBClass::Task10Ms()
 {
-    static uint8_t counter10ms = 0;
+    static uint16_t counter10ms = 0;
 
     // stop CAN chatter when requested
     if (vehicle_status.CANQuiet == 1)
@@ -177,7 +177,12 @@ void VWMLBClass::Task10Ms()
     if (counter10ms % 5 == 0)
     {
         msg2AE(); // DCDC_01    0x2AE     CRC
-        counter10ms = 0;
+    }
+
+    // --- 960 ms tasks ---
+    if (counter10ms % 96 == 0)
+    {
+        msg1A555548(); // ORU_01 0x1A555548
     }
 }
 
@@ -203,12 +208,11 @@ void VWMLBClass::Task100Ms()
     {
         msg3C0(); //  Klemmen_Status_01   CRC
         msg503(); // HVK_01     0x503     CRC
-        msg184(); // ZV_01    0x184       CRC
-        msg578(); // BMS_DC_01    0x578   CRC
+        msg17B(); // FCU_02    0x17B       DBC GenMsgCycleTime = 100 ms
         msg1A1();
         msg39D();
         msg509();
-        msg552();
+        msg552(); // HVEM_05 0x552         DBC GenMsgCycleTime = 100 ms
         msg5AC();
     }
 
@@ -216,7 +220,7 @@ void VWMLBClass::Task100Ms()
     if (counter100ms % 2 == 0)
     {
         msg1A2(); // ESP_15   0x1A2       CRC
-        msg583();
+        msg583(); // ZV_02 0x583           DBC GenMsgCycleTime = 200 ms
     }
 
     // --- 500 ms tasks ---
@@ -231,8 +235,9 @@ void VWMLBClass::Task100Ms()
     // --- 1000 ms tasks ---
     if (counter100ms % 10 == 0)
     {
+        msg184(); // ZV_01    0x184       CRC
+        msg578(); // BMS_DC_01    0x578   CRC
         msg485();
-        msg1A555548();
         msg1A5555AD();
         msg96A955EB();
         msg9A555539();
@@ -448,11 +453,33 @@ void VWMLBClass::emulateMLB()
     // Lock Status:
     if (vehicle_status.locked == 0)
     {
-        mlb_state.ZV_verriegelt_soll = 1;
+        mlb_state.ZV_FT_verriegeln = 0;         // VAL_ 388 ZV_FT_verriegeln 0 "FT nicht verriegeln" 1 "FT verriegeln" ;
+        mlb_state.ZV_FT_entriegeln = 1;         // VAL_ 388 ZV_FT_entriegeln 0 "FT nicht entriegeln" 1 "FT entriegeln" ;
+        mlb_state.ZV_BT_verriegeln = 0;         // VAL_ 388 ZV_BT_verriegeln 0 "BT nicht verriegeln" 1 "BT verriegeln" ;
+        mlb_state.ZV_BT_entriegeln = 1;         // VAL_ 388 ZV_BT_entriegeln 0 "BT nicht entriegeln" 1 "BT ist zu entriegeln" ;
+        mlb_state.ZV_entriegeln_Anf = 1;        // VAL_ 388 ZV_entriegeln_Anf 0 "nicht_betaetigt" 1 "betaetigt" ;
+        mlb_state.ZV_verriegelt_intern_ist = 0; // VAL_ 1411 ZV_verriegelt_intern_ist 1 "Fahrzeug innen verriegelt; Istzustand" ;
+        mlb_state.ZV_verriegelt_extern_ist = 0; // VAL_ 1411 ZV_verriegelt_extern_ist 1 "Fahrzeug_aussen_verriegelt_Istzustand" ;
+        mlb_state.ZV_verriegelt_intern_soll = 0; // VAL_ 1411 ZV_verriegelt_intern_soll 1 "Fahrzeug verriegelt intern; Sollzusstand" ;
+        mlb_state.ZV_verriegelt_extern_soll = 0; // VAL_ 1411 ZV_verriegelt_extern_soll 1 "Fahrzeug verriegelt extern; Sollzusstand" ;
+        mlb_state.ZV_verriegelt_soll = 1;       // VAL_ 1411 ZV_verriegelt_soll 0 "Init" 1 "nicht_verriegelt" 2 "verriegelt" ;
+        mlb_state.FCU_TK_Betankung_Anforderung = 0; // VAL_ 379 FCU_TK_Betankung_Anforderung 0 "inaktiv" 1 "aktiv" ;
+        mlb_state.FCU_TK_Freigabe_Tankklappe = 1; // VAL_ 379 FCU_TK_Freigabe_Tankklappe 0 "keineFreigabe" 1 "Freigabe" 2 "Init" 3 "Fehler" ;
     }
-    if (vehicle_status.locked == 1)
+    else
     {
-        mlb_state.ZV_verriegelt_soll = 2;
+        mlb_state.ZV_FT_verriegeln = 1;         // VAL_ 388 ZV_FT_verriegeln 0 "FT nicht verriegeln" 1 "FT verriegeln" ;
+        mlb_state.ZV_FT_entriegeln = 0;         // VAL_ 388 ZV_FT_entriegeln 0 "FT nicht entriegeln" 1 "FT entriegeln" ;
+        mlb_state.ZV_BT_verriegeln = 1;         // VAL_ 388 ZV_BT_verriegeln 0 "BT nicht verriegeln" 1 "BT verriegeln" ;
+        mlb_state.ZV_BT_entriegeln = 0;         // VAL_ 388 ZV_BT_entriegeln 0 "BT nicht entriegeln" 1 "BT ist zu entriegeln" ;
+        mlb_state.ZV_entriegeln_Anf = 0;        // VAL_ 388 ZV_entriegeln_Anf 0 "nicht_betaetigt" 1 "betaetigt" ;
+        mlb_state.ZV_verriegelt_intern_ist = 1; // VAL_ 1411 ZV_verriegelt_intern_ist 1 "Fahrzeug innen verriegelt; Istzustand" ;
+        mlb_state.ZV_verriegelt_extern_ist = 1; // VAL_ 1411 ZV_verriegelt_extern_ist 1 "Fahrzeug_aussen_verriegelt_Istzustand" ;
+        mlb_state.ZV_verriegelt_intern_soll = 1; // VAL_ 1411 ZV_verriegelt_intern_soll 1 "Fahrzeug verriegelt intern; Sollzusstand" ;
+        mlb_state.ZV_verriegelt_extern_soll = 1; // VAL_ 1411 ZV_verriegelt_extern_soll 1 "Fahrzeug verriegelt extern; Sollzusstand" ;
+        mlb_state.ZV_verriegelt_soll = 2;       // VAL_ 1411 ZV_verriegelt_soll 0 "Init" 1 "nicht_verriegelt" 2 "verriegelt" ;
+        mlb_state.FCU_TK_Betankung_Anforderung = 0; // VAL_ 379 FCU_TK_Betankung_Anforderung 0 "inaktiv" 1 "aktiv" ;
+        mlb_state.FCU_TK_Freigabe_Tankklappe = 0; // VAL_ 379 FCU_TK_Freigabe_Tankklappe 0 "keineFreigabe" 1 "Freigabe" 2 "Init" 3 "Fehler" ;
     }
 
     // // Charger Activation State Logic:
@@ -619,18 +646,26 @@ void VWMLBClass::SetCanInterface(CanHardware *c)
     can->RegisterUserMessage(0x564); // LAD_01
     can->RegisterUserMessage(0x565); // HVLM_03
     can->RegisterUserMessage(0x67E); // LAD_02
-    can->RegisterUserMessage(0x9A55549D); // HVLM_08
-    can->RegisterUserMessage(0x9A555515); // HVLM_09
-    can->RegisterUserMessage(0x92DD5472); // HVLM_10
-    can->RegisterUserMessage(0x92DD5491); // HVLM_11
-    can->RegisterUserMessage(0x9A55554D); // HVLM_15
-    can->RegisterUserMessage(0x97F00044); // KN_Ladegeraet
+    // Register raw 29-bit IDs and legacy flag-encoded IDs for backend compatibility.
+    can->RegisterUserMessage(0x1A55549D); // HVLM_08
+    can->RegisterUserMessage(0x9A55549D); // HVLM_08 (legacy flag-encoded)
+    can->RegisterUserMessage(0x1A555515); // HVLM_09
+    can->RegisterUserMessage(0x9A555515); // HVLM_09 (legacy flag-encoded)
+    can->RegisterUserMessage(0x12DD5472); // HVLM_10
+    can->RegisterUserMessage(0x92DD5472); // HVLM_10 (legacy flag-encoded)
+    can->RegisterUserMessage(0x12DD5491); // HVLM_11
+    can->RegisterUserMessage(0x92DD5491); // HVLM_11 (legacy flag-encoded)
+    can->RegisterUserMessage(0x1A55554D); // HVLM_15
+    can->RegisterUserMessage(0x9A55554D); // HVLM_15 (legacy flag-encoded)
+    can->RegisterUserMessage(0x17F00044); // KN_Ladegeraet
+    can->RegisterUserMessage(0x97F00044); // KN_Ladegeraet (legacy flag-encoded)
 }
 
 void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
 {
     uint8_t *bytes = (uint8_t *)data; // arrgghhh this converts the two 32bit array into bytes. See comments are useful:) ... Stolen from Zombie, Left comments as they're now famous.
     uint32_t can_id = static_cast<uint32_t>(id);
+    if (can_id > 0x1FFFFFFFU) can_id &= 0x1FFFFFFFU;
     switch (can_id)
     {
     case 0x488: // HVLM_06 Sender: Ladegeraet_Konzern
@@ -826,7 +861,7 @@ void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
         charger_status.LAD_Fehlerzustand = ((bytes[7] >> 7) & (0x01U)); // Receiver: Vector__XXX
         break;
 
-    case 0x9A55549D: // HVLM_08 Sender: Ladegeraet_Konzern
+    case 0x1A55549D: // HVLM_08 Sender: Ladegeraet_Konzern
         // CM_ SG_ 2589283485 HVLM_Funktion_Dauer_BattKond "Funktion Dauerkonditionierung HV-Batterie.";
         charger_status.HVLM_Funktion_Dauer_BattKond = ((bytes[6] >> 6) & (0x01U)); // Receiver: BMC_MLBevo,Gateway,Gateway_PAG
 
@@ -837,13 +872,13 @@ void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
         charger_status.HVLM_Dauer_Klima_02 = ((bytes[7] >> 2) & (0x3FU)); // Receiver: Gateway,Gateway_PAG,TME
         break;
 
-    case 0x9A555515: // HVLM_09 Sender: Ladegeraet_Konzern
+    case 0x1A555515: // HVLM_09 Sender: Ladegeraet_Konzern
         // CM_ SG_ 2589283605 HVLM_AWC_Sollstrom "Angeforderter Sollstrom fuer AWC Laden";
         charger_status.HVLM_AWC_Sollstrom =
             ((((bytes[6] >> 7) & (0x01U)) | ((bytes[7] & (0xFFU)) << 1)) * 0.1f); // Receiver: AWC
         break;
 
-    case 0x92DD5472: // HVLM_10 Sender: Ladegeraet_Konzern
+    case 0x12DD5472: // HVLM_10 Sender: Ladegeraet_Konzern
         // CM_ SG_ 2463978610 HVLM_RtmWarnLadeverbindung "RTM Charging connection fault";
         charger_status.HVLM_RtmWarnLadeverbindung = ((bytes[3] >> 7) & (0x01U)) | ((bytes[4] & (0x03U)) << 1); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
 
@@ -872,7 +907,7 @@ void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
         charger_status.HVLM_Ladeanzeige_Intens_Front = ((bytes[7] >> 1) & (0x7FU)); // Receiver: Gateway,Gateway_PAG,Sub_Gateway
         break;
 
-    case 0x92DD5491: // HVLM_11 Sender: Ladegeraet_Konzern
+    case 0x12DD5491: // HVLM_11 Sender: Ladegeraet_Konzern
         // CM_ SG_ 2463978641 HVLM_11_CRC "Berechnung siehe Lastenheft Kommunikationsabsicherung / End-to-End Kommunikationsabsicherung";
         charger_status.HVLM_11_CRC = (bytes[0] & (0xFFU)); // Receiver: DCDC_HV_02
 
@@ -890,7 +925,7 @@ void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
         charger_status.HVLM_HVLB_SollModus = ((bytes[4] >> 4) & (0x07U)); // Receiver: DCDC_HV_02
         break;
 
-    case 0x9A55554D: // HVLM_15 Sender: Ladegeraet_Konzern
+    case 0x1A55554D: // HVLM_15 Sender: Ladegeraet_Konzern
         // CM_ SG_ 2589283661 HVLM_PlanAnfr_Leistung "Ladeplan-Anfrage fuer die Ladeplanung: Leistung";
         charger_status.HVLM_PlanAnfr_Leistung = ((bytes[0] & (0xFFU)) | ((bytes[1] & (0x0FU)) << 8)) * 200; // Receiver: AWC,DCDC_HV_02,TME
 
@@ -919,7 +954,7 @@ void VWMLBClass::DecodeCAN(int id, uint32_t data[2])
         charger_status.HVLM_LadegrenzeAnfr_Zaehler = ((bytes[7] >> 4) & (0x0FU)); // Receiver: BMC_MLBevo
         break;
 
-    case 0x97F00044: // KN_Ladegeraet Sender: Ladegeraet_Konzern
+    case 0x17F00044: // KN_Ladegeraet Sender: Ladegeraet_Konzern
         // CM_ SG_ 2549088324 LG_KompSchutz "Funktionseinschraenkung aufgrund Komponentenschutz aktiv";
         charger_status.LG_KompSchutz = (bytes[0] & (0x01U)); // Receiver: Vector__XXX
 
@@ -1071,15 +1106,18 @@ void VWMLBClass::msg5CA() // BMS_07   0x5CA
 {
     uint8_t buf[8]{};
     buf[1] = vag_cnt5CA;
-    buf[2] = (mlb_state.BMS_Batt_Energy & 0x0F) << 4;
-    buf[3] = ((mlb_state.BMS_Batt_Energy >> 4) & 0x7F) |
+    buf[1] |= (mlb_state.BMS_Batt_Energy & 0x0F) << 4;
+    buf[2] = ((mlb_state.BMS_Batt_Energy >> 4) & 0x7F) |
              ((mlb_state.BMS_Charger_Active & 0x01) << 7);
-    buf[4] = (mlb_state.BMS_Battdiag & 0x07) |
+    buf[3] = (mlb_state.BMS_Battdiag & 0x07) |
              ((mlb_state.BMS_Freig_max_Perf & 0x03) << 3) |
              ((mlb_state.BMS_Balancing_Active & 0x03) << 6);
-    buf[5] = mlb_state.BMS_Max_Wh & 0xFF;
-    buf[6] = (mlb_state.BMS_Max_Wh >> 8) & 0x07;
-    buf[7] = (mlb_state.BMS_RIso_Ext >> 2) & 0xFF;
+    buf[4] = mlb_state.BMS_Max_Wh & 0xFF;
+    buf[5] = ((mlb_state.BMS_Max_Wh >> 8) & 0x07) |
+             ((mlb_state.HVK_Gesamtst_Spgfreiheit & 0x03) << 4) |
+             ((mlb_state.BMS_RIso_Ext & 0x03) << 6);
+    buf[6] = (mlb_state.BMS_RIso_Ext >> 2) & 0xFF;
+    buf[7] = (mlb_state.BMS_RIso_Ext >> 10) & 0x03;
     buf[0] = vag_utils::vw_crc_calc(buf, 8, ID_BMS_07);
     can->Send(ID_BMS_07, buf, 8);
     vag_cnt5CA = (vag_cnt5CA + 1) & 0x0F;
@@ -1101,8 +1139,8 @@ void VWMLBClass::msg3C0() // Klemmen_Status_01
     buf[1] = vag_cnt3C0;
     buf[2] = (mlb_state.ZAS_Kl_S & 0x01) | ((mlb_state.ZAS_Kl_15 & 0x01) << 1) | ((mlb_state.ZAS_Kl_X & 0x01) << 2) |
              ((mlb_state.ZAS_Kl_50_Startanforderung & 0x01) << 3);
-    buf[0] = vag_utils::vw_crc_calc(buf, 8, 0x3C0);
-    can->Send(0x3C0, buf, 8);
+    buf[0] = vag_utils::vw_crc_calc(buf, 4, 0x3C0);
+    can->Send(0x3C0, buf, 4);
     vag_cnt3C0 = (vag_cnt3C0 + 1) & 0x0F;
 }
 
@@ -1180,6 +1218,14 @@ void VWMLBClass::msg583() // ZV_02 0x583
              ((mlb_state.ZV_verriegelt_extern_soll & 0x01) << 3);
     buf[7] = (mlb_state.ZV_verriegelt_soll & 0x03) << 6;
     can->Send(ID_ZV_02, buf, 8);
+}
+
+void VWMLBClass::msg17B() // FCU_02 0x17B
+{
+    uint8_t buf[8]{};
+    buf[5] = (mlb_state.FCU_TK_Betankung_Anforderung & 0x01) << 3; // DBC SG_ FCU_TK_Betankung_Anforderung : 43|1@1+
+    buf[7] = mlb_state.FCU_TK_Freigabe_Tankklappe & 0x03; // DBC SG_ FCU_TK_Freigabe_Tankklappe : 56|2@1+
+    can->Send(ID_FCU_02, buf, 8);
 }
 
 void VWMLBClass::msg59E() // BMS_06 0x59E

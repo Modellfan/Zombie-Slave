@@ -948,7 +948,7 @@ struct MLB_State {
     uint16_t BMS_OpenCircuit_Volts{};
     bool BMS_Status_ServiceDisconnect{};
     uint8_t BMS_HV_Status{};
-    bool BMS_Faultstatus{};
+    uint8_t BMS_Faultstatus{};
     uint8_t BMS_IstModus{};
     uint16_t BMS_Batt_Ah{};
     uint16_t BMS_Target_SOC_HiRes{};
@@ -975,7 +975,7 @@ struct MLB_State {
     uint16_t HVEM_MaxSpannung_HV{};
     uint8_t HMS_Systemstatus{};
     uint8_t HMS_aktives_System{};
-    bool HMS_Fehlerstatus{};
+    uint8_t HMS_Fehlerstatus{};
     uint8_t HVK_HVLM_Sollmodus{}; // requested target mode of the charging manager: 0=Not Enabled, 1=Enabled
     bool HV_Bordnetz_aktiv{};     // high-voltage vehicle electrical system active: 0=Not Active, 1=Active
     uint8_t HVK_MO_EmSollzustand{}; // 0 "HvOff" 1 "HvStbyReq" 2 "HvStbyWait" 3 "HvBattOnReq" 4 "HvBattOnWait" 10 "HvOnIdle" 20 "HvOnDrvRdy" 46 "HvAcChPreReq" 47 "HvAcChPreWait" 48 "HvAcChReq" 49 "HvDcChWait" 50 "HvDcCh" 56 "HvDcChPreReq" 57 "HvDcChPreWait" 58 "HvDcChReq" 59 "HvDcChWait" 60 "HvDcCh" 67 "HvChOffReq" 68 "HvChOffWait" 69 "HvOnIdleReq" 70 "HvOnIdleWait" 96 "HvCpntOffReq" 97 "HvCpntOffWait" 98 "HvBattOffReq" 99 "HvBattOffWait" 119 "HvElmOffReq" 120 "HvElmOff"
@@ -991,6 +991,8 @@ struct MLB_State {
     bool ZV_verriegelt_intern_soll{};
     bool ZV_verriegelt_extern_soll{};
     uint8_t ZV_verriegelt_soll{};
+    bool FCU_TK_Betankung_Anforderung{};
+    uint8_t FCU_TK_Freigabe_Tankklappe{};
     bool BMS_Charger_Active{};
     uint16_t BMS_RIso_Ext{4090};
     uint8_t HVK_Gesamtst_Spgfreiheit{};
@@ -1033,6 +1035,7 @@ private:
       static constexpr uint32_t ID_BMS_DC_01 = 0x578;
       static constexpr uint32_t ID_HVEM_05 = 0x552;
       static constexpr uint32_t ID_ZV_02  = 0x583;
+      static constexpr uint32_t ID_FCU_02 = 0x17B;
       static constexpr uint32_t ID_BMS_04 = 0x5A2;
       static constexpr uint32_t ID_BMS_06 = 0x59E;
       static constexpr uint32_t ID_BMS_07 = 0x5CA;
@@ -1057,6 +1060,7 @@ private:
       void msg509();      // BMS_10     0x509
       void msg552();      // HVEM_05    0x552
       void msg583();      // ZV_02      0x583
+      void msg17B();      // FCU_02     0x17B
       void msg59E();      // BMS_06     0x59E
       void msg5AC();      // HVEM_02    0x5AC
       void msg64F();      // BCM1_04    0x64F
