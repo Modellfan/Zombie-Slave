@@ -48,6 +48,7 @@
 #include "lvdu.h"
 #include "eps.h"
 #include "vw_mlb_charger.h"
+#include "mVCUIntegration.h"
 
 #define PRINT_JSON 0
 
@@ -66,6 +67,7 @@ static VacuumPump vacuumPump;
 static LVDU lvdu;
 static EPS eps;
 static VWMLBClass mlbCharger;
+static mVCUIntegration mvcuIntegration;
 
 // Whenever the user clears mapped can messages or changes the
 // CAN interface of a device, this will be called by the CanHardware module
@@ -78,6 +80,7 @@ static void SetCanFilters()
    DCDCTesla.SetCanInterface(dcdc_can);
    teensyBms.SetCanInterface(bms_can);
    mlbCharger.SetCanInterface(charger_can);
+   mvcuIntegration.SetCanInterface(charger_can);
 
    canInterface[0]->RegisterUserMessage(0x601); // CanSDO
    canInterface[1]->RegisterUserMessage(0x601); // CanSDO
@@ -122,6 +125,7 @@ static void Ms100Task(void)
    lvdu.Task100Ms();
    eps.Task100Ms();
    mlbCharger.Task100Ms();
+   mvcuIntegration.Task100Ms();
 }
 
 // sample 10 ms task

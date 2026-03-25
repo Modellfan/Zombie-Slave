@@ -48,7 +48,7 @@
    3. Display values
  */
 // Next param id (increase when adding new parameter!): 167
-// Next value Id: 2337
+// Next value Id: 2338
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST                                                                        \
    PARAM_ENTRY(CAT_COMM, canspeed, CANSPEEDS, 0, 4, 2, 1)                                 \
@@ -115,6 +115,7 @@
    VALUE_ENTRY(mlb_chr_LAD_IstSpannung_HV, "V", 2314)                                     \
    VALUE_ENTRY(mlb_chr_LAD_IstStrom_HV, "A", 2315)                                        \
    VALUE_ENTRY(mlb_chr_LAD_Temperatur, "°C", 2316)                                        \
+   VALUE_ENTRY(mlb_chr_LAD_Verlustleistung, "W", 2337)                                     \
    VALUE_ENTRY(mlb_chr_HVLM_Ladesystemhinweise, HVLM_LADESYSTEMHINWEISE, 2317)            \
    VALUE_ENTRY(mlb_chr_HVLM_Zustand_LED, HVLM_ZUSTAND_LED, 2318)                          \
    VALUE_ENTRY(mlb_chr_HVLM_MaxStrom_Netz, "Unit_Amper", 2319)                            \
