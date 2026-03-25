@@ -41,7 +41,7 @@ LDFLAGS    = -Llibopencm3/lib -T$(LDSCRIPT) -march=armv7 -nostartfiles -Wl,--gc-
 OBJSL = main.o hwinit.o stm32scheduler.o params.o terminal.o terminal_prj.o \
         my_string.o digio.o sine_core.o my_fp.o printf.o anain.o \
         param_save.o errormessage.o stm32_can.o canhardware.o canmap.o cansdo.o \
-        picontroller.o terminalcommands.o TeslaDCDC.o teensyBMS.o \
+        picontroller.o terminalcommands.o TeslaDCDC.o teensyBMS.o mVCUIntegration.o \
         vw_mlb_charger.o vag_utils.o
 
 

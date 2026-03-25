@@ -273,6 +273,7 @@ void VWMLBClass::TagParams() // To make code portable between standalone (more p
     Param::SetInt(Param::mlb_chr_LAD_IstSpannung_HV, charger_status.LAD_IstSpannung_HV);
     Param::SetInt(Param::mlb_chr_LAD_IstStrom_HV, static_cast<int>(charger_status.LAD_IstStrom_HV));
     Param::SetInt(Param::mlb_chr_LAD_Temperatur, charger_status.LAD_Temperatur);
+    Param::SetInt(Param::mlb_chr_LAD_Verlustleistung, charger_status.LAD_Verlustleistung);
     Param::SetInt(Param::mlb_chr_HVLM_Ladesystemhinweise, charger_status.HVLM_Ladesystemhinweise);
     Param::SetInt(Param::mlb_chr_HVLM_Zustand_LED, charger_status.HVLM_Zustand_LED);
     Param::SetInt(Param::mlb_chr_HVLM_MaxStrom_Netz, static_cast<int>(charger_status.HVLM_MaxStrom_Netz));
