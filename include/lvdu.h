@@ -6,6 +6,7 @@
 #include "digio.h"
 #include "errormessage.h"
 #include "anain.h"
+#include <stdint.h>
 
 // Configuration macros
 #define LVDU_DIAGNOSE_DELAY_STEPS 40        // 4000 ms - How long hold the relay after ignition off to check, if the relay is working
@@ -18,7 +19,7 @@
                                             // AnaIn::dc_power_supply returns millivolts, multiply by this factor to get
                                             // the actual battery voltage in volts
 #define LVDU_DIAGNOSE_COOLDOWN_STEPS 2      // 200 ms cooldown after diagnosis ends
-#define LVDU_HV_CONTACTOR_TIMEOUT_STEPS 100  // 10s @ 100ms - HV contactor handshake sub-state timeout
+#define LVDU_HV_CONTACTOR_TIMEOUT_STEPS 100 // 10s @ 100ms - HV contactor handshake sub-state timeout
 
 enum VehicleState
 {
@@ -32,7 +33,8 @@ enum VehicleState
     STATE_DRIVE,
     STATE_CHARGE,
     STATE_ERROR,
-    STATE_LIMP_HOME
+    STATE_LIMP_HOME,
+    STATE_FORCE_VCU_SHUTDOWN
 };
 
 enum class VehicleTriggerEvent
@@ -211,6 +213,7 @@ private:
     uint16_t chargeDoneCounter = 0;
     bool chargeFinishedLatched = false; // Remembers that the last charge cycle completed while plug stays inserted
     uint8_t readySafetyOffCounter = 0;
+    uint16_t forceVcuShutdownTimer = 0;
 
     // Interne Flags
     bool ignitionOn = false;
@@ -340,6 +343,17 @@ private:
             TransitionTo(STATE_STANDBY, VehicleTriggerEvent::AUTO_WAKE_SLEEP_TO_STANDBY);
             break;
 
+        case STATE_FORCE_VCU_SHUTDOWN:
+            if (forceVcuShutdownTimer > 0)
+            {
+                --forceVcuShutdownTimer;
+            }
+            else
+            {
+                TransitionTo(STATE_SLEEP, prevTriggerEvent);
+            }
+            break;
+
         case STATE_HV_CONNECTING:
             hvManager.SetHVRequest(true);
             if (Param::GetInt(Param::HVCM_state) == HvContactorManager::HV_CONNECTED && queuedState != STATE_INVALID)
@@ -378,12 +392,12 @@ private:
                     // If CAN comms to the BMS fail or LV drops too low while balancing, shut down
                     if (!bmsValid || is12VTooLow)
                     {
-                        TransitionTo(STATE_SLEEP, VehicleTriggerEvent::BMS_BALANCING_AND_BMS_INVALID_OR_LV_TOO_LOW);
+                        TransitionTo(STATE_FORCE_VCU_SHUTDOWN, VehicleTriggerEvent::BMS_BALANCING_AND_BMS_INVALID_OR_LV_TOO_LOW);
                     }
                 }
                 else if (++standbyTimeoutCounter >= LVDU_STANDBY_TIMEOUT_STEPS)
                 {
-                    TransitionTo(STATE_SLEEP, VehicleTriggerEvent::STANDBY_TIMEOUT_EXPIRED);
+                    TransitionTo(STATE_FORCE_VCU_SHUTDOWN, VehicleTriggerEvent::STANDBY_TIMEOUT_EXPIRED);
                 }
             }
             break;
@@ -503,7 +517,7 @@ private:
 
     case STATE_ERROR:
         if (!ignitionOn)
-            TransitionTo(STATE_SLEEP, VehicleTriggerEvent::IGNITION_OFF_IN_ERROR);
+            TransitionTo(STATE_FORCE_VCU_SHUTDOWN, VehicleTriggerEvent::IGNITION_OFF_IN_ERROR);
         break;
 
     case STATE_LIMP_HOME:
@@ -562,13 +576,30 @@ private:
         if (forceSleepTimer == 0)
         {
             forceSleepActive = false;
-            TransitionTo(STATE_SLEEP, VehicleTriggerEvent::LV_TOO_LOW_FORCE_SLEEP_TIMEOUT);
+            TransitionTo(STATE_FORCE_VCU_SHUTDOWN, VehicleTriggerEvent::LV_TOO_LOW_FORCE_SLEEP_TIMEOUT);
         }
     }
 }
 
 void TransitionTo(VehicleState newState, VehicleState queuedStateNext, VehicleTriggerEvent triggerEvent)
 {
+    if (newState == STATE_FORCE_VCU_SHUTDOWN)
+    {
+        const int configuredDelayMs = Param::GetInt(Param::LVDU_force_vcu_shutdown_delay);
+        if (configuredDelayMs > 0)
+        {
+            forceVcuShutdownTimer = static_cast<uint16_t>((configuredDelayMs + 99) / 100);
+        }
+        else
+        {
+            forceVcuShutdownTimer = 0;
+        }
+    }
+    else
+    {
+        forceVcuShutdownTimer = 0;
+    }
+
     prevPrevState = prevState;
     prevState = state;
     state = newState;
@@ -693,6 +724,13 @@ void UpdateOutputs()
         DigIo::ready_out.Clear();
         break;
 
+    case STATE_FORCE_VCU_SHUTDOWN:
+        // Keep the VCU powered long enough for the CAN shutdown command to be seen before dropping the relay.
+        DigIo::vcu_out.Set();
+        DigIo::condition_out.Clear();
+        DigIo::ready_out.Clear();
+        break;
+
     case STATE_HV_CONNECTING:
         // Handshake phase: keep control power on, but do not assert condition/ready yet.
         DigIo::vcu_out.Set();
@@ -768,6 +806,7 @@ void UpdateParams()
     Param::SetInt(Param::LVDU_vcu_out, DigIo::vcu_out.Get() ? 1 : 0);
     Param::SetInt(Param::LVDU_condition_out, DigIo::condition_out.Get() ? 1 : 0);
     Param::SetInt(Param::LVDU_ready_out, DigIo::ready_out.Get() ? 1 : 0);
+    Param::SetInt(Param::LVDU_forceVCUsShutdown, state == STATE_FORCE_VCU_SHUTDOWN ? 1 : 0);
 
     // Comfort functions only allowed when HV is connected.
     const int hvState = Param::GetInt(Param::HVCM_state);

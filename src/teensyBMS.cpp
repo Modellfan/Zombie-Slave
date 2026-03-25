@@ -3,20 +3,10 @@
 #include <string.h>
 #include <libopencm3/stm32/crc.h>
 
-// CAN message ID for VCU -> BMS feedback
+// CAN message ID for the periodic VCU -> BMS status frame.
+// Byte 1 carries the "force VCU shutdown" pre-sleep warning.
+// Byte 2 carries the independent HV request state from the HVCM/LVDU.
 #define VCU_STATUS_MSG_ID 0x437
-
-/*
-Shutdown sequence (simplified)
-------------------------------
-
- BMS        VCU       Contactors
-  |--0x41F: request-->|
-  |<--0x437: status---|
-  |                   |--open HV
-  |<--0x41F: ready----|
-  |--0x41F: ack------>|
-*/
 
 void TeensyBMS::SetCanInterface(CanHardware* c) {
     if (c == nullptr) {
@@ -167,7 +157,9 @@ void TeensyBMS::Task100Ms() {
     // Current firmware does not publish contactor-manager specific DTCs on 0x41C byte 5.
     Param::SetInt(Param::BMS_CONT_DTC, 0);
 
-    // Send VCU status back to the BMS every cycle (100ms)
+    // Send VCU status back to the BMS every cycle (100ms).
+    // Byte 1 is the pre-sleep shutdown warning for downstream VCUs.
+    // Byte 2 is the separate HV request signal and must not be used as shutdown messaging.
     if (can) {
         uint8_t bytes[8] = {0};
         bytes[0] = static_cast<uint8_t>(Param::GetInt(Param::LVDU_vehicle_state));
