@@ -129,7 +129,8 @@ public:
         Param::SetInt(Param::heater_fault, fault_present ? 1 : 0);
 
         // Main control logic
-        bool heater_should_run = (manual_override || flap_signal > flap_threshold);
+        bool can_contactor_request = Param::GetInt(Param::heater_can_contactor_request) != 0;
+        bool heater_should_run = (manual_override || flap_signal > flap_threshold || can_contactor_request);
 
         // Detect thermal switch closing (rising edge)
         if (thermal_closed && thermal_switch_was_open)

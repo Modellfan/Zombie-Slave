@@ -92,6 +92,7 @@ static bool CanCallback(uint32_t id, uint32_t data[2], uint8_t dlc) // This is w
    DCDCTesla.DecodeCAN(id, (uint8_t *)data);
    teensyBms.DecodeCAN(id, (uint8_t *)data);
    mlbCharger.DecodeCAN(id, data);
+   mvcuIntegration.DecodeCAN(id, (uint8_t *)data, dlc);
    return false;
 }
 

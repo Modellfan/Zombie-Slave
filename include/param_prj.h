@@ -176,6 +176,7 @@
    VALUE_ENTRY(heater_thermal_switch_in, "0=Overtemp, 1=OK", 2131)                        \
    VALUE_ENTRY(heater_contactor_feedback_in, "0=Open, 1=Closed", 2132)                    \
    VALUE_ENTRY(heater_contactor_out, "0=Off, 1=On", 2133)                                 \
+   VALUE_ENTRY(heater_can_contactor_request, "0=Off, 1=On", 2170)                         \
    VALUE_ENTRY(heater_off_confirmed, "0=No, 1=Yes", 2142)                                 \
    VALUE_ENTRY(heater_fault, "0=OK, 1=Fault", 2143)                                       \
    VALUE_ENTRY(hv_comfort_functions_allowed, "0=No, 1=Yes", 2144)                         \
