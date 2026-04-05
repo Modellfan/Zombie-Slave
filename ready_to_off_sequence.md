@@ -1,13 +1,15 @@
-# READY -> Ignition OFF Sequence (LVDU, Ready Relay, HV Manager, TeensyBMS)
+# READY -> Ignition OFF / Sleep Sequence (LVDU, Ready Relay, TeensyBMS)
 
 This document describes what happens when the system is in `STATE_READY` and the
-ignition input is turned OFF. It focuses on the ready relay behavior and the HV
-contactor request/handshake path that goes through `LVDU` and `TeensyBMS`.
+ignition input is turned OFF. It focuses on the ready relay behavior, the
+separate HV request path, and the dedicated shutdown message that is sent before
+the LVDU drops the VCU relay on the way to `STATE_SLEEP`.
 
 Scope:
 - Software paths in `LVDU` (`include/lvdu.h`)
 - Ready relay (`DigIo::ready_out`)
-- HV contactor request (`LVDU_connectHVcommand`)
+- HV request (`HVCM_to_bms_hv_request`)
+- Pre-sleep shutdown message (`LVDU_forceVCUsShutdown`)
 - TeensyBMS VCU status feedback (`src/teensyBMS.cpp`)
 
 ## 1) Starting point: `STATE_READY`
@@ -18,7 +20,7 @@ While in `STATE_READY`:
   - `DigIo::ready_out` is ON.
   - `DigIo::condition_out` is ON.
   - `DigIo::vcu_out` is ON.
-- `LVDU_connectHVcommand` is set from the HV manager request (subject to load
+- `HVCM_to_bms_hv_request` is set from the HV manager request (subject to load
   interlocks).
 
 ## 2) Ignition turns OFF
@@ -64,22 +66,25 @@ So after ignition OFF:
 - The request stays ON while in `STATE_CONDITIONING`.
 - Actual HV feedback depends on the BMS contactor state.
 
-## 5) How LVDU requests HV from the BMS (TeensyBMS handshake)
+## 5) What TeensyBMS sends to the BMS every 100 ms
 
 Every 100 ms `TeensyBMS::Task100Ms()` sends the VCU status frame to the BMS:
 - Byte 0: `LVDU_vehicle_state`
 - Byte 1: `LVDU_forceVCUsShutdown`
-- Byte 2: `LVDU_connectHVcommand`
+- Byte 2: `HVCM_to_bms_hv_request`
 - Byte 6: rolling counter
 - Byte 7: CRC
 
-The important piece is `LVDU_connectHVcommand`:
-- When the LVDU wants HV on, it sets `LVDU_connectHVcommand = 1`.
-- When LVDU wants HV off, it sets `LVDU_connectHVcommand = 0`.
+Important distinction:
+- `LVDU_forceVCUsShutdown` is the shutdown messaging bit that warns the BMS and
+  downstream VCUs that the LVDU is about to drop the VCU relay before entering
+  `STATE_SLEEP`.
+- `HVCM_to_bms_hv_request` is only the HV request signal. It controls whether
+  the BMS should keep HV active. It is **not** the shutdown message.
 
 After ignition OFF:
 - `STATE_CONDITIONING` keeps the HV request ON.
-- Therefore `LVDU_connectHVcommand` remains 1 while conditioning is active,
+- Therefore `HVCM_to_bms_hv_request` remains 1 while conditioning is active,
   unless the HV-off interlock is explicitly allowing it to go low.
 
 ## 6) When does LVDU request HV OFF?
@@ -95,19 +100,44 @@ In the READY -> ignition OFF path:
   - `CONDITIONING` -> `STANDBY`
 - On entering `STANDBY`, `hvManager.SetHVRequest(false)` is executed.
 
-At that point, `LVDU_connectHVcommand` will go low unless HV loads are still
+At that point, `HVCM_to_bms_hv_request` will go low unless HV loads are still
 active and the HV-off interlock keeps it high.
 
-## 7) Summary sequence (high level)
+## 7) How sleep shutdown messaging now works
+
+Before the LVDU turns off `DigIo::vcu_out` and enters `STATE_SLEEP`, the sleep
+call sites always transition into `STATE_FORCE_VCU_SHUTDOWN` first.
+
+During `STATE_FORCE_VCU_SHUTDOWN`:
+- `LVDU_forceVCUsShutdown = 1`
+- `DigIo::vcu_out` stays ON
+- `DigIo::condition_out` is OFF
+- `DigIo::ready_out` is OFF
+
+When the delay expires:
+- the next 100 ms cycle transitions to `STATE_SLEEP`
+- `LVDU_forceVCUsShutdown` returns to 0
+- `DigIo::vcu_out` is turned OFF
+
+When the configured delay is 0 ms:
+- the system still enters `STATE_FORCE_VCU_SHUTDOWN`
+- on the following 100 ms cycle it transitions to `STATE_SLEEP`
+
+This same pre-sleep delay is used for:
+- normal standby -> sleep shutdown
+- error -> sleep shutdown
+- forced low-voltage sleep shutdown
+
+## 8) Summary sequence (high level)
 
 1. `STATE_READY`, ignition ON:
    - `ready_out = ON`
-   - `LVDU_connectHVcommand = 1`
+   - `HVCM_to_bms_hv_request = 1`
 
 2. Ignition OFF:
    - `STATE_READY` -> `STATE_CONDITIONING`
    - `ready_out = ON` during diagnose window
-   - `LVDU_connectHVcommand = 1`
+   - `HVCM_to_bms_hv_request = 1`
 
 3. Diagnosis ends:
    - `ready_out = OFF`
@@ -116,10 +146,21 @@ active and the HV-off interlock keeps it high.
 4. Conditioning completes:
    - `STATE_CONDITIONING` -> `STATE_STANDBY`
    - `hvManager.SetHVRequest(false)`
-   - `LVDU_connectHVcommand` goes low if no HV loads are active
+   - `HVCM_to_bms_hv_request` goes low if no HV loads are active
 
-5. TeensyBMS sends VCU status with `LVDU_connectHVcommand = 0`
-   - BMS opens contactors
-   - LVDU sees `BMS_CONT_State` drop, `hvManager.IsHVActive()` becomes false
+5. Before any transition from `STATE_STANDBY` or `STATE_ERROR` to `STATE_SLEEP`
+   completes:
+   - `STATE_FORCE_VCU_SHUTDOWN` is entered
+   - TeensyBMS sends VCU status with `LVDU_forceVCUsShutdown = 1`
+   - `vcu_out` stays ON for the configured delay
 
-End state: `STATE_STANDBY` with ready relay OFF and HV contactors open.
+6. After the delay expires:
+   - `STATE_SLEEP` is entered
+   - `vcu_out` turns OFF
+   - `LVDU_forceVCUsShutdown` returns to 0
+
+End state: `STATE_SLEEP` with the VCU relay off, after the shutdown warning was
+held long enough to be transmitted.
+
+Default setting:
+- `LVDU_force_vcu_shutdown_delay = 1000 ms`
