@@ -37,6 +37,7 @@
 #include "printf.h"
 #include "stm32scheduler.h"
 #include "terminalcommands.h"
+#include "sdocommands.h"
 #include "tesla_valve.h"
 #include "tesla_coolant_pump.h"
 #include "dcdc.h"
@@ -56,6 +57,7 @@
 static Stm32Scheduler *scheduler;
 static CanHardware *canInterface[3];
 static CanMap *canMap;
+static uint8_t canMapTxSlot;
 
 // Functional SW components
 static TeslaCoolantPump coolantPump;
@@ -114,10 +116,6 @@ static void Ms100Task(void)
    // This sets a fixed point value WITHOUT calling the parm_Change() function
    Param::SetFloat(Param::cpuload, cpuLoad / 10);
 
-   // If we chose to send CAN messages every 100 ms, do this here.
-   if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-      canMap->SendAll();
-
    // Give calculation power to the module
    teslaValve.Task100Ms();
    coolantPump.Task100Ms();
@@ -135,9 +133,12 @@ static void Ms10Task(void)
    // Set timestamp of error message
    ErrorMessage::SetTime(rtc_get_counter_val());
 
-   // If we chose to send CAN messages every 10 ms, do this here.
-   if (Param::GetInt(Param::canperiod) == CAN_PERIOD_10MS)
-      canMap->SendAll();
+   // Spread 100ms mapped CAN messages over ten 10ms scheduler slices.
+   if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
+   {
+      canMap->SendByIndex(canMapTxSlot);
+      canMapTxSlot = (canMapTxSlot + 1) % MAX_MESSAGES;
+   }
 
    heater.Task10Ms();
    vacuumPump.Task10Ms();
@@ -147,6 +148,13 @@ static void Ms10Task(void)
 // sample 1 ms task
 static void Ms1Task(void)
 {
+   // Spread 10ms mapped CAN messages over ten 1ms scheduler slices.
+   if (Param::GetInt(Param::canperiod) == CAN_PERIOD_10MS)
+   {
+      canMap->SendByIndex(canMapTxSlot);
+      canMapTxSlot = (canMapTxSlot + 1) % MAX_MESSAGES;
+   }
+
    coolantPump.Task1Ms();
 }
 
@@ -208,6 +216,7 @@ extern "C" int main(void)
    c.AddCallback(&cb);
    c2.AddCallback(&cb);
    TerminalCommands::SetCanMap(&cm);
+   SdoCommands::SetCanMap(&cm);
    canMap = &cm;
 
    // This is all we need to do to set up a terminal on USART3
@@ -240,10 +249,18 @@ extern "C" int main(void)
    while (1)
    {
       char c = 0;
+      CanSdo::SdoFrame* sdoFrame = sdo.GetPendingUserspaceSdo();
+
       t.Run();
       if (sdo.GetPrintRequest() == PRINT_JSON)
       {
          TerminalCommands::PrintParamsJson(&sdo, &c);
+      }
+
+      if (0 != sdoFrame)
+      {
+         SdoCommands::ProcessStandardCommands(sdoFrame);
+         sdo.SendSdoReply(sdoFrame);
       }
    }
 

@@ -1,0 +1,177 @@
+VERSION "ZombieSlave TeensyBMS TeslaDCDC mVCU CAN map"
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ZombieSlave TeensyBMS TeslaDCDC mVCU Vector__XXX
+
+
+BO_ 528 TeslaDCDC_Status: 8 TeslaDCDC
+ SG_ DCDC_HeaterShorted : 0|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_OverTemp : 1|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_OutputUndervolt : 2|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_BiasFault : 3|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_InputNotOk : 4|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_OutputOvervolt : 5|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_CurrentLimited : 6|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_HeaterOpenCircuit : 7|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_CoolantRequest : 8|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_ThermalLimit : 9|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_VoltageRegFault : 10|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_CalibrationFactorFault : 11|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ DCDC_CoolantTemperature : 16|8@1- (0.5,40) [-24|103.5] "degC" ZombieSlave
+ SG_ DCDC_InputPower : 24|8@1+ (16,0) [0|4080] "W" ZombieSlave
+ SG_ DCDC_OutputCurrent : 32|8@1+ (1,0) [0|255] "A" ZombieSlave
+ SG_ DCDC_OutputVoltage : 40|8@1+ (0.1,0) [0|25.5] "V" ZombieSlave
+
+BO_ 984 TeslaDCDC_Command: 3 ZombieSlave
+ SG_ DCDC_VoltageSetpoint : 0|10@1+ (0.0068493151,9) [9|16.0068] "V" TeslaDCDC
+ SG_ DCDC_OutputEnable : 10|1@1+ (1,0) [0|1] "" TeslaDCDC
+
+BO_ 1050 TeensyBMS_VoltageCurrent: 8 TeensyBMS
+ SG_ BMS_PackVoltage : 0|16@1+ (0.1,0) [0|6553.5] "V" ZombieSlave
+ SG_ BMS_PackCurrent : 16|16@1+ (0.1,-500) [-500|6053.5] "A" ZombieSlave
+ SG_ BMS_MinCellVoltage : 32|8@1+ (0.02,0) [0|5.1] "V" ZombieSlave
+ SG_ BMS_MaxCellVoltage : 40|8@1+ (0.02,0) [0|5.1] "V" ZombieSlave
+ SG_ BMS_VoltageCurrentCounter : 48|4@1+ (1,0) [0|15] "" ZombieSlave
+ SG_ BMS_VoltageCurrentCrc : 56|8@1+ (1,0) [0|255] "" ZombieSlave
+
+BO_ 1051 TeensyBMS_CellTempPower: 8 TeensyBMS
+ SG_ BMS_MinCellTemperature : 0|8@1+ (1,-40) [-40|215] "degC" ZombieSlave
+ SG_ BMS_MaxCellTemperature : 8|8@1+ (1,-40) [-40|215] "degC" ZombieSlave
+ SG_ BMS_BalancingVoltage : 16|8@1+ (0.02,0) [0|5.1] "V" ZombieSlave
+ SG_ BMS_DeltaCellVoltage : 24|8@1+ (2,0) [0|510] "mV" ZombieSlave
+ SG_ BMS_PackPower : 32|16@1+ (10,-300000) [-300000|355350] "W" ZombieSlave
+ SG_ BMS_CellTempPowerCounter : 48|4@1+ (1,0) [0|15] "" ZombieSlave
+ SG_ BMS_CellTempPowerCrc : 56|8@1+ (1,0) [0|255] "" ZombieSlave
+
+BO_ 1052 TeensyBMS_LimitsFault: 8 TeensyBMS
+ SG_ BMS_MaxDischargeCurrent : 0|16@1+ (0.1,0) [0|6553.5] "A" ZombieSlave
+ SG_ BMS_MaxChargeCurrent : 16|16@1+ (0.1,0) [0|6553.5] "A" ZombieSlave
+ SG_ BMS_ContactorState : 32|8@1+ (1,0) [0|255] "" ZombieSlave
+ SG_ BMS_DtcFlags : 40|8@1+ (1,0) [0|255] "" ZombieSlave
+ SG_ BMS_LimitsFaultCounter : 48|4@1+ (1,0) [0|15] "" ZombieSlave
+ SG_ BMS_LimitsFaultCrc : 56|8@1+ (1,0) [0|255] "" ZombieSlave
+
+BO_ 1053 TeensyBMS_SocSoh: 8 TeensyBMS
+ SG_ BMS_StateOfCharge : 0|16@1+ (0.01,0) [0|655.35] "%" ZombieSlave
+ SG_ BMS_StateOfHealth : 16|16@1+ (0.01,0) [0|655.35] "%" ZombieSlave
+ SG_ BMS_BalancingStatus : 32|8@1+ (1,0) [0|255] "" ZombieSlave
+ SG_ BMS_State : 40|8@1+ (1,0) [0|255] "" ZombieSlave
+ SG_ BMS_SocSohCounter : 48|4@1+ (1,0) [0|15] "" ZombieSlave
+ SG_ BMS_SocSohCrc : 56|8@1+ (1,0) [0|255] "" ZombieSlave
+
+BO_ 1054 TeensyBMS_Hmi: 8 TeensyBMS
+ SG_ BMS_AverageEnergyPerHour : 0|16@1- (0.01,0) [-327.68|327.67] "kW" ZombieSlave
+ SG_ BMS_RemainingTime : 16|16@1+ (1,0) [0|65535] "s" ZombieSlave
+ SG_ BMS_RemainingEnergy : 32|16@1+ (0.001,0) [0|65.535] "kWh" ZombieSlave
+ SG_ BMS_HmiCounter : 48|4@1+ (1,0) [0|15] "" ZombieSlave
+ SG_ BMS_HmiCrc : 56|8@1+ (1,0) [0|255] "" ZombieSlave
+
+BO_ 1079 ZombieSlave_VcuStatus: 8 ZombieSlave
+ SG_ LVDU_VehicleState : 0|8@1+ (1,0) [0|255] "" TeensyBMS
+ SG_ LVDU_ForceVcusShutdown : 8|8@1+ (1,0) [0|1] "" TeensyBMS
+ SG_ HVCM_ToBmsHvRequest : 16|8@1+ (1,0) [0|255] "" TeensyBMS
+ SG_ VCU_StatusCounter : 48|4@1+ (1,0) [0|15] "" TeensyBMS
+ SG_ VCU_StatusCrc : 56|8@1+ (1,0) [0|255] "" TeensyBMS
+
+BO_ 1080 mVCU_ChargePowerStatus: 8 ZombieSlave
+ SG_ mVCU_ActualChargePower : 0|32@1+ (1,0) [0|4294967295] "W" mVCU
+ SG_ mVCU_MaxChargePower : 32|32@1+ (1,0) [0|4294967295] "W" mVCU
+
+BO_ 1081 mVCU_HeaterStatus: 8 ZombieSlave
+ SG_ Heater_Active : 0|8@1+ (1,0) [0|1] "" mVCU
+ SG_ Heater_ContactorFeedbackIn : 8|8@1+ (1,0) [0|1] "" mVCU
+ SG_ Heater_Fault : 16|8@1+ (1,0) [0|1] "" mVCU
+ SG_ Heater_ThermalSwitchIn : 24|8@1+ (1,0) [0|1] "" mVCU
+ SG_ Heater_ContactorOut : 32|8@1+ (1,0) [0|1] "" mVCU
+ SG_ Heater_CanContactorRequest : 40|8@1+ (1,0) [0|1] "" mVCU
+ SG_ Heater_StatusCounter : 48|4@1+ (1,0) [0|15] "" mVCU
+ SG_ Heater_StatusCrc : 56|8@1+ (1,0) [0|255] "" mVCU
+
+BO_ 1082 mVCU_HeaterControl: 8 mVCU
+ SG_ Heater_CloseRequest : 0|1@1+ (1,0) [0|1] "" ZombieSlave
+ SG_ Heater_ControlCounter : 48|4@1+ (1,0) [0|15] "" ZombieSlave
+ SG_ Heater_ControlCrc : 56|8@1+ (1,0) [0|255] "" ZombieSlave
+
+
+CM_ BO_ 528 "RX by ZombieSlave TeslaDCDC::DecodeCAN(), registered as 0x210. Status timeout is 1000 ms in firmware.";
+CM_ BO_ 984 "TX by ZombieSlave TeslaDCDC::Task100Ms() every 500 ms. Voltage command is raw=(setpoint_V-9)*146, clamped to 9..16 V.";
+CM_ BO_ 1050 "RX by TeensyBMS::parseMsg1(), registered as 0x41A. Byte 7 is STM32 CRC low byte over bytes 0..6.";
+CM_ BO_ 1051 "RX by TeensyBMS::parseMsg2(), registered as 0x41B. Byte 7 is STM32 CRC low byte over bytes 0..6.";
+CM_ BO_ 1052 "RX by TeensyBMS::parseMsg3(), registered as 0x41C. Byte 5 is BMS DTC flags in current firmware.";
+CM_ BO_ 1053 "RX by TeensyBMS::parseMsg4(), registered as 0x41D. BalancingActive is derived from BalancingStatus == 1.";
+CM_ BO_ 1054 "RX by TeensyBMS::parseMsg5(), registered as 0x41E. AverageEnergyPerHour is signed little-endian int16 scaled by 0.01 kW.";
+CM_ BO_ 1079 "TX by ZombieSlave TeensyBMS::Task100Ms() every 100 ms. Byte 7 is STM32 CRC low byte over bytes 0..6.";
+CM_ BO_ 1080 "TX by ZombieSlave mVCUIntegration::Task100Ms() every 100 ms. Actual power is DC charge power plus charger loss power, clipped at zero.";
+CM_ BO_ 1081 "TX by ZombieSlave mVCUIntegration::Task100Ms() every 100 ms. Byte 7 is STM32 CRC low byte over bytes 0..6.";
+CM_ BO_ 1082 "RX by ZombieSlave mVCUIntegration::DecodeCAN(), registered as 0x43A. Requires DLC 8, valid CRC, and sequential 4-bit counter; request times out after 500 ms.";
+
+CM_ SG_ 528 DCDC_CoolantTemperature "Firmware decodes byte 2 as signed int8, then coolantTemp_degC = raw * 0.5 + 40.";
+CM_ SG_ 1051 BMS_PackPower "Firmware decodes bytes 4..5 as unsigned raw kW with factor 0.01 and offset -300, then stores W.";
+CM_ SG_ 1080 mVCU_ActualChargePower "Source: (mlb_chr_LAD_IstSpannung_HV * mlb_chr_LAD_IstStrom_HV) + mlb_chr_LAD_Verlustleistung.";
+CM_ SG_ 1080 mVCU_MaxChargePower "Source: mlb_chr_HVLM_MaxLadeLeistung.";
+
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 100000;
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+BA_ "GenMsgCycleTime" BO_ 984 500;
+BA_ "GenMsgCycleTime" BO_ 1079 100;
+BA_ "GenMsgCycleTime" BO_ 1080 100;
+BA_ "GenMsgCycleTime" BO_ 1081 100;
+
+VAL_ 528 DCDC_HeaterShorted 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_OverTemp 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_OutputUndervolt 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_BiasFault 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_InputNotOk 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_OutputOvervolt 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_CurrentLimited 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_HeaterOpenCircuit 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_CoolantRequest 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_ThermalLimit 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_VoltageRegFault 0 "No" 1 "Yes" ;
+VAL_ 528 DCDC_CalibrationFactorFault 0 "No" 1 "Yes" ;
+VAL_ 984 DCDC_OutputEnable 0 "Disabled" 1 "Enabled" ;
+VAL_ 1052 BMS_ContactorState 0 "INIT" 1 "OPEN" 2 "CLOSING_PRECHARGE" 3 "CLOSING_POSITIVE" 4 "CLOSED" 5 "OPENING_POSITIVE" 6 "OPENING_PRECHARGE" 7 "FAULT" ;
+VAL_ 1052 BMS_DtcFlags 0 "NONE" 1 "DTC_BMS_CAN_SEND_ERROR" 2 "DTC_BMS_CAN_INIT_ERROR" 4 "DTC_BMS_PACK_FAULT" 8 "DTC_BMS_CONTACTOR_FAULT" 16 "DTC_BMS_SHUNT_FAULT" 32 "RESERVED_BIT5" 64 "RESERVED_BIT6" 128 "RESERVED_BIT7" ;
+VAL_ 1053 BMS_BalancingStatus 0 "idle" 1 "balancing" 2 "finished" ;
+VAL_ 1053 BMS_State 0 "INIT" 1 "OPERATING" 2 "FAULT" ;
+VAL_ 1079 LVDU_VehicleState 0 "SLEEP" 1 "STANDBY" 2 "HV_CONNECTING" 3 "HV_DISCONNECTING" 4 "READY" 5 "CONDITIONING" 6 "DRIVE" 7 "CHARGE" 8 "ERROR" 9 "LIMP_HOME" 10 "FORCE_VCU_SHUTDOWN" ;
+VAL_ 1079 LVDU_ForceVcusShutdown 0 "Off" 1 "On" ;
+VAL_ 1081 Heater_Active 0 "Off" 1 "On" ;
+VAL_ 1081 Heater_ContactorFeedbackIn 0 "Open" 1 "Closed" ;
+VAL_ 1081 Heater_Fault 0 "Ok" 1 "Fault" ;
+VAL_ 1081 Heater_ThermalSwitchIn 0 "Open_Overtemp" 1 "Closed_Ok" ;
+VAL_ 1081 Heater_ContactorOut 0 "Off" 1 "On" ;
+VAL_ 1081 Heater_CanContactorRequest 0 "Off" 1 "On" ;
+VAL_ 1082 Heater_CloseRequest 0 "Off" 1 "Request_Close" ;
